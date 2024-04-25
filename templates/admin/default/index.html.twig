@@ -1,0 +1,248 @@
+{% extends 'admin/layout.html.twig' %}
+
+{% block subtitle %} - Dashboard{% endblock %}
+
+{% block stylesheetspecific %}
+    <style>
+        .m--bg-brand-donut {
+            background-color: #716aca !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- BEGIN: Subheader -->
+    <div class="m-subheader ">
+        <div class="d-flex align-items-center">
+            <div class="mr-auto">
+                <h3 class="m-subheader__title m-subheader__title--separator">Dashboard </h3>
+                <ul class="m-subheader__breadcrumbs m-nav m-nav--inline">
+                    <li class="m-nav__item m-nav__item--home">
+                        <a href="#" class="m-nav__link m-nav__link--icon">
+                            <i class="m-nav__link-icon la la-home"></i>
+                        </a>
+                    </li>
+                    <li class="m-nav__separator">-</li>
+                    <li class="m-nav__item">
+                        <a href="" class="m-nav__link">
+                            <span class="m-nav__link-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="m-nav__separator">-</li>
+                    <li class="m-nav__item">
+                        <a href="" class="m-nav__link">
+                            <span class="m-nav__link-text">Website Statistics</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- END: Subheader -->
+    <div class="m-content">
+
+        <div class="m-portlet">
+            <div class="m-portlet__body  m-portlet__body--no-padding">
+                <div class="row m-row--no-padding m-row--col-separator-xl">
+                    <div class="col-xl-4">
+
+                        {% if projects | length > 0 %}
+                            <div class="m-widget1">
+                                {% for item in projects %}
+                                    <div class="m-widget1__item">
+                                        <div class="row m-row--no-padding align-items-center">
+                                            <div class="col">
+                                                <h3 class="m-widget1__title">{{ item.number }} - {{ item.name }}</h3>
+                                                <span class="m-widget1__desc">{{ item.contractor }}</span>
+                                            </div>
+                                            <div class="col m--align-right">
+                                                <span class="m-widget1__number {% if loop.index == 1 %}m--font-success{% endif %} {% if loop.index == 2 %}m--font-info{% endif %} {% if loop.index == 3 %}m--font-danger{% endif %}">${{ item.amount| number_format(2, '.', ',') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!--end:: Widgets/Stats2-1 -->
+                    </div>
+                    <div class="col-xl-4">
+
+                        <!--begin:: Widgets/Revenue Change-->
+                        <div class="m-widget14">
+                            <div class="m-widget14__header">
+                                <h3 class="m-widget14__title">
+                                    Main contractors
+                                </h3>
+                                <span class="m-widget14__desc">
+                                   percentage of projects per contractor
+                                </span>
+                            </div>
+                            <div class="row  align-items-center">
+                                <div class="col">
+                                    <div id="m_chart_revenue_change" class="m-widget14__chart1" style="height: 180px">
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="m-widget14__legends">
+                                        {% for item in chart1.data %}
+
+                                            <div class="m-widget14__legend">
+                                                <span class="m-widget14__legend-bullet {% if loop.index == 1 %}m--bg-accent{% endif %} {% if loop.index == 2 %}m--bg-warning{% endif %} {% if loop.index == 3 %}m--bg-brand{% endif %}"></span>
+                                                <span class="m-widget14__legend-text">{{ item.porciento }}% {{ item.name }}</span>
+                                            </div>
+
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--end:: Widgets/Revenue Change-->
+                    </div>
+                    <div class="col-xl-4">
+
+                        <!--begin:: Widgets/Profit Share-->
+                        <div class="m-widget14">
+                            <div class="m-widget14__header">
+                                <h3 class="m-widget14__title">
+                                    Profit Share
+                                </h3>
+                                <span class="m-widget14__desc">
+                                    Profit Share between projects
+                                </span>
+                            </div>
+                            <div class="row  align-items-center">
+                                <div class="col">
+                                    <div id="m_chart_profit_share" class="m-widget14__chart" style="height: 160px">
+                                        <div class="m-widget14__stat" style="font-size: 1rem;">
+                                            ${{ chart2.total | number_format(2, '.', ',') }}</div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="m-widget14__legends">
+
+                                        {% for item in chart2.data %}
+
+                                            <div class="m-widget14__legend">
+                                                <span class="m-widget14__legend-bullet {% if loop.index == 1 %}m--bg-accent{% endif %} {% if loop.index == 2 %}m--bg-warning{% endif %} {% if loop.index == 3 %}m--bg-brand-donut{% endif %}"></span>
+                                                <span class="m-widget14__legend-text">{{ item.porciento }}% {{ item.number }} - {{ item.name }}</span>
+                                            </div>
+
+                                        {% endfor %}
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--end:: Widgets/Profit Share-->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6">
+
+                <!--begin:: Widgets/Sales Stats-->
+                <div class="m-portlet m-portlet--bordered-semi m-portlet--full-height ">
+                    <div class="m-portlet__head">
+                        <div class="m-portlet__head-caption">
+                            <div class="m-portlet__head-title">
+                                <h3 class="m-portlet__head-text">
+                                    Sales Stats
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="m-portlet__head-tools">
+
+                        </div>
+                    </div>
+                    <div class="m-portlet__body">
+
+                        <!--begin::Widget 6-->
+                        <div class="m-widget15">
+                            <div class="m-widget15__chart" style="height:180px;">
+                                <canvas id="m_chart_sales_stats"></canvas>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem;">
+                            <a href="{{ url('invoice') }}" class="btn m-btn--pill btn-secondary m-btn m-btn--hover-brand m-btn--custom">View invoices</a>
+                        </div>
+
+                        <!--end::Widget 6-->
+                    </div>
+                </div>
+
+                <!--end:: Widgets/Sales Stats-->
+            </div>
+            <div class="col-xl-6">
+
+                <!--begin:: Widgets/Top Products-->
+                <div class="m-portlet m-portlet--full-height m-portlet--fit ">
+                    <div class="m-portlet__head">
+                        <div class="m-portlet__head-caption">
+                            <div class="m-portlet__head-title">
+                                <h3 class="m-portlet__head-text">
+                                    Top Items
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="m-portlet__head-tools">
+
+                        </div>
+                    </div>
+                    <div class="m-portlet__body">
+
+                        <!--begin::Widget5-->
+                        <div class="m-widget4 m-widget4--chart-bottom">
+                            {% for item in items %}
+                                <div class="m-widget4__item">
+                                    <div class="m-widget4__info">
+                                    <span class="m-widget4__title">
+                                        {{ item.name }}
+                                    </span><br>
+                                        <span class="m-widget4__sub">
+                                       {{ item.unit }}
+                                    </span>
+                                    </div>
+                                    <span class="m-widget4__ext">
+                                    <span class="m-widget4__number {% if loop.index == 1 %}m--font-success{% endif %} {% if loop.index == 2 %}m--font-info{% endif %} {% if loop.index == 3 %}m--font-danger{% endif %}">${{ item.amount | number_format(2,'.', ',') }}</span>
+                                </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div style="margin-top: 1.5rem;">
+                            <a href="{{ url('item') }}" class="btn m-btn--pill btn-secondary m-btn m-btn--hover-brand m-btn--custom">View all</a>
+                        </div>
+
+                        <!--end::Widget 5-->
+                    </div>
+                </div>
+
+                <!--end:: Widgets/Top Products-->
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block javascriptsspecific %}
+    <script src="{{ asset('bundles/ican/js/pages/index.js') }}?{{ 'now' | date('U') }}"></script>
+    <script>
+
+        var chart1_data = {{ chart1|json_encode(constant('JSON_PRETTY_PRINT'))|raw }};
+
+        var chart2_data = {{ chart2|json_encode(constant('JSON_PRETTY_PRINT'))|raw }};
+
+        var chart3_data = {{ chart3|json_encode(constant('JSON_PRETTY_PRINT'))|raw }};
+
+        jQuery(document).ready(function () {
+            Index.init();
+        });
+    </script>
+{% endblock %}

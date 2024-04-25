@@ -1,0 +1,27 @@
+contractor:
+  path:  /contractor
+  defaults: { _controller: App\Controller\Admin\ContractorController::index }
+
+listarContractorAdmin:
+  path:  /contractor/listarContractor
+  defaults: { _controller: App\Controller\Admin\ContractorController::listar, _format: json }
+
+eliminarContractorAdmin:
+  path:  /contractor/eliminarContractor
+  defaults: { _controller: App\Controller\Admin\ContractorController::eliminar, _format: json }
+
+eliminarContractorsAdmin:
+  path:  /contractor/eliminarContractors
+  defaults: { _controller: App\Controller\Admin\ContractorController::eliminarContractors, _format: json }
+
+salvarContractorAdmin:
+  path:  /contractor/salvarContractor
+  defaults: { _controller: App\Controller\Admin\ContractorController::salvar, _format: json }
+
+cargarDatosContractorAdmin:
+  path:  /contractor/cargarDatos
+  defaults: { _controller: App\Controller\Admin\ContractorController::cargarDatos, _format: json }
+
+eliminarContactContractorAdmin:
+  path:  /contractor/eliminarContact
+  defaults: { _controller: App\Controller\Admin\ContractorController::eliminarContact, _format: json }

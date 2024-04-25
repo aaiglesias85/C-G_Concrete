@@ -1,0 +1,867 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.0
+-- https://www.phpmyadmin.net/
+--
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 24-04-2024 a las 18:52:50
+-- Versión del servidor: 11.2.2-MariaDB
+-- Versión de PHP: 8.1.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Base de datos: `constructora`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `contractor`
+--
+
+CREATE TABLE `contractor` (
+  `contractor_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `contact_name` varchar(255) DEFAULT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `contractor`
+--
+
+INSERT INTO `contractor` (`contractor_id`, `name`, `phone`, `contact_name`, `contact_email`, `created_at`, `updated_at`) VALUES
+(1, 'CONTRACTOR, INC', '(618)985-7850', 'Dan Schamerhorn', 'merhorn@earsnel.com', '2024-04-13 19:10:40', '2024-04-13 19:54:24'),
+(3, 'CONTRACTOR TWO , INC', '(653)289-6532', 'Dan Smith', 'dan@gmail.com', '2024-04-24 04:23:31', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `contractor_contact`
+--
+
+CREATE TABLE `contractor_contact` (
+  `contact_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `contractor_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `contractor_contact`
+--
+
+INSERT INTO `contractor_contact` (`contact_id`, `name`, `email`, `phone`, `contractor_id`) VALUES
+(1, 'Dan Schamerhorn', 'merhorn@earsnel.com', '(618)985-7850', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `function`
+--
+
+CREATE TABLE `function` (
+  `function_id` int(11) NOT NULL,
+  `url` varchar(50) DEFAULT NULL,
+  `description` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `function`
+--
+
+INSERT INTO `function` (`function_id`, `url`, `description`) VALUES
+(1, 'home', 'Home'),
+(2, 'rol', 'Roles'),
+(3, 'users', 'Users'),
+(4, 'log', 'Logs'),
+(5, 'unit', 'Unit of Measurement'),
+(6, 'item', 'Items'),
+(7, 'inspectors', 'Inspectors'),
+(8, 'contractors', 'Contractors'),
+(9, 'projects', 'Projects'),
+(10, 'daily_tracking', 'Daily Tracking'),
+(11, 'invoice', 'Invoices'),
+(12, 'notification', 'Notifications');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `inspector`
+--
+
+CREATE TABLE `inspector` (
+  `inspector_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `inspector`
+--
+
+INSERT INTO `inspector` (`inspector_id`, `name`, `phone`, `email`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Carlos Magill', '(678)558-2565', 'gill@arersnl.com', 1, '2024-04-13 00:03:19', '2024-04-13 00:03:50');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `invoice`
+--
+
+CREATE TABLE `invoice` (
+  `invoice_id` int(11) NOT NULL,
+  `number` varchar(50) DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `project_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `invoice`
+--
+
+INSERT INTO `invoice` (`invoice_id`, `number`, `start_date`, `end_date`, `notes`, `created_at`, `updated_at`, `project_id`) VALUES
+(3, '1', '2024-04-01', '2024-04-30', 'dsds fsdfsdf', '2024-04-23 04:21:25', '2024-04-23 19:01:16', 1),
+(4, '2', '2024-03-01', '2024-03-31', 'dsf sdfdsf sdfsdfsdf', '2024-04-23 19:36:18', NULL, 1),
+(5, '3', '2024-02-01', '2024-02-29', 'dfdf sdfsdf sdf sdf sdf sdf', '2024-04-23 19:40:22', NULL, 1),
+(6, '4', '2024-01-01', '2024-01-31', 'fd dfg df gdfg dfg fdgdfg df gdfg dfg', '2024-04-23 19:40:44', NULL, 1),
+(7, '5', '2024-04-01', '2024-04-30', 'fgg dg fdgdf g', '2024-04-24 04:21:24', '2024-04-24 16:59:59', 2),
+(8, '6', '2024-04-01', '2024-04-30', 'g fdgdfg fdg', '2024-04-24 04:24:52', '2024-04-24 16:59:17', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `invoice_item`
+--
+
+CREATE TABLE `invoice_item` (
+  `id` int(11) NOT NULL,
+  `quantity` float(8,2) DEFAULT NULL,
+  `price` float(8,2) DEFAULT NULL,
+  `invoice_id` int(11) DEFAULT NULL,
+  `item_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `invoice_item`
+--
+
+INSERT INTO `invoice_item` (`id`, `quantity`, `price`, `invoice_id`, `item_id`) VALUES
+(12, 5.00, 1500.00, 3, 19),
+(13, 6.00, 29.00, 3, 1),
+(14, 3.00, 700.00, 3, 8),
+(15, 5.00, 29.00, 3, 1),
+(16, 5.00, 2100.00, 3, 16),
+(17, 50.00, 70.00, 4, 2),
+(18, 5.00, 700.00, 4, 8),
+(19, 159.00, 47.18, 4, 17),
+(20, 130.00, 16.50, 4, 6),
+(21, 25.00, 16.50, 5, 6),
+(22, 12.00, 700.00, 5, 8),
+(23, 2.00, 2100.00, 5, 16),
+(24, 15.00, 150.00, 5, 20),
+(25, 25.00, 16.50, 6, 7),
+(26, 20.00, 30.00, 6, 14),
+(27, 10.00, 70.00, 6, 12),
+(28, 22.00, 150.00, 6, 20),
+(29, 50.00, 100.00, 7, 13),
+(30, 15.00, 16.50, 7, 6),
+(31, 100.00, 16.50, 8, 6),
+(32, 20.00, 58.00, 8, 4),
+(33, 1000.00, 58.00, 8, 4),
+(34, 100.00, 150.00, 7, 20);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `item`
+--
+
+CREATE TABLE `item` (
+  `item_id` int(11) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `price` float(8,2) DEFAULT NULL,
+  `status` tinyint(1) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `unit_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `item`
+--
+
+INSERT INTO `item` (`item_id`, `description`, `price`, `status`, `created_at`, `updated_at`, `unit_id`) VALUES
+(1, 'CONC MEDIAN 4IN', 29.00, 1, '2024-04-12 20:18:17', NULL, 1),
+(2, 'CONC MEDIAN 6IN', 70.00, 1, '2024-04-12 20:18:40', NULL, 1),
+(3, 'CONCRETE V GUTTER', 25.00, 1, '2024-04-12 20:19:00', NULL, 2),
+(4, 'CONC VALLEY GUTTER 6IN', 58.00, 1, '2024-04-12 20:19:26', NULL, 1),
+(5, 'CONC VALLEY GUTTER 8IN', 77.00, 1, '2024-04-12 20:19:51', NULL, 1),
+(6, 'CONC CURB & GUTTEER 8INX30IN TP2', 16.50, 1, '2024-04-12 20:20:29', NULL, 2),
+(7, 'CONC CURB & GUTTEER 8INX30IN TP7', 16.50, 1, '2024-04-12 20:22:07', NULL, 2),
+(8, 'CLASS B CONCRETE', 700.00, 1, '2024-04-12 20:22:31', NULL, 3),
+(9, 'CLASS B CONCRETE, INCL REINF STEEL', 0.00, 1, '2024-04-12 20:23:08', NULL, 3),
+(10, 'CLASS B CONC, BASE OR PVMT WIDENING', 253.00, 1, '2024-04-12 20:23:35', NULL, 3),
+(11, 'BAR REINF. STEEL ', 0.00, 1, '2024-04-12 20:23:52', NULL, 4),
+(12, 'CONC DRIVEWAY 8IN', 70.00, 1, '2024-04-12 20:24:09', NULL, 1),
+(13, 'CONC SLOPE DRAIN ', 100.00, 1, '2024-04-12 20:24:29', NULL, 1),
+(14, 'CONC SIDEWALK 4IN', 30.00, 1, '2024-04-12 20:25:08', NULL, 1),
+(15, 'CONC SIDEWALK 8IN', 63.00, 1, '2024-04-12 20:25:30', NULL, 1),
+(16, 'CONC SPILLWAY TP3', 2100.00, 1, '2024-04-12 20:25:50', NULL, 5),
+(17, 'PLAIN CONC DITCH PAVING', 47.18, 1, '2024-04-12 20:26:54', NULL, 1),
+(18, 'EXTRA CONCRETE', 208.00, 1, '2024-04-12 20:27:17', NULL, 3),
+(19, 'EXTRA LABOR', 1500.00, 1, '2024-04-12 20:27:37', NULL, 6),
+(20, 'Cubic Yards of Concrete', 150.00, 1, '2024-04-12 20:28:15', '2024-04-14 17:54:52', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `log`
+--
+
+CREATE TABLE `log` (
+  `log_id` int(11) NOT NULL,
+  `operation` varchar(255) DEFAULT NULL,
+  `category` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `ip` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Volcado de datos para la tabla `log`
+--
+
+INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `created_at`, `user_id`) VALUES
+(2, 'Update', 'Rol', 'The rol is modified: Administrator', '::1', '2024-04-12 17:15:24', 1),
+(3, 'Update', 'Rol', 'The rol is modified: User', '::1', '2024-04-12 17:15:29', 1),
+(4, 'Update', 'Rol', 'The rol is modified: User', '::1', '2024-04-12 17:15:39', 1),
+(5, 'Update', 'User', 'The user is modified: Administrator Concrete', '::1', '2024-04-12 18:37:27', 1),
+(6, 'Add', 'Unit', 'The unit is added: CU', '::1', '2024-04-12 19:46:36', 1),
+(7, 'Update', 'Unit', 'The unit is modified: CU', '::1', '2024-04-12 19:46:41', 1),
+(8, 'Delete', 'Unit', 'The unit is deleted: CU', '::1', '2024-04-12 19:46:45', 1),
+(9, 'Add', 'Item', 'The item is added: CONC MEDIAN 4IN', '::1', '2024-04-12 20:18:17', 1),
+(10, 'Add', 'Item', 'The item is added: CONC MEDIAN 6IN', '::1', '2024-04-12 20:18:40', 1),
+(11, 'Add', 'Item', 'The item is added: CONCRETE V GUTTER', '::1', '2024-04-12 20:19:00', 1),
+(12, 'Add', 'Item', 'The item is added: CONC VALLEY GUTTER 6IN', '::1', '2024-04-12 20:19:26', 1),
+(13, 'Add', 'Item', 'The item is added: CONC VALLEY GUTTER 8IN', '::1', '2024-04-12 20:19:51', 1),
+(14, 'Add', 'Item', 'The item is added: CONC CURB & GUTTEER 8INX30IN TP2', '::1', '2024-04-12 20:20:29', 1),
+(15, 'Add', 'Item', 'The item is added: CONC CURB & GUTTEER 8INX30IN TP7', '::1', '2024-04-12 20:22:07', 1),
+(16, 'Add', 'Item', 'The item is added: CLASS B CONCRETE', '::1', '2024-04-12 20:22:31', 1),
+(17, 'Add', 'Item', 'The item is added: CLASS B CONCRETE, INCL REINF STEEL', '::1', '2024-04-12 20:23:08', 1),
+(18, 'Add', 'Item', 'The item is added: CLASS B CONC, BASE OR PVMT WIDENING', '::1', '2024-04-12 20:23:35', 1),
+(19, 'Add', 'Item', 'The item is added: BAR REINF. STEEL ', '::1', '2024-04-12 20:23:52', 1),
+(20, 'Add', 'Item', 'The item is added: CONC DRIVEWAY 8IN', '::1', '2024-04-12 20:24:09', 1),
+(21, 'Add', 'Item', 'The item is added: CONC SLOPE DRAIN ', '::1', '2024-04-12 20:24:29', 1),
+(22, 'Add', 'Item', 'The item is added: CONC SIDEWALK 4IN', '::1', '2024-04-12 20:25:08', 1),
+(23, 'Add', 'Item', 'The item is added: CONC SIDEWALK 8IN', '::1', '2024-04-12 20:25:30', 1),
+(24, 'Add', 'Item', 'The item is added: CONC SPILLWAY TP3', '::1', '2024-04-12 20:25:50', 1),
+(25, 'Add', 'Item', 'The item is added: PLAIN CONC DITCH PAVING', '::1', '2024-04-12 20:26:54', 1),
+(26, 'Add', 'Item', 'The item is added: EXTRA CONCRETE', '::1', '2024-04-12 20:27:17', 1),
+(27, 'Add', 'Item', 'The item is added: EXTRA LABOR', '::1', '2024-04-12 20:27:37', 1),
+(28, 'Add', 'Item', 'The item is added: Cubic Yards of Concrete', '::1', '2024-04-12 20:28:15', 1),
+(29, 'Add', 'Inspector', 'The inspector is added: Carlos Magill', '::1', '2024-04-13 00:03:19', 1),
+(30, 'Update', 'Inspector', 'The inspector is modified: Carlos Magill', '::1', '2024-04-13 00:03:44', 1),
+(31, 'Update', 'Inspector', 'The inspector is modified: Carlos Magill', '::1', '2024-04-13 00:03:50', 1),
+(32, 'Add', 'Contractor', 'The contractor is added: CONTRACTOR, INC', '::1', '2024-04-13 19:10:41', 1),
+(33, 'Update', 'Contractor', 'The contractor is modified: CONTRACTOR, INC', '::1', '2024-04-13 19:16:11', 1),
+(34, 'Update', 'Contractor', 'The contractor is modified: CONTRACTOR, INC', '::1', '2024-04-13 19:54:24', 1),
+(35, 'Add', 'Contractor', 'The contractor is added: Disrupsoft', '::1', '2024-04-13 23:00:10', 1),
+(36, 'Delete', 'Contractor', 'The contractor is deleted: Disrupsoft', '::1', '2024-04-13 23:00:20', 1),
+(37, 'Update', 'Item', 'The item is modified: Cubic Yards of Concrete', '::1', '2024-04-14 17:54:52', 1),
+(38, 'Add', 'Project', 'The project is added: FL COUNTY', '::1', '2024-04-14 20:24:53', 1),
+(39, 'Add', 'Project Item Details', 'The item is add: PLAIN CONC DITCH PAVING', '::1', '2024-04-14 21:55:05', 1),
+(40, 'Update', 'Project Item Details', 'The item is modified: PLAIN CONC DITCH PAVING', '::1', '2024-04-14 22:15:53', 1),
+(41, 'Add', 'Project Item Details', 'The item is add: CLASS B CONC, BASE OR PVMT WIDENING', '::1', '2024-04-14 22:21:23', 1),
+(42, 'Delete', 'Item Project', 'The item details project is deleted: CLASS B CONC, BASE OR PVMT WIDENING', '::1', '2024-04-14 22:21:30', 1),
+(43, 'Add', 'Project Item Details', 'The item is add: CLASS B CONCRETE', '::1', '2024-04-16 18:38:12', 1),
+(44, 'Delete', 'Item Project', 'The item details project is deleted: CLASS B CONCRETE', '::1', '2024-04-16 18:39:12', 1),
+(45, 'Add', 'Project Item Details', 'The item is add: CLASS B CONCRETE', '::1', '2024-04-16 18:39:28', 1),
+(46, 'Update', 'Project Item Details', 'The item is modified: CLASS B CONCRETE', '::1', '2024-04-16 18:39:38', 1),
+(47, 'Delete', 'Item Project', 'The item details project is deleted: CLASS B CONCRETE', '::1', '2024-04-16 18:39:42', 1),
+(48, 'Add', 'Project Item Details', 'The item is add: CLASS B CONCRETE', '::1', '2024-04-16 18:39:48', 1),
+(49, 'Add', 'Project Item Details', 'The item is add: CONC MEDIAN 4IN', '::1', '2024-04-16 18:44:17', 1),
+(50, 'Add', 'Project Item Details', 'The item is add: CONC MEDIAN 4IN', '::1', '2024-04-16 18:44:29', 1),
+(51, 'Add', 'Project Item Details', 'The item is add: CONC SPILLWAY TP3', '::1', '2024-04-16 18:44:39', 1),
+(52, 'Add', 'Project Item Details', 'The item is add: EXTRA LABOR', '::1', '2024-04-16 18:48:15', 1),
+(53, 'Add', 'Invoice', 'The invoice #1 is added', '::1', '2024-04-23 02:39:04', 1),
+(54, 'Delete', 'Invoice', 'The invoice #1 is deleted', '::1', '2024-04-23 02:41:16', 1),
+(55, 'Add', 'Invoice', 'The invoice #1 is added', '::1', '2024-04-23 04:14:51', 1),
+(56, 'Delete', 'Invoice', 'The invoice #1 is deleted', '::1', '2024-04-23 04:19:45', 1),
+(57, 'Add', 'Invoice', 'The invoice #1 is added', '::1', '2024-04-23 04:21:25', 1),
+(58, 'Update', 'Invoice', 'The invoice #1 is modified', '::1', '2024-04-23 04:21:35', 1),
+(59, 'Update', 'Invoice', 'The invoice #1 is modified', '::1', '2024-04-23 17:43:33', 1),
+(60, 'Update', 'Invoice', 'The invoice #1 is modified', '::1', '2024-04-23 19:01:16', 1),
+(61, 'Add', 'Project Item Details', 'The item is add: CLASS B CONCRETE', '::1', '2024-04-23 19:35:31', 1),
+(62, 'Add', 'Project Item Details', 'The item is add: CONC MEDIAN 6IN', '::1', '2024-04-23 19:35:45', 1),
+(63, 'Add', 'Invoice', 'The invoice #2 is added', '::1', '2024-04-23 19:36:18', 1),
+(64, 'Add', 'Project Item Details', 'The item is add: CONC CURB & GUTTEER 8INX30IN TP2', '::1', '2024-04-23 19:37:31', 1),
+(65, 'Add', 'Project Item Details', 'The item is add: CLASS B CONCRETE', '::1', '2024-04-23 19:37:44', 1),
+(66, 'Add', 'Project Item Details', 'The item is add: CONC SPILLWAY TP3', '::1', '2024-04-23 19:37:55', 1),
+(67, 'Add', 'Project Item Details', 'The item is add: Cubic Yards of Concrete', '::1', '2024-04-23 19:38:09', 1),
+(68, 'Update', 'Project Item Details', 'The item is modified: Cubic Yards of Concrete', '::1', '2024-04-23 19:38:20', 1),
+(69, 'Add', 'Project Item Details', 'The item is add: CONC CURB & GUTTEER 8INX30IN TP7', '::1', '2024-04-23 19:38:51', 1),
+(70, 'Add', 'Project Item Details', 'The item is add: CONC SIDEWALK 4IN', '::1', '2024-04-23 19:39:02', 1),
+(71, 'Add', 'Project Item Details', 'The item is add: CONC DRIVEWAY 8IN', '::1', '2024-04-23 19:39:19', 1),
+(72, 'Add', 'Project Item Details', 'The item is add: Cubic Yards of Concrete', '::1', '2024-04-23 19:39:35', 1),
+(73, 'Add', 'Invoice', 'The invoice #3 is added', '::1', '2024-04-23 19:40:22', 1),
+(74, 'Add', 'Invoice', 'The invoice #4 is added', '::1', '2024-04-23 19:40:44', 1),
+(75, 'Add', 'Project', 'The project is added: FL MIAMI', '::1', '2024-04-24 04:20:22', 1),
+(76, 'Add', 'Project Item Details', 'The item is add: CONC SLOPE DRAIN ', '::1', '2024-04-24 04:20:56', 1),
+(77, 'Add', 'Project Item Details', 'The item is add: CONC CURB & GUTTEER 8INX30IN TP2', '::1', '2024-04-24 04:21:06', 1),
+(78, 'Add', 'Invoice', 'The invoice #5 is added', '::1', '2024-04-24 04:21:24', 1),
+(79, 'Add', 'Contractor', 'The contractor is added: CONTRACTOR TWO , INC', '::1', '2024-04-24 04:23:31', 1),
+(80, 'Add', 'Project', 'The project is added: Houston Texas', '::1', '2024-04-24 04:24:02', 1),
+(81, 'Add', 'Project Item Details', 'The item is add: CONC CURB & GUTTEER 8INX30IN TP2', '::1', '2024-04-24 04:24:23', 1),
+(82, 'Add', 'Project Item Details', 'The item is add: CONC VALLEY GUTTER 6IN', '::1', '2024-04-24 04:24:33', 1),
+(83, 'Add', 'Invoice', 'The invoice #6 is added', '::1', '2024-04-24 04:24:52', 1),
+(84, 'Update', 'Invoice', 'The invoice #6 is modified', '::1', '2024-04-24 16:59:17', 1),
+(85, 'Update', 'Invoice', 'The invoice #5 is modified', '::1', '2024-04-24 16:59:59', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `notification`
+--
+
+CREATE TABLE `notification` (
+  `id` int(11) NOT NULL,
+  `content` varchar(255) DEFAULT NULL,
+  `readed` tinyint(1) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `notification`
+--
+
+INSERT INTO `notification` (`id`, `content`, `readed`, `created_at`, `user_id`) VALUES
+(2, 'Generate april invoice', 1, '2024-04-16 13:23:00', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `project`
+--
+
+CREATE TABLE `project` (
+  `project_id` int(11) NOT NULL,
+  `project_number` varchar(50) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
+  `po_number` varchar(255) DEFAULT NULL,
+  `po_cg` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `contractor_id` int(11) DEFAULT NULL,
+  `inspector_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `project`
+--
+
+INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `po_number`, `po_cg`, `created_at`, `updated_at`, `contractor_id`, `inspector_id`) VALUES
+(1, '0009001', 'FL COUNTY', 'FL COUNTY', 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', NULL, 1, 1),
+(2, '0009002', 'FL MIAMI', 'FL MIAMI', '896532', '896532', '2024-04-24 04:20:22', NULL, 1, 1),
+(3, '0009003', 'Houston Texas', 'Houston Texas', '86532', '89653', '2024-04-24 04:24:02', NULL, 3, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `project_item_details`
+--
+
+CREATE TABLE `project_item_details` (
+  `id` int(11) NOT NULL,
+  `quantity` float(8,2) DEFAULT NULL,
+  `price` float(8,2) DEFAULT NULL,
+  `date` date DEFAULT NULL,
+  `project_id` int(11) DEFAULT NULL,
+  `item_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `project_item_details`
+--
+
+INSERT INTO `project_item_details` (`id`, `quantity`, `price`, `date`, `project_id`, `item_id`) VALUES
+(1, 130.00, 16.50, '2024-03-25', 1, 6),
+(2, 159.00, 47.18, '2024-03-18', 1, 17),
+(6, 3.00, 700.00, '2024-04-16', 1, 8),
+(7, 5.00, 29.00, '2024-04-16', 1, 1),
+(8, 6.00, 29.00, '2024-04-15', 1, 1),
+(9, 5.00, 2100.00, '2024-04-16', 1, 16),
+(10, 5.00, 1500.00, '2024-04-10', 1, 19),
+(11, 5.00, 700.00, '2024-03-13', 1, 8),
+(12, 50.00, 70.00, '2024-03-01', 1, 2),
+(13, 25.00, 16.50, '2024-02-01', 1, 6),
+(14, 12.00, 700.00, '2024-02-07', 1, 8),
+(15, 2.00, 2100.00, '2024-02-20', 1, 16),
+(16, 15.00, 150.00, '2024-02-29', 1, 20),
+(17, 25.00, 16.50, '2024-01-01', 1, 7),
+(18, 20.00, 30.00, '2024-01-08', 1, 14),
+(19, 10.00, 70.00, '2024-01-15', 1, 12),
+(20, 22.00, 150.00, '2024-01-22', 1, 20),
+(21, 50.00, 100.00, '2024-04-01', 2, 13),
+(22, 15.00, 16.50, '2024-04-17', 2, 6),
+(23, 100.00, 16.50, '2024-04-01', 3, 6),
+(24, 20.00, 58.00, '2024-04-16', 3, 4);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `rol`
+--
+
+CREATE TABLE `rol` (
+  `rol_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `rol`
+--
+
+INSERT INTO `rol` (`rol_id`, `name`) VALUES
+(1, 'Administrator'),
+(2, 'User');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `rol_permission`
+--
+
+CREATE TABLE `rol_permission` (
+  `id` int(11) NOT NULL,
+  `view_permission` tinyint(1) DEFAULT NULL,
+  `add_permission` tinyint(1) DEFAULT NULL,
+  `edit_permission` tinyint(1) DEFAULT NULL,
+  `delete_permission` tinyint(1) DEFAULT NULL,
+  `rol_id` int(11) DEFAULT NULL,
+  `function_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `rol_permission`
+--
+
+INSERT INTO `rol_permission` (`id`, `view_permission`, `add_permission`, `edit_permission`, `delete_permission`, `rol_id`, `function_id`) VALUES
+(9, 1, 1, 1, 1, 1, 1),
+(10, 1, 1, 1, 1, 1, 2),
+(11, 1, 1, 1, 1, 1, 3),
+(12, 1, 1, 1, 1, 1, 4),
+(14, 1, 1, 1, 1, 2, 1),
+(15, 1, 0, 0, 0, 2, 4),
+(16, 1, 1, 1, 1, 1, 5),
+(17, 1, 1, 1, 1, 1, 6),
+(18, 1, 1, 1, 1, 1, 7),
+(19, 1, 1, 1, 1, 1, 8),
+(20, 1, 1, 1, 1, 1, 9),
+(21, 1, 1, 1, 1, 1, 10),
+(22, 1, 1, 1, 1, 1, 11),
+(23, 1, 1, 1, 1, 1, 12),
+(24, 1, 1, 1, 1, 2, 12);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `unit`
+--
+
+CREATE TABLE `unit` (
+  `unit_id` int(11) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `unit`
+--
+
+INSERT INTO `unit` (`unit_id`, `description`, `status`) VALUES
+(1, 'SY', 1),
+(2, 'LF', 1),
+(3, 'CY', 1),
+(4, 'LB', 1),
+(5, 'EA', 1),
+(6, 'LS', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `user`
+--
+
+CREATE TABLE `user` (
+  `user_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `lastname` varchar(255) NOT NULL,
+  `email` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `status` tinyint(1) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `rol_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `user`
+--
+
+INSERT INTO `user` (`user_id`, `name`, `lastname`, `email`, `password`, `status`, `phone`, `created_at`, `updated_at`, `rol_id`) VALUES
+(1, 'Administrator', 'Concrete', 'admin@concrete.com', '$2y$12$ojiMWHh/4xuvv0D8JdpY7OnlBd5TuYTW76SyWlR5QNbOAgtBt64dy', 1, '', '2024-04-12 09:24:44', '2024-04-12 18:37:27', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `user_permission`
+--
+
+CREATE TABLE `user_permission` (
+  `id` int(11) NOT NULL,
+  `view_permission` tinyint(1) DEFAULT NULL,
+  `add_permission` tinyint(1) DEFAULT NULL,
+  `edit_permission` tinyint(1) DEFAULT NULL,
+  `delete_permission` tinyint(1) DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `function_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `user_permission`
+--
+
+INSERT INTO `user_permission` (`id`, `view_permission`, `add_permission`, `edit_permission`, `delete_permission`, `user_id`, `function_id`) VALUES
+(5, 1, 1, 1, 1, 1, 1),
+(6, 1, 1, 1, 1, 1, 2),
+(7, 1, 1, 1, 1, 1, 3),
+(8, 1, 1, 1, 1, 1, 4),
+(9, 1, 1, 1, 1, 1, 5),
+(10, 1, 1, 1, 1, 1, 6),
+(11, 1, 1, 1, 1, 1, 7),
+(12, 1, 1, 1, 1, 1, 8),
+(13, 1, 1, 1, 1, 1, 9),
+(14, 1, 1, 1, 1, 1, 10),
+(15, 1, 1, 1, 1, 1, 11),
+(16, 1, 1, 1, 1, 1, 12);
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `contractor`
+--
+ALTER TABLE `contractor`
+  ADD PRIMARY KEY (`contractor_id`);
+
+--
+-- Indices de la tabla `contractor_contact`
+--
+ALTER TABLE `contractor_contact`
+  ADD PRIMARY KEY (`contact_id`),
+  ADD KEY `Ref6474` (`contractor_id`);
+
+--
+-- Indices de la tabla `function`
+--
+ALTER TABLE `function`
+  ADD PRIMARY KEY (`function_id`);
+
+--
+-- Indices de la tabla `inspector`
+--
+ALTER TABLE `inspector`
+  ADD PRIMARY KEY (`inspector_id`);
+
+--
+-- Indices de la tabla `invoice`
+--
+ALTER TABLE `invoice`
+  ADD PRIMARY KEY (`invoice_id`),
+  ADD KEY `Ref6665` (`project_id`);
+
+--
+-- Indices de la tabla `invoice_item`
+--
+ALTER TABLE `invoice_item`
+  ADD PRIMARY KEY (`id`) USING BTREE,
+  ADD KEY `Ref6969` (`invoice_id`),
+  ADD KEY `Ref6770` (`item_id`);
+
+--
+-- Indices de la tabla `item`
+--
+ALTER TABLE `item`
+  ADD PRIMARY KEY (`item_id`),
+  ADD KEY `Ref6864` (`unit_id`);
+
+--
+-- Indices de la tabla `log`
+--
+ALTER TABLE `log`
+  ADD PRIMARY KEY (`log_id`),
+  ADD KEY `Ref135434` (`user_id`);
+
+--
+-- Indices de la tabla `notification`
+--
+ALTER TABLE `notification`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `Ref1377` (`user_id`);
+
+--
+-- Indices de la tabla `project`
+--
+ALTER TABLE `project`
+  ADD PRIMARY KEY (`project_id`),
+  ADD KEY `Ref6467` (`contractor_id`),
+  ADD KEY `Ref6573` (`inspector_id`);
+
+--
+-- Indices de la tabla `project_item_details`
+--
+ALTER TABLE `project_item_details`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `Ref6675` (`project_id`),
+  ADD KEY `Ref6776` (`item_id`);
+
+--
+-- Indices de la tabla `rol`
+--
+ALTER TABLE `rol`
+  ADD PRIMARY KEY (`rol_id`);
+
+--
+-- Indices de la tabla `rol_permission`
+--
+ALTER TABLE `rol_permission`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `Ref151` (`rol_id`),
+  ADD KEY `Ref192` (`function_id`);
+
+--
+-- Indices de la tabla `unit`
+--
+ALTER TABLE `unit`
+  ADD PRIMARY KEY (`unit_id`);
+
+--
+-- Indices de la tabla `user`
+--
+ALTER TABLE `user`
+  ADD PRIMARY KEY (`user_id`),
+  ADD KEY `Ref156` (`rol_id`);
+
+--
+-- Indices de la tabla `user_permission`
+--
+ALTER TABLE `user_permission`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `Ref133` (`user_id`),
+  ADD KEY `Ref194` (`function_id`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `contractor`
+--
+ALTER TABLE `contractor`
+  MODIFY `contractor_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `contractor_contact`
+--
+ALTER TABLE `contractor_contact`
+  MODIFY `contact_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `function`
+--
+ALTER TABLE `function`
+  MODIFY `function_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT de la tabla `inspector`
+--
+ALTER TABLE `inspector`
+  MODIFY `inspector_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `invoice`
+--
+ALTER TABLE `invoice`
+  MODIFY `invoice_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT de la tabla `invoice_item`
+--
+ALTER TABLE `invoice_item`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+
+--
+-- AUTO_INCREMENT de la tabla `item`
+--
+ALTER TABLE `item`
+  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
+-- AUTO_INCREMENT de la tabla `log`
+--
+ALTER TABLE `log`
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
+
+--
+-- AUTO_INCREMENT de la tabla `notification`
+--
+ALTER TABLE `notification`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `project`
+--
+ALTER TABLE `project`
+  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `project_item_details`
+--
+ALTER TABLE `project_item_details`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+
+--
+-- AUTO_INCREMENT de la tabla `rol`
+--
+ALTER TABLE `rol`
+  MODIFY `rol_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `rol_permission`
+--
+ALTER TABLE `rol_permission`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+
+--
+-- AUTO_INCREMENT de la tabla `unit`
+--
+ALTER TABLE `unit`
+  MODIFY `unit_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT de la tabla `user`
+--
+ALTER TABLE `user`
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT de la tabla `user_permission`
+--
+ALTER TABLE `user_permission`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `contractor_contact`
+--
+ALTER TABLE `contractor_contact`
+  ADD CONSTRAINT `Refcontractor74` FOREIGN KEY (`contractor_id`) REFERENCES `contractor` (`contractor_id`);
+
+--
+-- Filtros para la tabla `invoice`
+--
+ALTER TABLE `invoice`
+  ADD CONSTRAINT `Refproject65` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`);
+
+--
+-- Filtros para la tabla `invoice_item`
+--
+ALTER TABLE `invoice_item`
+  ADD CONSTRAINT `Refinvoice69` FOREIGN KEY (`invoice_id`) REFERENCES `invoice` (`invoice_id`),
+  ADD CONSTRAINT `Refitem70` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`);
+
+--
+-- Filtros para la tabla `item`
+--
+ALTER TABLE `item`
+  ADD CONSTRAINT `Refunit64` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`unit_id`);
+
+--
+-- Filtros para la tabla `log`
+--
+ALTER TABLE `log`
+  ADD CONSTRAINT `Refuser434` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
+
+--
+-- Filtros para la tabla `notification`
+--
+ALTER TABLE `notification`
+  ADD CONSTRAINT `Refuser77` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
+
+--
+-- Filtros para la tabla `project`
+--
+ALTER TABLE `project`
+  ADD CONSTRAINT `Refcontractor67` FOREIGN KEY (`contractor_id`) REFERENCES `contractor` (`contractor_id`),
+  ADD CONSTRAINT `Refinspector73` FOREIGN KEY (`inspector_id`) REFERENCES `inspector` (`inspector_id`);
+
+--
+-- Filtros para la tabla `project_item_details`
+--
+ALTER TABLE `project_item_details`
+  ADD CONSTRAINT `Refitem76` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`),
+  ADD CONSTRAINT `Refproject75` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`);
+
+--
+-- Filtros para la tabla `rol_permission`
+--
+ALTER TABLE `rol_permission`
+  ADD CONSTRAINT `Reffunction2` FOREIGN KEY (`function_id`) REFERENCES `function` (`function_id`),
+  ADD CONSTRAINT `Refrol1` FOREIGN KEY (`rol_id`) REFERENCES `rol` (`rol_id`);
+
+--
+-- Filtros para la tabla `user`
+--
+ALTER TABLE `user`
+  ADD CONSTRAINT `Refrol6` FOREIGN KEY (`rol_id`) REFERENCES `rol` (`rol_id`);
+
+--
+-- Filtros para la tabla `user_permission`
+--
+ALTER TABLE `user_permission`
+  ADD CONSTRAINT `Reffunction4` FOREIGN KEY (`function_id`) REFERENCES `function` (`function_id`),
+  ADD CONSTRAINT `Refuser3` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

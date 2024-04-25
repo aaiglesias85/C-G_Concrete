@@ -1,0 +1,422 @@
+<?php
+
+namespace App\Utils\Admin;
+
+use App\Entity\Contractor;
+use App\Entity\ContractorContact;
+use App\Entity\Project;
+use App\Utils\Base;
+
+class ContractorService extends Base
+{
+
+    /**
+     * EliminarContact: Elimina un contact en la BD
+     * @param int $contact_id Id
+     * @author Marcel
+     */
+    public function EliminarContact($contact_id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $this->getDoctrine()->getRepository(ContractorContact::class)
+            ->find($contact_id);
+        /**@var ContractorContact $entity */
+        if ($entity != null) {
+
+            $contact_name = $entity->getName();
+
+            $em->remove($entity);
+            $em->flush();
+
+            //Salvar log
+            $log_operacion = "Delete";
+            $log_categoria = "Contact";
+            $log_descripcion = "The contractor contact is deleted: $contact_name";
+            $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
+
+            $resultado['success'] = true;
+        } else {
+            $resultado['success'] = false;
+            $resultado['error'] = "The requested record does not exist";
+        }
+
+        return $resultado;
+    }
+
+    /**
+     * CargarDatosContractor: Carga los datos de un contractor
+     *
+     * @param int $contractor_id Id
+     *
+     * @author Marcel
+     */
+    public function CargarDatosContractor($contractor_id)
+    {
+        $resultado = array();
+        $arreglo_resultado = array();
+
+        $entity = $this->getDoctrine()->getRepository(Contractor::class)
+            ->find($contractor_id);
+        /** @var Contractor $entity */
+        if ($entity != null) {
+
+            $arreglo_resultado['name'] = $entity->getName();
+            $arreglo_resultado['phone'] = $entity->getPhone();
+            $arreglo_resultado['contactName'] = $entity->getContactName();
+            $arreglo_resultado['contactEmail'] = $entity->getContactEmail();
+
+            // contacts
+            $contacts = $this->ListarContacts($contractor_id);
+            $arreglo_resultado['contacts'] = $contacts;
+
+            $resultado['success'] = true;
+            $resultado['contractor'] = $arreglo_resultado;
+        }
+
+        return $resultado;
+    }
+
+    /**
+     * ListarContacts
+     * @param $contractor_id
+     * @return array
+     */
+    public function ListarContacts($contractor_id)
+    {
+        $contacts = [];
+
+        $contractor_contacts = $this->getDoctrine()->getRepository(ContractorContact::class)
+            ->ListarContacts($contractor_id);
+        foreach ($contractor_contacts as $key => $contact) {
+            $contacts[] = [
+                'contact_id' => $contact->getContactId(),
+                'name' => $contact->getName(),
+                'email' => $contact->getEmail(),
+                'phone' => $contact->getPhone(),
+                'posicion' => $key
+            ];
+        }
+
+        return $contacts;
+    }
+
+    /**
+     * EliminarContractor: Elimina un rol en la BD
+     * @param int $contractor_id Id
+     * @author Marcel
+     */
+    public function EliminarContractor($contractor_id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $this->getDoctrine()->getRepository(Contractor::class)
+            ->find($contractor_id);
+        /**@var Contractor $entity */
+        if ($entity != null) {
+
+            // projects
+            $projects = $this->getDoctrine()->getRepository(Project::class)
+                ->ListarProjectsDeContractor($contractor_id);
+            if (count($projects) > 0) {
+                $resultado['success'] = false;
+                $resultado['error'] = "The contractor could not be deleted, because it is related to a project";
+                return $resultado;
+            }
+
+            // contacts
+            $contacts = $this->getDoctrine()->getRepository(ContractorContact::class)
+                ->ListarContacts($contractor_id);
+            foreach ($contacts as $contact) {
+                $em->remove($contact);
+            }
+
+            $contractor_descripcion = $entity->getName();
+
+
+            $em->remove($entity);
+            $em->flush();
+
+            //Salvar log
+            $log_operacion = "Delete";
+            $log_categoria = "Contractor";
+            $log_descripcion = "The contractor is deleted: $contractor_descripcion";
+            $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
+
+            $resultado['success'] = true;
+        } else {
+            $resultado['success'] = false;
+            $resultado['error'] = "The requested record does not exist";
+        }
+
+        return $resultado;
+    }
+
+    /**
+     * EliminarContractors: Elimina los contractors seleccionados en la BD
+     * @param int $ids Ids
+     * @author Marcel
+     */
+    public function EliminarContractors($ids)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        if ($ids != "") {
+            $ids = explode(',', $ids);
+            $cant_eliminada = 0;
+            $cant_total = 0;
+            foreach ($ids as $contractor_id) {
+                if ($contractor_id != "") {
+                    $cant_total++;
+                    $entity = $this->getDoctrine()->getRepository(Contractor::class)
+                        ->find($contractor_id);
+                    /**@var Contractor $entity */
+                    if ($entity != null) {
+
+                        // projects
+                        $projects = $this->getDoctrine()->getRepository(Project::class)
+                            ->ListarProjectsDeContractor($contractor_id);
+                        if (count($projects) == 0) {
+                            // contacts
+                            $contacts = $this->getDoctrine()->getRepository(ContractorContact::class)
+                                ->ListarContacts($contractor_id);
+                            foreach ($contacts as $contact) {
+                                $em->remove($contact);
+                            }
+
+                            $contractor_descripcion = $entity->getName();
+
+                            $em->remove($entity);
+                            $cant_eliminada++;
+
+                            //Salvar log
+                            $log_operacion = "Delete";
+                            $log_categoria = "Contractor";
+                            $log_descripcion = "The contractor is deleted: $contractor_descripcion";
+                            $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
+                        }
+
+                    }
+                }
+            }
+        }
+        $em->flush();
+
+        if ($cant_eliminada == 0) {
+            $resultado['success'] = false;
+            $resultado['error'] = "The contractors could not be deleted, because they are associated with a project";
+        } else {
+            $resultado['success'] = true;
+
+            $mensaje = ($cant_eliminada == $cant_total) ? "The operation was successful" : "The operation was successful. But attention, it was not possible to delete all the selected contractors because they are associated with a project";
+            $resultado['message'] = $mensaje;
+        }
+
+        return $resultado;
+    }
+
+    /**
+     * ActualizarContractor: Actuializa los datos del rol en la BD
+     * @param int $contractor_id Id
+     * @author Marcel
+     */
+    public function ActualizarContractor($contractor_id, $name, $phone, $contactName, $contactEmail, $contacts)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $this->getDoctrine()->getRepository(Contractor::class)
+            ->find($contractor_id);
+        /** @var Contractor $entity */
+        if ($entity != null) {
+            //Verificar description
+            $contractor = $this->getDoctrine()->getRepository(Contractor::class)
+                ->findOneBy(['name' => $name]);
+            if ($contractor != null && $entity->getContractorId() != $contractor->getContractorId()) {
+                $resultado['success'] = false;
+                $resultado['error'] = "The contractor name is in use, please try entering another one.";
+                return $resultado;
+            }
+
+            $entity->setName($name);
+            $entity->setPhone($phone);
+            $entity->setContactName($contactName);
+            $entity->setContactEmail($contactEmail);
+
+            $entity->setUpdatedAt(new \DateTime());
+
+            // save contacts
+            $this->SalvarContacts($entity, $contacts);
+
+            $em->flush();
+
+            //Salvar log
+            $log_operacion = "Update";
+            $log_categoria = "Contractor";
+            $log_descripcion = "The contractor is modified: $name";
+            $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
+
+            $resultado['success'] = true;
+
+            return $resultado;
+        }
+    }
+
+    /**
+     * SalvarContractor: Guarda los datos de contractor en la BD
+     * @param string $description Nombre
+     * @author Marcel
+     */
+    public function SalvarContractor($name, $phone, $contactName, $contactEmail, $contacts)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        //Verificar email
+        $contractor = $this->getDoctrine()->getRepository(Contractor::class)
+            ->findOneBy(['name' => $name]);
+        if ($contractor != null) {
+            $resultado['success'] = false;
+            $resultado['error'] = "The contractor name is in use, please try entering another one.";
+            return $resultado;
+        }
+
+        $entity = new Contractor();
+
+        $entity->setName($name);
+        $entity->setPhone($phone);
+        $entity->setContactName($contactName);
+        $entity->setContactEmail($contactEmail);
+
+        $entity->setCreatedAt(new \DateTime());
+
+        $em->persist($entity);
+
+        // save contacts
+        $this->SalvarContacts($entity, $contacts);
+
+        $em->flush();
+
+        //Salvar log
+        $log_operacion = "Add";
+        $log_categoria = "Contractor";
+        $log_descripcion = "The contractor is added: $name";
+        $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
+
+        $resultado['success'] = true;
+
+        return $resultado;
+    }
+
+    /**
+     * SalvarContacts
+     * @param $contacts
+     * @param Contractor $entity
+     * @return void
+     */
+    public function SalvarContacts($entity, $contacts)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        //Senderos
+        foreach ($contacts as $value) {
+
+            $contact_entity = null;
+
+            if (is_numeric($value->contact_id)) {
+                $contact_entity = $this->getDoctrine()->getRepository(ContractorContact::class)
+                    ->find($value->contact_id);
+            }
+
+            $is_new_contact = false;
+            if ($contact_entity == null) {
+                $contact_entity = new ContractorContact();
+                $is_new_contact = true;
+            }
+
+            $contact_entity->setName($value->name);
+            $contact_entity->setEmail($value->email);
+            $contact_entity->setPhone($value->phone);
+
+            if ($is_new_contact) {
+                $contact_entity->setContractor($entity);
+
+                $em->persist($contact_entity);
+            }
+        }
+    }
+
+    /**
+     * ListarContractors: Listar los contractors
+     *
+     * @param int $start Inicio
+     * @param int $limit Limite
+     * @param string $sSearch Para buscar
+     *
+     * @author Marcel
+     */
+    public function ListarContractors($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0)
+    {
+        $arreglo_resultado = array();
+        $cont = 0;
+
+        $lista = $this->getDoctrine()->getRepository(Contractor::class)
+            ->ListarContractors($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0);
+
+        foreach ($lista as $value) {
+            $contractor_id = $value->getContractorId();
+
+            $acciones = $this->ListarAcciones($contractor_id);
+
+            $arreglo_resultado[$cont] = array(
+                "id" => $contractor_id,
+                "name" => $value->getName(),
+                "phone" => $value->getPhone(),
+                "contactName" => $value->getContactName(),
+                "contactEmail" => $value->getContactEmail(),
+                "acciones" => $acciones
+            );
+
+            $cont++;
+        }
+
+        return $arreglo_resultado;
+    }
+
+    /**
+     * TotalContractors: Total de contractors
+     * @param string $sSearch Para buscar
+     * @author Marcel
+     */
+    public function TotalContractors($sSearch)
+    {
+        $total = $this->getDoctrine()->getRepository(Contractor::class)
+            ->TotalContractors($sSearch);
+
+        return $total;
+    }
+
+    /**
+     * ListarAcciones: Lista los permisos de un usuario de la BD
+     *
+     * @author Marcel
+     */
+    public function ListarAcciones($id)
+    {
+        $usuario = $this->getUser();
+        $permiso = $this->BuscarPermiso($usuario->getUsuarioId(), 8);
+
+        $acciones = "";
+
+        if (count($permiso) > 0) {
+            if ($permiso[0]['editar']) {
+                $acciones .= '<a href="javascript:;" class="edit m-portlet__nav-link btn m-btn m-btn--hover-success m-btn--icon m-btn--icon-only m-btn--pill" title="Edit record" data-id="' . $id . '"> <i class="la la-edit"></i> </a> ';
+            } else {
+                $acciones .= '<a href="javascript:;" class="edit m-portlet__nav-link btn m-btn m-btn--hover-success m-btn--icon m-btn--icon-only m-btn--pill" title="View record" data-id="' . $id . '"> <i class="la la-eye"></i> </a> ';
+            }
+            if ($permiso[0]['eliminar']) {
+                $acciones .= ' <a href="javascript:;" class="delete m-portlet__nav-link btn m-btn m-btn--hover-danger m-btn--icon m-btn--icon-only m-btn--pill" title="Delete record" data-id="' . $id . '"><i class="la la-trash"></i></a>';
+            }
+        }
+
+        return $acciones;
+    }
+}
