@@ -1,5 +1,5 @@
 daily_tracking:
-  path: /daily-tracking
+  path: /data-tracking
   defaults: { _controller: App\Controller\Admin\DailyTrackingController::index }
 
 listarDailyTrackingAdmin:
