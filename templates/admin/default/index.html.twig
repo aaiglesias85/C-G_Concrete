@@ -47,23 +47,28 @@
                 <div class="row m-row--no-padding m-row--col-separator-xl">
                     <div class="col-xl-4">
 
-                        {% if projects | length > 0 %}
-                            <div class="m-widget1">
-                                {% for item in projects %}
-                                    <div class="m-widget1__item">
-                                        <div class="row m-row--no-padding align-items-center">
-                                            <div class="col">
-                                                <h3 class="m-widget1__title">{{ item.number }} - {{ item.name }}</h3>
-                                                <span class="m-widget1__desc">{{ item.contractor }}</span>
-                                            </div>
-                                            <div class="col m--align-right">
-                                                <span class="m-widget1__number {% if loop.index == 1 %}m--font-success{% endif %} {% if loop.index == 2 %}m--font-info{% endif %} {% if loop.index == 3 %}m--font-danger{% endif %}">${{ item.amount| number_format(2, '.', ',') }}</span>
-                                            </div>
-                                        </div>
+                        <div class="m-widget1">
+                            <div class="m-widget1__item">
+                                <div class="row m-row--no-padding align-items-center">
+                                    <div class="col">
+                                        <h3 class="m-widget1__title">Projects</h3>
+                                        <span class="m-widget1__desc">Active projects</span><br>
+                                        <span class="m-widget1__desc">Inactive projects</span>
                                     </div>
-                                {% endfor %}
+                                    <div class="col m--align-right">
+                                        </br>
+                                        <span class="m-widget1__number m--font-success">{{ stats.total_proyectos_activos }}</span>
+                                        </br>
+                                        <span class="m-widget1__number m--font-danger">{{ stats.total_proyectos_inactivos }}</span>
+                                    </div>
+                                </div>
                             </div>
-                        {% endif %}
+                            <div class="m-widget1__item">
+                                <div class="row m-row--no-padding align-items-center">
+
+                                </div>
+                            </div>
+                        </div>
 
                         <!--end:: Widgets/Stats2-1 -->
                     </div>

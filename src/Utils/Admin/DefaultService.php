@@ -13,6 +13,28 @@ class DefaultService extends Base
 {
 
     /**
+     * ListarStats: listar stats
+     * @return array
+     */
+    public function ListarStats()
+    {
+        $arreglo_resultado = [];
+
+        // total de proyectos activos
+        $total_proyectos_activos = $this->getDoctrine()->getRepository(Project::class)
+            ->TotalProjects('', '', '', 1);
+
+        // total de proyectos inactivos
+        $total_proyectos_inactivos = $this->getDoctrine()->getRepository(Project::class)
+            ->TotalProjects('', '', '', 0);
+
+        return [
+            'total_proyectos_activos' => $total_proyectos_activos,
+            'total_proyectos_inactivos' => $total_proyectos_inactivos
+        ];
+    }
+
+    /**
      * ListarItemsConMontos: lista los items ordenados por el monto
      * @return array
      */

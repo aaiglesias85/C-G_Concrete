@@ -29,8 +29,8 @@ class DefaultController extends AbstractController
         if (count($permiso) > 0) {
             if ($permiso[0]['ver']) {
 
-                // projects
-                $projects = $this->defaultService->ListarProyectosConMontos();
+                // stats
+                $stats = $this->defaultService->ListarStats();
                 // chart 1
                 $chart1 = $this->defaultService->DevolverDataChart1();
                 // chart 2
@@ -42,7 +42,7 @@ class DefaultController extends AbstractController
 
                 return $this->render('admin/default/index.html.twig', array(
                     'usuario' => $usuario,
-                    'projects' => $projects,
+                    'stats' => $stats,
                     'chart1' => $chart1,
                     'chart2' => $chart2,
                     'chart3' => $chart3,
