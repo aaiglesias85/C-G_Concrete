@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 24-04-2024 a las 18:52:50
+-- Tiempo de generación: 27-04-2024 a las 02:46:05
 -- Versión del servidor: 11.2.2-MariaDB
 -- Versión de PHP: 8.1.12
 
@@ -371,6 +371,8 @@ CREATE TABLE `project` (
   `project_number` varchar(50) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   `location` varchar(255) DEFAULT NULL,
+  `manager` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) DEFAULT NULL,
   `po_number` varchar(255) DEFAULT NULL,
   `po_cg` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
@@ -383,10 +385,10 @@ CREATE TABLE `project` (
 -- Volcado de datos para la tabla `project`
 --
 
-INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `po_number`, `po_cg`, `created_at`, `updated_at`, `contractor_id`, `inspector_id`) VALUES
-(1, '0009001', 'FL COUNTY', 'FL COUNTY', 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', NULL, 1, 1),
-(2, '0009002', 'FL MIAMI', 'FL MIAMI', '896532', '896532', '2024-04-24 04:20:22', NULL, 1, 1),
-(3, '0009003', 'Houston Texas', 'Houston Texas', '86532', '89653', '2024-04-24 04:24:02', NULL, 3, 1);
+INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `contractor_id`, `inspector_id`) VALUES
+(1, '0009001', 'FL COUNTY', 'FL COUNTY', NULL, 1, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', NULL, 1, 1),
+(2, '0009002', 'FL MIAMI', 'FL MIAMI', NULL, 1, '896532', '896532', '2024-04-24 04:20:22', NULL, 1, 1),
+(3, '0009003', 'Houston Texas', 'Houston Texas', NULL, 1, '86532', '89653', '2024-04-24 04:24:02', NULL, 3, 1);
 
 -- --------------------------------------------------------
 
@@ -429,6 +431,19 @@ INSERT INTO `project_item_details` (`id`, `quantity`, `price`, `date`, `project_
 (22, 15.00, 16.50, '2024-04-17', 2, 6),
 (23, 100.00, 16.50, '2024-04-01', 3, 6),
 (24, 20.00, 58.00, '2024-04-16', 3, 4);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `project_notes`
+--
+
+CREATE TABLE `project_notes` (
+  `id` int(11) NOT NULL,
+  `notes` text DEFAULT NULL,
+  `date` date DEFAULT NULL,
+  `project_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -652,6 +667,13 @@ ALTER TABLE `project_item_details`
   ADD KEY `Ref6776` (`item_id`);
 
 --
+-- Indices de la tabla `project_notes`
+--
+ALTER TABLE `project_notes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `Ref6678` (`project_id`);
+
+--
 -- Indices de la tabla `rol`
 --
 ALTER TABLE `rol`
@@ -757,6 +779,12 @@ ALTER TABLE `project_item_details`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
+-- AUTO_INCREMENT de la tabla `project_notes`
+--
+ALTER TABLE `project_notes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `rol`
 --
 ALTER TABLE `rol`
@@ -840,6 +868,12 @@ ALTER TABLE `project`
 ALTER TABLE `project_item_details`
   ADD CONSTRAINT `Refitem76` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`),
   ADD CONSTRAINT `Refproject75` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`);
+
+--
+-- Filtros para la tabla `project_notes`
+--
+ALTER TABLE `project_notes`
+  ADD CONSTRAINT `Refproject78` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`);
 
 --
 -- Filtros para la tabla `rol_permission`
