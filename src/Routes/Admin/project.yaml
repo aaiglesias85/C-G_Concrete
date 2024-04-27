@@ -46,3 +46,20 @@ eliminarItemDetailsProjectAdmin:
 listarItemDetailsParaInvoiceProjectAdmin:
   path: /project/listarItemDetailsParaInvoice
   defaults: { _controller: App\Controller\Admin\ProjectController::listarItemDetailsParaInvoice, _format: json }
+
+#notes
+listarNotesProjectAdmin:
+  path: /project/listarNotes
+  defaults: { _controller: App\Controller\Admin\ProjectController::listarNotes, _format: json }
+
+salvarNotesProjectAdmin:
+  path: /project/salvarNotes
+  defaults: { _controller: App\Controller\Admin\ProjectController::salvarNotes, _format: json }
+
+cargarDatosNotesProjectAdmin:
+  path: /project/cargarDatosNotes
+  defaults: { _controller: App\Controller\Admin\ProjectController::cargarDatosNotes, _format: json }
+
+eliminarNotesProjectAdmin:
+  path: /project/eliminarNotes
+  defaults: { _controller: App\Controller\Admin\ProjectController::eliminarNotes, _format: json }

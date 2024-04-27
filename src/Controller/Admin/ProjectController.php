@@ -62,6 +62,7 @@ class ProjectController extends AbstractController
         $sSearch = isset($query['generalSearch']) && is_string($query['generalSearch']) ? $query['generalSearch'] : '';
         $contractor_id = isset($query['contractor_id']) && is_string($query['contractor_id']) ? $query['contractor_id'] : '';
         $inspector_id = isset($query['inspector_id']) && is_string($query['inspector_id']) ? $query['inspector_id'] : '';
+        $status = isset($query['status']) && is_string($query['status']) ? $query['status'] : '';
         //Sort
         $sort = !empty($request->get('sort')) ? $request->get('sort') : array();
         $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'desc';
@@ -74,7 +75,7 @@ class ProjectController extends AbstractController
 
         try {
             $pages = 1;
-            $total = $this->projectService->TotalProjects($sSearch, $contractor_id, $inspector_id);
+            $total = $this->projectService->TotalProjects($sSearch, $contractor_id, $inspector_id, $status);
             if ($limit > 0) {
                 $pages = ceil($total / $limit); // calculate total pages
                 $page = max($page, 1); // get 1 page when $_REQUEST['page'] <= 0
@@ -94,7 +95,8 @@ class ProjectController extends AbstractController
                 'sort' => $sSortDir_0
             );
 
-            $data = $this->projectService->ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $contractor_id, $inspector_id);
+            $data = $this->projectService->ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
+                $contractor_id, $inspector_id, $status);
 
             $resultadoJson = array(
                 'meta' => $meta,
@@ -126,13 +128,15 @@ class ProjectController extends AbstractController
         $location = $request->get('location');
         $po_number = $request->get('po_number');
         $po_cg = $request->get('po_cg');
+        $manager = $request->get('manager');
+        $status = $request->get('status');
 
         try {
 
             if ($project_id == "") {
-                $resultado = $this->projectService->SalvarProject($contractor_id, $inspector_id, $number, $name, $location, $po_number, $po_cg);
+                $resultado = $this->projectService->SalvarProject($contractor_id, $inspector_id, $number, $name, $location, $po_number, $po_cg, $manager, $status);
             } else {
-                $resultado = $this->projectService->ActualizarProject($project_id, $contractor_id, $inspector_id, $number, $name, $location, $po_number, $po_cg);
+                $resultado = $this->projectService->ActualizarProject($project_id, $contractor_id, $inspector_id, $number, $name, $location, $po_number, $po_cg, $manager, $status);
             }
 
             if ($resultado['success']) {
@@ -457,4 +461,163 @@ class ProjectController extends AbstractController
         }
 
     }
+
+    /**
+     * listarNotes Acción que lista los notes projects
+     *
+     */
+    public function listarNotes(Request $request)
+    {
+
+        // search filter by keywords
+        $query = !empty($request->get('query')) ? $request->get('query') : array();
+        $sSearch = isset($query['generalSearch']) && is_string($query['generalSearch']) ? $query['generalSearch'] : '';
+        $project_id = isset($query['project_id']) && is_string($query['project_id']) ? $query['project_id'] : '';
+        $fecha_inicial = isset($query['fechaInicial']) && is_string($query['fechaInicial']) ? $query['fechaInicial'] : '';
+        $fecha_fin = isset($query['fechaFin']) && is_string($query['fechaFin']) ? $query['fechaFin'] : '';
+
+        //Sort
+        $sort = !empty($request->get('sort')) ? $request->get('sort') : array();
+        $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'desc';
+        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'date';
+        //$start and $limit
+        $pagination = !empty($request->get('pagination')) ? $request->get('pagination') : array();
+        $page = !empty($pagination['page']) ? (int)$pagination['page'] : 1;
+        $limit = !empty($pagination['perpage']) ? (int)$pagination['perpage'] : -1;
+        $start = 0;
+
+        try {
+            $pages = 1;
+            $total = $project_id != '' ? $this->projectService->TotalNotes($sSearch, $project_id, $fecha_inicial, $fecha_fin) : 0;
+            if ($limit > 0) {
+                $pages = ceil($total / $limit); // calculate total pages
+                $page = max($page, 1); // get 1 page when $_REQUEST['page'] <= 0
+                $page = min($page, $pages); // get last page when $_REQUEST['page'] > $totalPages
+                $start = ($page - 1) * $limit;
+                if ($start < 0) {
+                    $start = 0;
+                }
+            }
+
+            $meta = array(
+                'page' => $page,
+                'pages' => $pages,
+                'perpage' => $limit,
+                'total' => $total,
+                'field' => $iSortCol_0,
+                'sort' => $sSortDir_0
+            );
+
+            $data = $project_id != '' ? $this->projectService->ListarNotes($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $fecha_inicial, $fecha_fin) : [];
+
+            $resultadoJson = array(
+                'meta' => $meta,
+                'data' => $data
+            );
+
+            return $this->json($resultadoJson);
+
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+    }
+
+    /**
+     * salvarNotes Acción que salvar un notes en la BD
+     *
+     */
+    public function salvarNotes(Request $request)
+    {
+        $notes_id = $request->get('notes_id');
+
+        $project_id = $request->get('project_id');
+        $notes = $request->get('notes');
+        $date = $request->get('date');
+
+        try {
+
+            $resultado = $this->projectService->SalvarNotes($notes_id, $project_id, $notes, $date);
+
+            if ($resultado['success']) {
+
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['message'] = "The operation was successful";
+
+                return $this->json($resultadoJson);
+            } else {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['error'] = $resultado['error'];
+
+                return $this->json($resultadoJson);
+            }
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+    }
+
+    /**
+     * cargarDatosNotes Acción que carga los datos del notes project en la BD
+     *
+     */
+    public function cargarDatosNotes(Request $request)
+    {
+        $notes_id = $request->get('notes_id');
+
+        try {
+            $resultado = $this->projectService->CargarDatosNotes($notes_id);
+            if ($resultado['success']) {
+
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['notes'] = $resultado['notes'];
+
+                return $this->json($resultadoJson);
+            } else {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['error'] = $resultado['error'];
+
+                return $this->json($resultadoJson);
+            }
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+
+    }
+
+    /**
+     * eliminarNotes Acción que elimina un notes en la BD
+     *
+     */
+    public function eliminarNotes(Request $request)
+    {
+        $notes_id = $request->get('notes_id');
+
+        try {
+            $resultado = $this->projectService->EliminarNotes($notes_id);
+            if ($resultado['success']) {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['message'] = "The operation was successful";
+                return $this->json($resultadoJson);
+            } else {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['error'] = $resultado['error'];
+                return $this->json($resultadoJson);
+            }
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+
+    }
+
 }

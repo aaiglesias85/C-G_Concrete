@@ -18,7 +18,8 @@ class ProjectRepository extends EntityRepository
     {
         $consulta = $this->createQueryBuilder('p')
             ->leftJoin('p.contractor', 'c')
-            ->leftJoin('p.inspector', 'i');
+            ->leftJoin('p.inspector', 'i')
+            ->where('p.status = 1');
 
         if ($sSearch != "") {
             $consulta->andWhere('p.projectNumber LIKE :number OR p.name LIKE :name OR p.poNumber LIKE :po OR p.poCG LIKE :cg')
@@ -87,7 +88,8 @@ class ProjectRepository extends EntityRepository
      *
      * @return Project[]
      */
-    public function ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $contractor_id = '', $inspector_id = '')
+    public function ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
+                                   $contractor_id = '', $inspector_id = '', $status = '')
     {
         $consulta = $this->createQueryBuilder('p')
             ->leftJoin('p.contractor', 'c')
@@ -109,6 +111,11 @@ class ProjectRepository extends EntityRepository
         if ($inspector_id != '') {
             $consulta->andWhere('i.inspectorId = :inspector_id')
                 ->setParameter('inspector_id', $inspector_id);
+        }
+
+        if ($status !== '') {
+            $consulta->andWhere('p.status = :status')
+                ->setParameter('status', $status);
         }
 
         switch ($iSortCol_0) {
@@ -138,7 +145,7 @@ class ProjectRepository extends EntityRepository
      *
      * @author Marcel
      */
-    public function TotalProjects($sSearch, $contractor_id = '', $inspector_id = '')
+    public function TotalProjects($sSearch, $contractor_id = '', $inspector_id = '', $status = '')
     {
         $em = $this->getEntityManager();
         $consulta = 'SELECT COUNT(p.projectId) FROM App\Entity\Project p ';
@@ -167,6 +174,15 @@ class ProjectRepository extends EntityRepository
                 $where .= 'WHERE (i.inspectorId = :inspector_id) ';
             else
                 $where .= 'AND (i.inspectorId = :inspector_id) ';
+        }
+
+        if ($status !== '') {
+
+            $esta_query = explode("WHERE", $where);
+            if (count($esta_query) == 1)
+                $where .= 'WHERE (p.status = :status) ';
+            else
+                $where .= 'AND (p.status = :status) ';
         }
 
         $consulta .= $join;
@@ -198,6 +214,11 @@ class ProjectRepository extends EntityRepository
         $esta_query_inspector_id = substr_count($consulta, ':inspector_id');
         if ($esta_query_inspector_id == 1) {
             $query->setParameter('inspector_id', $inspector_id);
+        }
+
+        $esta_query_status = substr_count($consulta, ':status');
+        if ($esta_query_status == 1) {
+            $query->setParameter('status', $status);
         }
 
         $total = $query->getSingleScalarResult();

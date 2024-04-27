@@ -45,6 +45,20 @@ class Project
     /**
      * @var string
      *
+     * @ORM\Column(name="manager", type="string", length=255, nullable=false)
+     */
+    private $manager;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="status", type="boolean", nullable=false)
+     */
+    private $status;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="po_number", type="string", length=255, nullable=false)
      */
     private $poNumber;
@@ -195,6 +209,26 @@ class Project
     public function setInspector($inspector)
     {
         $this->inspector = $inspector;
+    }
+
+    public function getManager()
+    {
+        return $this->manager;
+    }
+
+    public function setManager($manager)
+    {
+        $this->manager = $manager;
+    }
+
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    public function setStatus($status)
+    {
+        $this->status = $status;
     }
 
 }

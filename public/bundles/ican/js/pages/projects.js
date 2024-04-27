@@ -43,6 +43,24 @@ var Projects = function () {
                 title: "Inspector"
             },
             {
+                field: "manager",
+                title: "Manager"
+            },
+            {
+                field: "status",
+                title: "Status",
+                responsive: {visible: 'lg'},
+                width: 80,
+                // callback function support for column rendering
+                template: function (row) {
+                    var status = {
+                        1: {'title': 'Active', 'class': ' m-badge--success'},
+                        0: {'title': 'Inactive', 'class': ' m-badge--danger'}
+                    };
+                    return '<span class="m-badge ' + status[row.status].class + ' m-badge--wide">' + status[row.status].title + '</span>';
+                }
+            },
+            {
                 field: "acciones",
                 width: 80,
                 title: "Actions",
@@ -147,6 +165,9 @@ var Projects = function () {
         var inspector_id = $('#filtro-inspector').val();
         query.inspector_id = inspector_id;
 
+        var status = $('#filtro-status').val();
+        query.status = status;
+
         oTable.setDataSourceQuery(query);
         oTable.load();
     }
@@ -166,6 +187,8 @@ var Projects = function () {
 
         $('#inspector').val('');
         $('#inspector').trigger('change');
+
+        $('#estadoactivo').prop('checked', true);
 
         var $element = $('.select2');
         $element.removeClass('has-error').tooltip("dispose");
@@ -262,6 +285,8 @@ var Projects = function () {
                 var location = $('#location').val();
                 var po_number = $('#po_number').val();
                 var po_cg = $('#po_cg').val();
+                var manager = $('#manager').val();
+                var status = ($('#estadoactivo').prop('checked')) ? 1 : 0;
 
                 MyApp.block('#form-project');
 
@@ -277,7 +302,9 @@ var Projects = function () {
                         'number': number,
                         'location': location,
                         'po_number': po_number,
-                        'po_cg': po_cg
+                        'po_cg': po_cg,
+                        'manager': manager,
+                        'status': status
                     },
                     success: function (response) {
                         mApp.unblock('#form-project');
@@ -384,20 +411,27 @@ var Projects = function () {
                         var formTitle = "You want to update the project? Follow the next steps:";
                         $('#form-project-title').html(formTitle);
 
-                        $('#name').val(response.project.name);
-                        $('#number').val(response.project.number);
-                        $('#location').val(response.project.location);
-                        $('#po_number').val(response.project.po_number);
-                        $('#po_cg').val(response.project.po_cg);
-
                         $('#contractor').val(response.project.contractor_id);
                         $('#contractor').trigger('change');
 
                         $('#inspector').val(response.project.inspector_id);
                         $('#inspector').trigger('change');
 
+                        $('#name').val(response.project.name);
+                        $('#number').val(response.project.number);
+                        $('#location').val(response.project.location);
+                        $('#po_number').val(response.project.po_number);
+                        $('#po_cg').val(response.project.po_cg);
+                        $('#manager').val(response.project.manager);
+
+
+                        if (!response.project.status) {
+                            $('#estadoactivo').prop('checked', false);
+                            $('#estadoinactivo').prop('checked', true);
+                        }
+
                         // habilitar tab
-                        totalTabs = 2;
+                        totalTabs = 3;
                         $('#btn-wizard-siguiente').removeClass('m--hide');
                         $('#nav-tabs-project').removeClass('m--hide');
 
@@ -621,6 +655,9 @@ var Projects = function () {
                 case 2:
                     btnClickFiltrarItems();
                     break;
+                case 3:
+                    btnClickFiltrarNotes();
+                    break;
             }
 
         });
@@ -663,6 +700,10 @@ var Projects = function () {
                 case 2:
                     $('#tab-items').tab('show');
                     btnClickFiltrarItems();
+                    break;
+                case 3:
+                    $('#tab-notes').tab('show');
+                    btnClickFiltrarNotes();
                     break;
             }
         }, 0);
@@ -832,7 +873,7 @@ var Projects = function () {
         //Busqueda
         var query = oTableItems.getDataSourceQuery();
         $('#lista-items .m_form_search').on('keyup', function (e) {
-            btnClickFiltrar();
+            btnClickFiltrarItems();
         }).val(query.generalSearch);
     };
     var initAccionFiltrarItems = function () {
@@ -1118,6 +1159,353 @@ var Projects = function () {
     };
 
 
+    // notes
+    var oTableNotes;
+    var rowDeleteNote = null;
+    var initTableNotes = function () {
+        MyApp.block('#notes-table-editable');
+
+        var table = $('#notes-table-editable');
+
+        var aoColumns = [
+            {
+                field: "date",
+                title: "Date",
+                width: 100,
+                textAlign: 'center'
+            },
+            {
+                field: "notes",
+                title: "Notes",
+            },
+            {
+                field: "acciones",
+                width: 80,
+                title: "Actions",
+                sortable: false,
+                overflow: 'visible',
+                textAlign: 'center'
+            }
+        ];
+        oTableNotes = table.mDatatable({
+            // datasource definition
+            data: {
+                type: 'remote',
+                source: {
+                    read: {
+                        url: 'project/listarNotes',
+                    }
+                },
+                pageSize: 10,
+                saveState: {
+                    cookie: false,
+                    webstorage: false
+                },
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            // layout definition
+            layout: {
+                theme: 'default', // datatable theme
+                class: '', // custom wrapper class
+                scroll: false, // enable/disable datatable scroll both horizontal and vertical when needed.
+                //height: 550, // datatable's body's fixed height
+                footer: false // display/hide footer
+            },
+            // column sorting
+            sortable: true,
+            pagination: true,
+            // columns definition
+            columns: aoColumns,
+            // toolbar
+            toolbar: {
+                // toolbar items
+                items: {
+                    // pagination
+                    pagination: {
+                        // page size select
+                        pageSizeSelect: [10, 25, 30, 50, -1] // display dropdown to select pagination size. -1 is used for "ALl" option
+                    }
+                }
+            },
+        });
+
+        //Events
+        oTableNotes
+            .on('m-datatable--on-ajax-done', function () {
+                mApp.unblock('#notes-table-editable');
+            })
+            .on('m-datatable--on-ajax-fail', function (e, jqXHR) {
+                mApp.unblock('#notes-table-editable');
+            })
+            .on('m-datatable--on-goto-page', function (e, args) {
+                MyApp.block('#notes-table-editable');
+            })
+            .on('m-datatable--on-reloaded', function (e) {
+                MyApp.block('#notes-table-editable');
+            })
+            .on('m-datatable--on-sort', function (e, args) {
+                MyApp.block('#notes-table-editable');
+            })
+            .on('m-datatable--on-check', function (e, args) {
+                //eventsWriter('Checkbox active: ' + args.toString());
+            })
+            .on('m-datatable--on-uncheck', function (e, args) {
+                //eventsWriter('Checkbox inactive: ' + args.toString());
+            });
+
+        //Busqueda
+        var query = oTableNotes.getDataSourceQuery();
+        $('#lista-notes .m_form_search').on('keyup', function (e) {
+            btnClickFiltrarNotes();
+        }).val(query.generalSearch);
+    };
+    var initAccionFiltrarNotes = function () {
+
+        $(document).off('click', "#btn-filtrar-notes");
+        $(document).on('click', "#btn-filtrar-notes", function (e) {
+            btnClickFiltrarNotes();
+        });
+
+    };
+    var btnClickFiltrarNotes = function () {
+        var query = oTableNotes.getDataSourceQuery();
+
+        var generalSearch = $('#lista-notes .m_form_search').val();
+        query.generalSearch = generalSearch;
+
+        var project_id = $('#project_id').val();
+        query.project_id = project_id;
+
+        var fechaInicial = $('#filtro-fecha-inicial-notes').val();
+        query.fechaInicial = fechaInicial;
+
+        var fechaFin = $('#filtro-fecha-fin-notes').val();
+        query.fechaFin = fechaFin;
+
+        oTableNotes.setDataSourceQuery(query);
+        oTableNotes.load();
+    }
+
+    var initFormNote = function () {
+        $("#notes-form").validate({
+            rules: {
+                date: {
+                    required: true
+                },
+                notes: {
+                    required: true,
+                }
+            },
+            showErrors: function (errorMap, errorList) {
+                // Clean up any tooltips for valid elements
+                $.each(this.validElements(), function (index, element) {
+                    var $element = $(element);
+
+                    $element.data("title", "") // Clear the title - there is no error associated anymore
+                        .removeClass("has-error")
+                        .tooltip("dispose");
+
+                    $element
+                        .closest('.form-group')
+                        .removeClass('has-error').addClass('success');
+                });
+
+                // Create new tooltips for invalid elements
+                $.each(errorList, function (index, error) {
+                    var $element = $(error.element);
+
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", error.message)
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+
+                });
+            },
+        });
+    };
+    var initAccionesNotes = function () {
+
+        $(document).off('click', "#btn-agregar-note");
+        $(document).on('click', "#btn-agregar-note", function (e) {
+            // reset
+            resetFormNote();
+
+            $('#modal-notes').modal({
+                'show': true
+            });
+        });
+
+        $(document).off('click', "#btn-salvar-note");
+        $(document).on('click', "#btn-salvar-note", function (e) {
+            e.preventDefault();
+
+            if ($('#notes-form').valid() ) {
+
+                var notes_id = $('#notes_id').val();
+                var project_id = $('#project_id').val();
+                var notes = $('#notes').val();
+                var date = $('#notes-date').val();
+
+                MyApp.block('#modal-notes .modal-content');
+
+                $.ajax({
+                    type: "POST",
+                    url: "project/salvarNotes",
+                    dataType: "json",
+                    data: {
+                        'notes_id': notes_id,
+                        'project_id': project_id,
+                        'notes': notes,
+                        'date': date
+                    },
+                    success: function (response) {
+                        mApp.unblock('#modal-notes .modal-content');
+                        if (response.success) {
+
+                            toastr.success(response.message, "Success !!!");
+
+                            // reset
+                            resetFormNote();
+                            $('#modal-notes').modal('hide');
+
+                            //actualizar lista
+                            btnClickFiltrarNotes();
+
+                        } else {
+                            toastr.error(response.error, "Error !!!");
+                        }
+                    },
+                    failure: function (response) {
+                        mApp.unblock('#modal-notes .modal-content');
+
+                        toastr.error(response.error, "Error !!!");
+                    }
+                });
+
+
+            }
+        });
+
+        $(document).off('click', "#notes-table-editable a.edit");
+        $(document).on('click', "#notes-table-editable a.edit", function (e) {
+            e.preventDefault();
+            resetFormNote();
+
+            $('#modal-notes').modal({
+                'show': true
+            });
+
+            var notes_id = $(this).data('id');
+            $('#notes_id').val(notes_id);
+
+            editRow(notes_id);
+        });
+
+        $(document).off('click', "#notes-table-editable a.delete");
+        $(document).on('click', "#notes-table-editable a.delete", function (e) {
+
+            e.preventDefault();
+            rowDeleteNote = $(this).data('id');
+            $('#modal-eliminar-notes').modal({
+                'show': true
+            });
+        });
+
+        $(document).off('click', "#btn-delete-note");
+        $(document).on('click', "#btn-delete-note", function (e) {
+
+            var notes_id = rowDeleteNote;
+
+            MyApp.block('#notes-table-editable');
+
+            $.ajax({
+                type: "POST",
+                url: "project/eliminarNotes",
+                dataType: "json",
+                data: {
+                    'notes_id': notes_id
+                },
+                success: function (response) {
+                    mApp.unblock('#notes-table-editable');
+                    if (response.success) {
+
+                        btnClickFiltrarNotes();
+
+                        toastr.success(response.message, "Success !!!");
+
+                    } else {
+                        toastr.error(response.error, "Error !!!");
+                    }
+                },
+                failure: function (response) {
+                    mApp.unblock('#notes-table-editable');
+
+                    toastr.error(response.error, "Error !!!");
+                }
+            });
+
+        });
+
+        function editRow(notes_id) {
+
+            MyApp.block('#modal-notes .modal-content');
+
+            $.ajax({
+                type: "POST",
+                url: "project/cargarDatosNotes",
+                dataType: "json",
+                data: {
+                    'notes_id': notes_id
+                },
+                success: function (response) {
+                    mApp.unblock('#modal-notes .modal-content');
+                    if (response.success) {
+                        //Datos project
+
+                        $('#notes-date').val(response.notes.date);
+                        $('#notes').val(response.notes.notes);
+
+                    } else {
+                        toastr.error(response.error, "Error !!!");
+                    }
+                },
+                failure: function (response) {
+                    mApp.unblock('#modal-notes .modal-content');
+
+                    toastr.error(response.error, "Error !!!");
+                }
+            });
+
+        }
+    };
+    var resetFormNote = function () {
+        $('#notes-form input').each(function (e) {
+            $element = $(this);
+            $element.val('');
+
+            $element.data("title", "").removeClass("has-error").tooltip("dispose");
+            $element.closest('.form-group').removeClass('has-error').addClass('success');
+        });
+        $('#notes-form textarea').each(function (e) {
+            $element = $(this);
+            $element.val('');
+
+            $element.data("title", "").removeClass("has-error").tooltip("dispose");
+            $element.closest('.form-group').removeClass('has-error').addClass('success');
+        });
+
+        var fecha_actual = new Date();
+        $('#notes-date').val(fecha_actual.format('m/d/Y'));
+    };
+
+
     return {
         //main function to initiate the module
         init: function () {
@@ -1140,6 +1528,12 @@ var Projects = function () {
             initAccionFiltrarItems();
             initFormItem();
             initAccionesItems();
+
+            // notes
+            initTableNotes();
+            initAccionFiltrarNotes();
+            initFormNote();
+            initAccionesNotes();
 
             initAccionChange();
         }
