@@ -31,20 +31,22 @@ var Projects = function () {
                 title: "Name"
             },
             {
-                field: "location",
-                title: "Location"
+                field: "company",
+                title: "Company"
             },
             {
-                field: "contractor",
-                title: "Contractor"
+                field: "county",
+                title: "County"
             },
             {
-                field: "inspector",
-                title: "Inspector"
+                field: "startDate",
+                title: "From",
+                width: 100,
             },
             {
-                field: "manager",
-                title: "Manager"
+                field: "endDate",
+                title: "To",
+                width: 100,
             },
             {
                 field: "status",
@@ -159,14 +161,17 @@ var Projects = function () {
         var generalSearch = $('#lista-project .m_form_search').val();
         query.generalSearch = generalSearch;
 
-        var contractor_id = $('#filtro-contractor').val();
-        query.contractor_id = contractor_id;
-
-        var inspector_id = $('#filtro-inspector').val();
-        query.inspector_id = inspector_id;
+        var company_id = $('#filtro-company').val();
+        query.company_id = company_id;
 
         var status = $('#filtro-status').val();
         query.status = status;
+
+        var fechaInicial = $('#fechaInicial').val();
+        query.fechaInicial = fechaInicial;
+
+        var fechaFin = $('#fechaFin').val();
+        query.fechaFin = fechaFin;
 
         oTable.setDataSourceQuery(query);
         oTable.load();
@@ -182,16 +187,23 @@ var Projects = function () {
             $element.closest('.form-group').removeClass('has-error').addClass('success');
         });
 
-        $('#contractor').val('');
-        $('#contractor').trigger('change');
+        $('#company').val('');
+        $('#company').trigger('change');
 
         $('#inspector').val('');
         $('#inspector').trigger('change');
 
         $('#estadoactivo').prop('checked', true);
+        $('#federal_funding').prop('checked', false);
+        $('#resurfacing').prop('checked', false);
+        $('#certified_payrolls').prop('checked', false);
 
         var $element = $('.select2');
         $element.removeClass('has-error').tooltip("dispose");
+
+        // items
+        items = [];
+        actualizarTableListaItems();
 
         //Mostrar el primer tab
         resetWizard();
@@ -273,9 +285,9 @@ var Projects = function () {
 
             event_change = false;
 
-            var contractor_id = $('#contractor').val();
+            var company_id = $('#company').val();
 
-            if ($('#project-form').valid() && contractor_id != '') {
+            if ($('#project-form').valid() && company_id != '') {
 
                 var project_id = $('#project_id').val();
 
@@ -287,6 +299,15 @@ var Projects = function () {
                 var po_cg = $('#po_cg').val();
                 var manager = $('#manager').val();
                 var status = ($('#estadoactivo').prop('checked')) ? 1 : 0;
+                var owner = $('#owner').val();
+                var subcontract = $('#subcontract').val();
+                var county = $('#county').val();
+                var federal_funding = ($('#federal_funding').prop('checked')) ? 1 : 0;
+                var resurfacing = ($('#resurfacing').prop('checked')) ? 1 : 0;
+                var certified_payrolls = ($('#certified_payrolls').prop('checked')) ? 1 : 0;
+                var invoice_contact = $('#invoice_contact').val();
+                var start_date = $('#start_date').val();
+                var end_date = $('#end_date').val();
 
                 MyApp.block('#form-project');
 
@@ -296,7 +317,7 @@ var Projects = function () {
                     dataType: "json",
                     data: {
                         'project_id': project_id,
-                        'contractor_id': contractor_id,
+                        'company_id': company_id,
                         'inspector_id': inspector_id,
                         'name': name,
                         'number': number,
@@ -304,7 +325,17 @@ var Projects = function () {
                         'po_number': po_number,
                         'po_cg': po_cg,
                         'manager': manager,
-                        'status': status
+                        'status': status,
+                        'owner': owner,
+                        'subcontract': subcontract,
+                        'county': county,
+                        'federal_funding': federal_funding,
+                        'resurfacing': resurfacing,
+                        'certified_payrolls': certified_payrolls,
+                        'invoice_contact': invoice_contact,
+                        'start_date': start_date,
+                        'end_date': end_date,
+                        'items': JSON.stringify(items)
                     },
                     success: function (response) {
                         mApp.unblock('#form-project');
@@ -312,7 +343,9 @@ var Projects = function () {
 
                             toastr.success(response.message, "Success !!!");
                             cerrarForms();
-                            oTable.load();
+
+                            btnClickFiltrar();
+
                         } else {
                             toastr.error(response.error, "Error !!!");
                         }
@@ -324,8 +357,8 @@ var Projects = function () {
                     }
                 });
             } else {
-                if (contractor_id == "") {
-                    var $element = $('#select-contractor .select2');
+                if (company_id == "") {
+                    var $element = $('#select-company .select2');
                     $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
                         .data("title", "This field is required")
                         .addClass("has-error")
@@ -411,8 +444,8 @@ var Projects = function () {
                         var formTitle = "You want to update the project? Follow the next steps:";
                         $('#form-project-title').html(formTitle);
 
-                        $('#contractor').val(response.project.contractor_id);
-                        $('#contractor').trigger('change');
+                        $('#company').val(response.project.company_id);
+                        $('#company').trigger('change');
 
                         $('#inspector').val(response.project.inspector_id);
                         $('#inspector').trigger('change');
@@ -423,17 +456,30 @@ var Projects = function () {
                         $('#po_number').val(response.project.po_number);
                         $('#po_cg').val(response.project.po_cg);
                         $('#manager').val(response.project.manager);
+                        $('#owner').val(response.project.owner);
+                        $('#subcontract').val(response.project.subcontract);
+                        $('#county').val(response.project.county);
+                        $('#invoice_contact').val(response.project.invoice_contact);
 
+                        $('#federal_funding').prop('checked', response.project.federal_funding);
+                        $('#resurfacing').prop('checked', response.project.resurfacing);
+                        $('#certified_payrolls').prop('checked', response.project.certified_payrolls);
 
                         if (!response.project.status) {
                             $('#estadoactivo').prop('checked', false);
                             $('#estadoinactivo').prop('checked', true);
                         }
 
+                        $('#start_date').val(response.project.start_date);
+                        $('#end_date').val(response.project.end_date);
+
+                        // items
+                        items = response.project.items;
+                        actualizarTableListaItems();
+
                         // habilitar tab
-                        totalTabs = 3;
-                        $('#btn-wizard-siguiente').removeClass('m--hide');
-                        $('#nav-tabs-project').removeClass('m--hide');
+                        totalTabs = 4;
+                        $('.nav-item-hide').removeClass('m--hide');
 
                         event_change = false;
 
@@ -580,8 +626,11 @@ var Projects = function () {
         $('#item').change(changeItem);
         $('#item-quantity').change(calcularTotalItem);
         $('#item-price').change(calcularTotalItem);
-    }
 
+        $('#item-data-tracking').change(changeItemDataTracking);
+        $('#data-tracking-quantity').change(calcularTotalItemDataTracking);
+        $('#data-tracking-price').change(calcularTotalItemDataTracking);
+    }
     var changeItem = function () {
         var item_id = $('#item').val();
 
@@ -605,6 +654,29 @@ var Projects = function () {
             $('#item-total').val(total);
         }
     }
+    var changeItemDataTracking = function () {
+        var item_id = $('#item-data-tracking').val();
+
+        // reset
+        $('#data-tracking-quantity').val('');
+        $('#data-tracking-price').val('');
+        $('#data-tracking-total').val('');
+
+        if (item_id != '') {
+            var price = $('#item option[value="' + item_id + '"]').data("price");
+            $('#data-tracking-price').val(price);
+
+            calcularTotalItemDataTracking();
+        }
+    }
+    var calcularTotalItemDataTracking = function () {
+        var cantidad = $('#data-tracking-quantity').val();
+        var price = $('#data-tracking-price').val();
+        if (cantidad != '' && price != '') {
+            var total = parseFloat(cantidad) * parseFloat(price);
+            $('#data-tracking-total').val(total);
+        }
+    }
 
     var initPortlets = function () {
         var portlet = new mPortlet('lista-project');
@@ -619,7 +691,7 @@ var Projects = function () {
 
     //Wizard
     var activeTab = 1;
-    var totalTabs = 1;
+    var totalTabs = 2;
     var initWizard = function () {
         $(document).off('click', "#form-project .wizard-tab");
         $(document).on('click', "#form-project .wizard-tab", function (e) {
@@ -653,10 +725,13 @@ var Projects = function () {
             //bug visual de la tabla que muestra las cols corridas
             switch (activeTab) {
                 case 2:
-                    btnClickFiltrarItems();
+                    actualizarTableListaItems()
                     break;
                 case 3:
                     btnClickFiltrarNotes();
+                    break;
+                case 4:
+                    btnClickFiltrarDataTracking();
                     break;
             }
 
@@ -699,35 +774,40 @@ var Projects = function () {
                     break;
                 case 2:
                     $('#tab-items').tab('show');
-                    btnClickFiltrarItems();
+                    actualizarTableListaItems();
                     break;
                 case 3:
                     $('#tab-notes').tab('show');
                     btnClickFiltrarNotes();
                     break;
+                case 4:
+                    $('#tab-data-tracking').tab('show');
+                    btnClickFiltrarDataTracking();
+                    break;
+
             }
         }, 0);
     }
     var resetWizard = function () {
         activeTab = 1;
-        totalTabs = 1;
+        totalTabs = 2;
         mostrarTab();
         // $('#btn-wizard-finalizar').removeClass('m--hide').addClass('m--hide');
         $('#btn-wizard-anterior').removeClass('m--hide').addClass('m--hide');
-        $('#btn-wizard-siguiente').removeClass('m--hide').addClass('m--hide');
-        $('#nav-tabs-project').removeClass('m--hide').addClass('m--hide');
+        $('#btn-wizard-siguiente').removeClass('m--hide');
+        $('.nav-item-hide').removeClass('m--hide').addClass('m--hide');
     }
     var validWizard = function () {
         var result = true;
         if (activeTab == 1) {
 
-            var contractor_id = $('#contractor').val();
-            if (!$('#project-form').valid() || contractor_id == '') {
+            var company_id = $('#company').val();
+            if (!$('#project-form').valid() || company_id == '') {
                 result = false;
 
-                if (contractor_id == "") {
+                if (company_id == "") {
 
-                    var $element = $('#select-contractor .select2');
+                    var $element = $('#select-company .select2');
                     $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
                         .data("title", "This field is required")
                         .addClass("has-error")
@@ -745,8 +825,10 @@ var Projects = function () {
         return result;
     }
 
-    // items details
+    // items
     var oTableItems;
+    var items = [];
+    var nEditingRowItem = null;
     var rowDeleteItem = null;
     var initTableItems = function () {
         MyApp.block('#items-table-editable');
@@ -754,12 +836,6 @@ var Projects = function () {
         var table = $('#items-table-editable');
 
         var aoColumns = [
-            {
-                field: "date",
-                title: "Date",
-                width: 100,
-                textAlign: 'center'
-            },
             {
                 field: "item",
                 title: "Item",
@@ -794,31 +870,30 @@ var Projects = function () {
                 }
             },
             {
-                field: "acciones",
-                width: 80,
+                field: "posicion",
+                width: 120,
                 title: "Actions",
                 sortable: false,
                 overflow: 'visible',
-                textAlign: 'center'
+                textAlign: 'center',
+                template: function (row) {
+                    return `
+                    <a href="javascript:;" data-posicion="${row.posicion}" class="edit m-portlet__nav-link btn m-btn m-btn--hover-success m-btn--icon m-btn--icon-only m-btn--pill" title="Edit item"><i class="la la-edit"></i></a>
+                    <a href="javascript:;" data-posicion="${row.posicion}" class="delete m-portlet__nav-link btn m-btn m-btn--hover-danger m-btn--icon m-btn--icon-only m-btn--pill" title="Delete item"><i class="la la-trash"></i></a>
+                    `;
+                }
             }
         ];
         oTableItems = table.mDatatable({
             // datasource definition
             data: {
-                type: 'remote',
-                source: {
-                    read: {
-                        url: 'project/listarItemDetails',
-                    }
-                },
+                type: 'local',
+                source: items,
                 pageSize: 10,
                 saveState: {
                     cookie: false,
                     webstorage: false
-                },
-                serverPaging: true,
-                serverFiltering: true,
-                serverSorting: true
+                }
             },
             // layout definition
             layout: {
@@ -844,6 +919,9 @@ var Projects = function () {
                     }
                 }
             },
+            search: {
+                input: $('#lista-items .m_form_search'),
+            }
         });
 
         //Events
@@ -869,49 +947,17 @@ var Projects = function () {
             .on('m-datatable--on-uncheck', function (e, args) {
                 //eventsWriter('Checkbox inactive: ' + args.toString());
             });
-
-        //Busqueda
-        var query = oTableItems.getDataSourceQuery();
-        $('#lista-items .m_form_search').on('keyup', function (e) {
-            btnClickFiltrarItems();
-        }).val(query.generalSearch);
     };
-    var initAccionFiltrarItems = function () {
+    var actualizarTableListaItems = function () {
+        if (oTableItems) {
+            oTableItems.destroy();
+        }
 
-        $(document).off('click', "#btn-filtrar-items");
-        $(document).on('click', "#btn-filtrar-items", function (e) {
-            btnClickFiltrarItems();
-        });
-
-    };
-    var btnClickFiltrarItems = function () {
-        var query = oTableItems.getDataSourceQuery();
-
-        var generalSearch = $('#lista-items .m_form_search').val();
-        query.generalSearch = generalSearch;
-
-        var project_id = $('#project_id').val();
-        query.project_id = project_id;
-
-        var item_id = $('#filtro-item').val();
-        query.item_id = item_id;
-
-        var fechaInicial = $('#filtro-fecha-inicial-item').val();
-        query.fechaInicial = fechaInicial;
-
-        var fechaFin = $('#filtro-fecha-fin-item').val();
-        query.fechaFin = fechaFin;
-
-        oTableItems.setDataSourceQuery(query);
-        oTableItems.load();
+        initTableItems();
     }
-
     var initFormItem = function () {
         $("#item-form").validate({
             rules: {
-                date: {
-                    required: true
-                },
                 quantity: {
                     required: true,
                 },
@@ -970,50 +1016,44 @@ var Projects = function () {
             var item_id = $('#item').val();
             if ($('#item-form').valid() && item_id != '') {
 
-                var item_details_id = $('#item_details_id').val();
-                var project_id = $('#project_id').val();
+                var item = $("#item option:selected").text();
+                var unit = $('#item option[value="' + item_id + '"]').data("unit");
+
                 var quantity = $('#item-quantity').val();
                 var price = $('#item-price').val();
-                var date = $('#item-date').val();
+                var total = $('#item-total').val();
 
-                MyApp.block('#modal-item .modal-content');
+                if (nEditingRowItem == null) {
 
-                $.ajax({
-                    type: "POST",
-                    url: "project/salvarItemDetails",
-                    dataType: "json",
-                    data: {
-                        'item_details_id': item_details_id,
-                        'project_id': project_id,
-                        'item_id': item_id,
-                        'quantity': quantity,
-                        'price': price,
-                        'date': date
-                    },
-                    success: function (response) {
-                        mApp.unblock('#modal-item .modal-content');
-                        if (response.success) {
+                    items.push({
+                        project_item_id: '',
+                        item_id: item_id,
+                        item: item,
+                        unit: unit,
+                        quantity: quantity,
+                        price: price,
+                        total: total,
+                        posicion: items.length
+                    });
 
-                            toastr.success(response.message, "Success !!!");
-
-                            // reset
-                            resetFormItem();
-                            $('#modal-item').modal('hide');
-
-                            //actualizar lista
-                            btnClickFiltrarItems();
-
-                        } else {
-                            toastr.error(response.error, "Error !!!");
-                        }
-                    },
-                    failure: function (response) {
-                        mApp.unblock('#modal-item .modal-content');
-
-                        toastr.error(response.error, "Error !!!");
+                } else {
+                    var posicion = nEditingRowItem;
+                    if (items[posicion]) {
+                        items[posicion].item_id = item_id;
+                        items[posicion].item = item;
+                        items[posicion].unit = unit;
+                        items[posicion].quantity = quantity;
+                        items[posicion].price = price;
+                        items[posicion].total = total;
                     }
-                });
+                }
 
+                //actualizar lista
+                actualizarTableListaItems();
+
+                // reset
+                resetFormItem();
+                $('#modal-item').modal('hide');
 
             } else {
                 if (item_id == "") {
@@ -1034,24 +1074,41 @@ var Projects = function () {
 
         $(document).off('click', "#items-table-editable a.edit");
         $(document).on('click', "#items-table-editable a.edit", function (e) {
-            e.preventDefault();
-            resetFormItem();
+            var posicion = $(this).data('posicion');
+            if (items[posicion]) {
 
-            $('#modal-item').modal({
-                'show': true
-            });
+                // reset
+                resetFormItem();
 
-            var item_details_id = $(this).data('id');
-            $('#item_details_id').val(item_details_id);
+                nEditingRowItem = posicion;
 
-            editRow(item_details_id);
+                $('#item').off('change', changeItem);
+                $('#item-quantity').off('change', calcularTotalItem);
+                $('#item-price').off('change', calcularTotalItem);
+
+                $('#item').val(items[posicion].item_id);
+                $('#item').trigger('change');
+
+                $('#item-quantity').val(items[posicion].quantity);
+                $('#item-price').val(items[posicion].price);
+
+                calcularTotalItem();
+
+                $('#item').on('change', changeItem);
+                $('#item-quantity').on('change', calcularTotalItem);
+                $('#item-price').on('change', calcularTotalItem);
+
+                // open modal
+                $('#modal-item').modal('show');
+
+            }
         });
 
         $(document).off('click', "#items-table-editable a.delete");
         $(document).on('click', "#items-table-editable a.delete", function (e) {
 
             e.preventDefault();
-            rowDeleteItem = $(this).data('id');
+            rowDeleteItem = $(this).data('posicion');
             $('#modal-eliminar-item').modal({
                 'show': true
             });
@@ -1060,83 +1117,55 @@ var Projects = function () {
         $(document).off('click', "#btn-delete-item");
         $(document).on('click', "#btn-delete-item", function (e) {
 
-            var item_details_id = rowDeleteItem;
+            e.preventDefault();
+            var posicion = rowDeleteItem;
 
-            MyApp.block('#items-table-editable');
+            if (items[posicion]) {
 
-            $.ajax({
-                type: "POST",
-                url: "project/eliminarItemDetails",
-                dataType: "json",
-                data: {
-                    'item_details_id': item_details_id
-                },
-                success: function (response) {
-                    mApp.unblock('#items-table-editable');
-                    if (response.success) {
+                if (items[posicion].project_item_id != '') {
+                    MyApp.block('#items-table-editable');
 
-                        btnClickFiltrarItems();
+                    $.ajax({
+                        type: "POST",
+                        url: "project/eliminarItem",
+                        dataType: "json",
+                        data: {
+                            'project_item_id': items[posicion].project_item_id
+                        },
+                        success: function (response) {
+                            mApp.unblock('#items-table-editable');
+                            if (response.success) {
 
-                        toastr.success(response.message, "Success !!!");
+                                toastr.success(response.message, "Success !!!");
 
-                    } else {
-                        toastr.error(response.error, "Error !!!");
-                    }
-                },
-                failure: function (response) {
-                    mApp.unblock('#items-table-editable');
+                                deleteItem(posicion);
 
-                    toastr.error(response.error, "Error !!!");
+                            } else {
+                                toastr.error(response.error, "Error !!!");
+                            }
+                        },
+                        failure: function (response) {
+                            mApp.unblock('#items-table-editable');
+
+                            toastr.error(response.error, "Error !!!");
+                        }
+                    });
+                } else {
+                    deleteItem(posicion);
                 }
-            });
+            }
 
         });
 
-        function editRow(item_details_id) {
-
-            MyApp.block('#modal-item .modal-content');
-
-            $.ajax({
-                type: "POST",
-                url: "project/cargarDatosItemDetails",
-                dataType: "json",
-                data: {
-                    'item_details_id': item_details_id
-                },
-                success: function (response) {
-                    mApp.unblock('#modal-item .modal-content');
-                    if (response.success) {
-                        //Datos project
-
-                        $('#item-date').val(response.item.date);
-
-                        $('#item').off('change', changeItem);
-                        $('#item-quantity').off('change', calcularTotalItem);
-                        $('#item-price').off('change', calcularTotalItem);
-
-                        $('#item').val(response.item.item_id);
-                        $('#item').trigger('change');
-
-                        $('#item-quantity').val(response.item.quantity);
-                        $('#item-price').val(response.item.price);
-
-                        calcularTotalItem();
-
-                        $('#item').on('change', changeItem);
-                        $('#item-quantity').on('change', calcularTotalItem);
-                        $('#item-price').on('change', calcularTotalItem);
-
-                    } else {
-                        toastr.error(response.error, "Error !!!");
-                    }
-                },
-                failure: function (response) {
-                    mApp.unblock('#modal-item .modal-content');
-
-                    toastr.error(response.error, "Error !!!");
-                }
-            });
-
+        function deleteItem(posicion) {
+            //Eliminar
+            items.splice(posicion, 1);
+            //actualizar posiciones
+            for (var i = 0; i < items.length; i++) {
+                items[i].posicion = i;
+            }
+            //actualizar lista
+            actualizarTableListaItems();
         }
     };
     var resetFormItem = function () {
@@ -1151,8 +1180,420 @@ var Projects = function () {
         $('#item').val('');
         $('#item').trigger('change');
 
+        var $element = $('.select2');
+        $element.removeClass('has-error').tooltip("dispose");
+
+        nEditingRowItem = null;
+    };
+
+    // tracking
+    var oTableDataTracking;
+    var rowDeleteDataTracking = null;
+    var initTableDataTracking = function () {
+        MyApp.block('#data-tracking-table-editable');
+
+        var table = $('#data-tracking-table-editable');
+
+        var aoColumns = [
+            {
+                field: "date",
+                title: "Date",
+                width: 100,
+                textAlign: 'center'
+            },
+            {
+                field: "item",
+                title: "Item",
+            },
+            {
+                field: "unit",
+                title: "Unit",
+                width: 100,
+            },
+            {
+                field: "quantity",
+                title: "Quatity",
+                width: 100,
+                textAlign: 'center',
+            },
+            {
+                field: "price",
+                title: "Price",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.price, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "total",
+                title: "Total",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.total, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "acciones",
+                width: 80,
+                title: "Actions",
+                sortable: false,
+                overflow: 'visible',
+                textAlign: 'center'
+            }
+        ];
+        oTableDataTracking = table.mDatatable({
+            // datasource definition
+            data: {
+                type: 'remote',
+                source: {
+                    read: {
+                        url: 'project/listarDataTracking',
+                    }
+                },
+                pageSize: 10,
+                saveState: {
+                    cookie: false,
+                    webstorage: false
+                },
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            // layout definition
+            layout: {
+                theme: 'default', // datatable theme
+                class: '', // custom wrapper class
+                scroll: false, // enable/disable datatable scroll both horizontal and vertical when needed.
+                //height: 550, // datatable's body's fixed height
+                footer: false // display/hide footer
+            },
+            // column sorting
+            sortable: true,
+            pagination: true,
+            // columns definition
+            columns: aoColumns,
+            // toolbar
+            toolbar: {
+                // toolbar items
+                items: {
+                    // pagination
+                    pagination: {
+                        // page size select
+                        pageSizeSelect: [10, 25, 30, 50, -1] // display dropdown to select pagination size. -1 is used for "ALl" option
+                    }
+                }
+            },
+        });
+
+        //Events
+        oTableDataTracking
+            .on('m-datatable--on-ajax-done', function () {
+                mApp.unblock('#data-tracking-table-editable');
+            })
+            .on('m-datatable--on-ajax-fail', function (e, jqXHR) {
+                mApp.unblock('#data-tracking-table-editable');
+            })
+            .on('m-datatable--on-goto-page', function (e, args) {
+                MyApp.block('#data-tracking-table-editable');
+            })
+            .on('m-datatable--on-reloaded', function (e) {
+                MyApp.block('#data-tracking-table-editable');
+            })
+            .on('m-datatable--on-sort', function (e, args) {
+                MyApp.block('#data-tracking-table-editable');
+            })
+            .on('m-datatable--on-check', function (e, args) {
+                //eventsWriter('Checkbox active: ' + args.toString());
+            })
+            .on('m-datatable--on-uncheck', function (e, args) {
+                //eventsWriter('Checkbox inactive: ' + args.toString());
+            });
+
+        //Busqueda
+        var query = oTableDataTracking.getDataSourceQuery();
+        $('#lista-data-tracking .m_form_search').on('keyup', function (e) {
+            btnClickFiltrarDataTracking();
+        }).val(query.generalSearch);
+    };
+    var initAccionFiltrarDataTracking = function () {
+
+        $(document).off('click', "#btn-filtrar-data-tracking");
+        $(document).on('click', "#btn-filtrar-data-tracking", function (e) {
+            btnClickFiltrarDataTracking();
+        });
+
+    };
+    var btnClickFiltrarDataTracking = function () {
+        var query = oTableDataTracking.getDataSourceQuery();
+
+        var generalSearch = $('#lista-data-tracking .m_form_search').val();
+        query.generalSearch = generalSearch;
+
+        var project_id = $('#project_id').val();
+        query.project_id = project_id;
+
+        var item_id = $('#filtro-item').val();
+        query.item_id = item_id;
+
+        var fechaInicial = $('#filtro-fecha-inicial-data-tracking').val();
+        query.fechaInicial = fechaInicial;
+
+        var fechaFin = $('#filtro-fecha-fin-data-tracking').val();
+        query.fechaFin = fechaFin;
+
+        oTableDataTracking.setDataSourceQuery(query);
+        oTableDataTracking.load();
+    }
+
+    var initFormDataTracking = function () {
+        $("#data-tracking-form").validate({
+            rules: {
+                date: {
+                    required: true
+                },
+                quantity: {
+                    required: true,
+                },
+                price: {
+                    required: true
+                },
+            },
+            showErrors: function (errorMap, errorList) {
+                // Clean up any tooltips for valid elements
+                $.each(this.validElements(), function (index, element) {
+                    var $element = $(element);
+
+                    $element.data("title", "") // Clear the title - there is no error associated anymore
+                        .removeClass("has-error")
+                        .tooltip("dispose");
+
+                    $element
+                        .closest('.form-group')
+                        .removeClass('has-error').addClass('success');
+                });
+
+                // Create new tooltips for invalid elements
+                $.each(errorList, function (index, error) {
+                    var $element = $(error.element);
+
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", error.message)
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+
+                });
+            },
+        });
+    };
+    var initAccionesDataTracking = function () {
+
+        $(document).off('click', "#btn-agregar-data-tracking");
+        $(document).on('click', "#btn-agregar-data-tracking", function (e) {
+            // reset
+            resetFormDataTracking();
+
+            $('#modal-data-tracking').modal({
+                'show': true
+            });
+        });
+
+        $(document).off('click', "#btn-salvar-data-tracking");
+        $(document).on('click', "#btn-salvar-data-tracking", function (e) {
+            e.preventDefault();
+
+            var item_id = $('#item-data-tracking').val();
+            if ($('#data-tracking-form').valid() && item_id != '') {
+
+                var data_tracking_id = $('#data_tracking_id').val();
+                var project_id = $('#project_id').val();
+                var quantity = $('#data-tracking-quantity').val();
+                var price = $('#data-tracking-price').val();
+                var date = $('#data-tracking-date').val();
+
+                MyApp.block('#modal-data-tracking .modal-content');
+
+                $.ajax({
+                    type: "POST",
+                    url: "project/salvarDataTracking",
+                    dataType: "json",
+                    data: {
+                        'data_tracking_id': data_tracking_id,
+                        'project_id': project_id,
+                        'item_id': item_id,
+                        'quantity': quantity,
+                        'price': price,
+                        'date': date
+                    },
+                    success: function (response) {
+                        mApp.unblock('#modal-data-tracking .modal-content');
+                        if (response.success) {
+
+                            toastr.success(response.message, "Success !!!");
+
+                            // reset
+                            resetFormDataTracking();
+                            $('#modal-data-tracking').modal('hide');
+
+                            //actualizar lista
+                            btnClickFiltrarDataTracking();
+
+                        } else {
+                            toastr.error(response.error, "Error !!!");
+                        }
+                    },
+                    failure: function (response) {
+                        mApp.unblock('#modal-data-tracking .modal-content');
+
+                        toastr.error(response.error, "Error !!!");
+                    }
+                });
+
+
+            } else {
+                if (item_id == "") {
+                    var $element = $('#select-item-data-tracking .select2');
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", "This field is required")
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+                }
+            }
+
+        });
+
+        $(document).off('click', "#data-tracking-table-editable a.edit");
+        $(document).on('click', "#data-tracking-table-editable a.edit", function (e) {
+            e.preventDefault();
+            resetFormDataTracking();
+
+            $('#modal-data-tracking').modal({
+                'show': true
+            });
+
+            var data_tracking_id = $(this).data('id');
+            $('#data_tracking_id').val(data_tracking_id);
+
+            editRow(data_tracking_id);
+        });
+
+        $(document).off('click', "#data-tracking-table-editable a.delete");
+        $(document).on('click', "#data-tracking-table-editable a.delete", function (e) {
+
+            e.preventDefault();
+            rowDeleteDataTracking = $(this).data('id');
+            $('#modal-eliminar-data-tracking').modal({
+                'show': true
+            });
+        });
+
+        $(document).off('click', "#btn-delete-data-tracking");
+        $(document).on('click', "#btn-delete-data-tracking", function (e) {
+
+            var data_tracking_id = rowDeleteDataTracking;
+
+            MyApp.block('#data-tracking-table-editable');
+
+            $.ajax({
+                type: "POST",
+                url: "project/eliminarDataTracking",
+                dataType: "json",
+                data: {
+                    'data_tracking_id': data_tracking_id
+                },
+                success: function (response) {
+                    mApp.unblock('#data-tracking-table-editable');
+                    if (response.success) {
+
+                        btnClickFiltrarDataTracking();
+
+                        toastr.success(response.message, "Success !!!");
+
+                    } else {
+                        toastr.error(response.error, "Error !!!");
+                    }
+                },
+                failure: function (response) {
+                    mApp.unblock('#data-tracking-table-editable');
+
+                    toastr.error(response.error, "Error !!!");
+                }
+            });
+
+        });
+
+        function editRow(data_tracking_id) {
+
+            MyApp.block('#modal-data-tracking .modal-content');
+
+            $.ajax({
+                type: "POST",
+                url: "project/cargarDatosDataTracking",
+                dataType: "json",
+                data: {
+                    'data_tracking_id': data_tracking_id
+                },
+                success: function (response) {
+                    mApp.unblock('#modal-data-tracking .modal-content');
+                    if (response.success) {
+                        //Datos project
+
+                        $('#data-tracking-date').val(response.item.date);
+
+                        $('#item-data-tracking').off('change', changeItemDataTracking);
+                        $('#data-tracking-quantity').off('change', calcularTotalItemDataTracking);
+                        $('#data-tracking-price').off('change', calcularTotalItemDataTracking);
+
+                        $('#item-data-tracking').val(response.item.item_id);
+                        $('#item-data-tracking').trigger('change');
+
+                        $('#data-tracking-quantity').val(response.item.quantity);
+                        $('#data-tracking-price').val(response.item.price);
+
+                        calcularTotalItemDataTracking();
+
+                        $('#item-data-tracking').on('change', changeItemDataTracking);
+                        $('#data-tracking-quantity').on('change', calcularTotalItemDataTracking);
+                        $('#data-tracking-price').on('change', calcularTotalItemDataTracking);
+
+                    } else {
+                        toastr.error(response.error, "Error !!!");
+                    }
+                },
+                failure: function (response) {
+                    mApp.unblock('#modal-data-tracking .modal-content');
+
+                    toastr.error(response.error, "Error !!!");
+                }
+            });
+
+        }
+    };
+    var resetFormDataTracking = function () {
+        $('#data-tracking-form input').each(function (e) {
+            $element = $(this);
+            $element.val('');
+
+            $element.data("title", "").removeClass("has-error").tooltip("dispose");
+            $element.closest('.form-group').removeClass('has-error').addClass('success');
+        });
+
+        $('#item-data-tracking').val('');
+        $('#item-data-tracking').trigger('change');
+
         var fecha_actual = new Date();
-        $('#item-date').val(fecha_actual.format('m/d/Y'));
+        $('#data-tracking-date').val(fecha_actual.format('m/d/Y'));
 
         var $element = $('.select2');
         $element.removeClass('has-error').tooltip("dispose");
@@ -1287,7 +1728,6 @@ var Projects = function () {
         oTableNotes.setDataSourceQuery(query);
         oTableNotes.load();
     }
-
     var initFormNote = function () {
         $("#notes-form").validate({
             rules: {
@@ -1346,7 +1786,7 @@ var Projects = function () {
         $(document).on('click', "#btn-salvar-note", function (e) {
             e.preventDefault();
 
-            if ($('#notes-form').valid() ) {
+            if ($('#notes-form').valid()) {
 
                 var notes_id = $('#notes_id').val();
                 var project_id = $('#project_id').val();
@@ -1522,12 +1962,16 @@ var Projects = function () {
             initAccionEliminar();
             initAccionFiltrar();
 
-
             // items
             initTableItems();
-            initAccionFiltrarItems();
             initFormItem();
             initAccionesItems();
+
+            // data tracking
+            initTableDataTracking();
+            initAccionFiltrarDataTracking();
+            initFormDataTracking();
+            initAccionesDataTracking();
 
             // notes
             initTableNotes();

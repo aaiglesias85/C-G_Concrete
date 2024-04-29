@@ -5,21 +5,21 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Contractor
+ * Company
  *
- * @ORM\Table(name="contractor")
- * @ORM\Entity(repositoryClass="App\Repository\ContractorRepository")
+ * @ORM\Table(name="company")
+ * @ORM\Entity(repositoryClass="App\Repository\CompanyRepository")
  */
-class Contractor
+class Company
 {
     /**
      * @var integer
      *
-     * @ORM\Column(name="contractor_id", type="integer", nullable=false)
+     * @ORM\Column(name="company_id", type="integer", nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $contractorId;
+    private $companyId;
 
     /**
      * @var string
@@ -64,13 +64,13 @@ class Contractor
     private $updatedAt;
 
     /**
-     * Get contractorId
+     * Get companyId
      *
      * @return integer
      */
-    public function getContractorId()
+    public function getCompanyId()
     {
-        return $this->contractorId;
+        return $this->companyId;
     }
 
     public function getName()

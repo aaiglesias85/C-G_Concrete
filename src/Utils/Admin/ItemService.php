@@ -4,7 +4,8 @@ namespace App\Utils\Admin;
 
 use App\Entity\InvoiceItem;
 use App\Entity\Item;
-use App\Entity\ProjectItemDetails;
+use App\Entity\DataTracking;
+use App\Entity\ProjectItem;
 use App\Entity\Unit;
 use App\Utils\Base;
 
@@ -93,10 +94,17 @@ class ItemService extends Base
         $texto_error = '';
 
         //projects
-        $projects = $this->getDoctrine()->getRepository(ProjectItemDetails::class)
+        $projects = $this->getDoctrine()->getRepository(ProjectItem::class)
             ->ListarProjectsDeItem($item_id);
         if (!empty($projects)) {
             $texto_error = "The item could not be deleted, because it has associated projects";
+        }
+
+        //data tracking
+        $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->ListarDataTrackingsDeItem($item_id);
+        if (!empty($data_tracking)) {
+            $texto_error = "The item could not be deleted, because it has associated in data tracking";
         }
 
         //invoices

@@ -2,17 +2,17 @@
 
 namespace App\Repository;
 
-use App\Entity\Contractor;
+use App\Entity\Company;
 use Doctrine\ORM\EntityRepository;
 
 
-class ContractorRepository extends EntityRepository
+class CompanyRepository extends EntityRepository
 {
 
     /**
-     * ListarOrdenados: Lista los contractors
+     * ListarOrdenados: Lista los companies
      *
-     * @return Contractor[]
+     * @return Company[]
      */
     public function ListarOrdenados()
     {
@@ -24,14 +24,14 @@ class ContractorRepository extends EntityRepository
     }
 
     /**
-     * ListarContractors: Lista los contractors
+     * ListarCompanies: Lista los companies
      * @param int $start Inicio
      * @param int $limit Limite
      * @param string $sSearch Para buscar
      *
-     * @return Contractor[]
+     * @return Company[]
      */
-    public function ListarContractors($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0)
+    public function ListarCompanies($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0)
     {
         $consulta = $this->createQueryBuilder('c');
 
@@ -56,15 +56,15 @@ class ContractorRepository extends EntityRepository
     }
 
     /**
-     * TotalContractors: Total de contractors de la BD
+     * TotalCompanies: Total de companies de la BD
      * @param string $sSearch Para buscar
      *
      * @author Marcel
      */
-    public function TotalContractors($sSearch)
+    public function TotalCompanies($sSearch)
     {
         $em = $this->getEntityManager();
-        $consulta = 'SELECT COUNT(c.contractorId) FROM App\Entity\Contractor c ';
+        $consulta = 'SELECT COUNT(c.companyId) FROM App\Entity\Company c ';
         $join = '';
         $where = '';
 

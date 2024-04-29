@@ -58,12 +58,12 @@ class InvoiceService extends Base
         $end_date = $invoice_entity->getEndDate()->format('d/m/Y');
         $objWorksheet->setCellValueExplicit("I10", $end_date, DataType::TYPE_STRING);
 
-        // contractor
-        $contractor_entity = $invoice_entity->getProject()->getContractor();
-        $objWorksheet->setCellValue("B11", $contractor_entity->getName());
-        $objWorksheet->setCellValue("B13", $contractor_entity->getPhone());
-        $objWorksheet->setCellValue("C14", $contractor_entity->getContactName());
-        $objWorksheet->setCellValue("C15", $contractor_entity->getContactEmail());
+        // company
+        $company_entity = $invoice_entity->getProject()->getCompany();
+        $objWorksheet->setCellValue("B11", $company_entity->getName());
+        $objWorksheet->setCellValue("B13", $company_entity->getPhone());
+        $objWorksheet->setCellValue("C14", $company_entity->getContactName());
+        $objWorksheet->setCellValue("C15", $company_entity->getContactEmail());
 
         // inspector
         $inspector_entity = $invoice_entity->getProject()->getInspector();
@@ -191,8 +191,8 @@ class InvoiceService extends Base
 
             $arreglo_resultado['project_id'] = $entity->getProject()->getProjectId();
 
-            $contractor_id = $entity->getProject()->getContractor()->getContractorId();
-            $arreglo_resultado['contractor_id'] = $contractor_id;
+            $company_id = $entity->getProject()->getCompany()->getCompanyId();
+            $arreglo_resultado['company_id'] = $company_id;
 
             $arreglo_resultado['number'] = $entity->getNumber();
             $arreglo_resultado['start_date'] = $entity->getStartDate()->format('m/d/Y');
@@ -200,7 +200,7 @@ class InvoiceService extends Base
             $arreglo_resultado['notes'] = $entity->getNotes();
 
             // projects
-            $projects = $this->ListarProjectsDeContractor($contractor_id);
+            $projects = $this->ListarProjectsDeCompany($company_id);
             $arreglo_resultado['projects'] = $projects;
 
             // items
@@ -247,16 +247,16 @@ class InvoiceService extends Base
     }
 
     /**
-     * ListarProjectsDeContractor
-     * @param $contractor_id
+     * ListarProjectsDeCompany
+     * @param $company_id
      * @return array
      */
-    public function ListarProjectsDeContractor($contractor_id)
+    public function ListarProjectsDeCompany($company_id)
     {
         $projects = [];
 
         $lista = $this->getDoctrine()->getRepository(Project::class)
-            ->ListarOrdenados('', $contractor_id, '');
+            ->ListarOrdenados('', $company_id, '');
         foreach ($lista as $value) {
             $projects[] = [
                 'project_id' => $value->getProjectId(),
@@ -543,13 +543,13 @@ class InvoiceService extends Base
      *
      * @author Marcel
      */
-    public function ListarInvoices($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $contractor_id, $project_id, $fecha_inicial, $fecha_fin)
+    public function ListarInvoices($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $company_id, $project_id, $fecha_inicial, $fecha_fin)
     {
         $arreglo_resultado = array();
         $cont = 0;
 
         $lista = $this->getDoctrine()->getRepository(Invoice::class)
-            ->ListarInvoices($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $contractor_id, $project_id, $fecha_inicial, $fecha_fin);
+            ->ListarInvoices($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $company_id, $project_id, $fecha_inicial, $fecha_fin);
 
         foreach ($lista as $value) {
             $invoice_id = $value->getInvoiceId();
@@ -562,7 +562,7 @@ class InvoiceService extends Base
             $arreglo_resultado[$cont] = array(
                 "id" => $invoice_id,
                 "number" => $value->getNumber(),
-                "contractor" => $value->getProject()->getContractor()->getName(),
+                "company" => $value->getProject()->getCompany()->getName(),
                 "project" => $value->getProject()->getName(),
                 "startDate" => $value->getStartDate()->format('m/d/Y'),
                 "endDate" => $value->getEndDate()->format('m/d/Y'),
@@ -583,10 +583,10 @@ class InvoiceService extends Base
      * @param string $sSearch Para buscar
      * @author Marcel
      */
-    public function TotalInvoices($sSearch, $contractor_id, $project_id, $fecha_inicial, $fecha_fin)
+    public function TotalInvoices($sSearch, $company_id, $project_id, $fecha_inicial, $fecha_fin)
     {
         $total = $this->getDoctrine()->getRepository(Invoice::class)
-            ->TotalInvoices($sSearch, $contractor_id, $project_id, $fecha_inicial, $fecha_fin);
+            ->TotalInvoices($sSearch, $company_id, $project_id, $fecha_inicial, $fecha_fin);
 
         return $total;
     }

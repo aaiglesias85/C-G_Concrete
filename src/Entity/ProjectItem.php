@@ -5,12 +5,12 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * ProjectItemDetails
+ * ProjectItem
  *
- * @ORM\Table(name="project_item_details")
- * @ORM\Entity(repositoryClass="App\Repository\ProjectItemDetailsRepository")
+ * @ORM\Table(name="project_item")
+ * @ORM\Entity(repositoryClass="App\Repository\ProjectItemRepository")
  */
-class ProjectItemDetails
+class ProjectItem
 {
     /**
      * @var integer
@@ -34,13 +34,6 @@ class ProjectItemDetails
      * @ORM\Column(name="price", type="float", nullable=false)
      */
     private $price;
-
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="date", type="date", nullable=false)
-     */
-    private $date;
 
     /**
      * @var Project
@@ -91,16 +84,6 @@ class ProjectItemDetails
     public function setPrice($price)
     {
         $this->price = $price;
-    }
-
-    public function getDate(): \DateTime
-    {
-        return $this->date;
-    }
-
-    public function setDate(\DateTime $date): void
-    {
-        $this->date = $date;
     }
 
     /**

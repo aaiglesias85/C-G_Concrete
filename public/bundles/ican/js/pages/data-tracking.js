@@ -1,13 +1,13 @@
-var DailyTracking = function () {
+var DataTracking = function () {
 
     var oTable;
     var rowDelete = null;
 
     //Inicializar table
     var initTable = function () {
-        MyApp.block('#daily-tracking-table-editable');
+        MyApp.block('#data-tracking-table-editable');
 
-        var table = $('#daily-tracking-table-editable');
+        var table = $('#data-tracking-table-editable');
 
         var aoColumns = [];
 
@@ -76,7 +76,7 @@ var DailyTracking = function () {
                 type: 'remote',
                 source: {
                     read: {
-                        url: 'daily-tracking/listarDailyTracking',
+                        url: 'data-tracking/listarDataTracking',
                     }
                 },
                 pageSize: 10,
@@ -117,19 +117,19 @@ var DailyTracking = function () {
         //Events
         oTable
             .on('m-datatable--on-ajax-done', function () {
-                mApp.unblock('#daily-tracking-table-editable');
+                mApp.unblock('#data-tracking-table-editable');
             })
             .on('m-datatable--on-ajax-fail', function (e, jqXHR) {
-                mApp.unblock('#daily-tracking-table-editable');
+                mApp.unblock('#data-tracking-table-editable');
             })
             .on('m-datatable--on-goto-page', function (e, args) {
-                MyApp.block('#daily-tracking-table-editable');
+                MyApp.block('#data-tracking-table-editable');
             })
             .on('m-datatable--on-reloaded', function (e) {
-                MyApp.block('#daily-tracking-table-editable');
+                MyApp.block('#data-tracking-table-editable');
             })
             .on('m-datatable--on-sort', function (e, args) {
-                MyApp.block('#daily-tracking-table-editable');
+                MyApp.block('#data-tracking-table-editable');
             })
             .on('m-datatable--on-check', function (e, args) {
                 //eventsWriter('Checkbox active: ' + args.toString());
@@ -152,6 +152,9 @@ var DailyTracking = function () {
         var query = oTable.getDataSourceQuery();
 
         query.generalSearch = '';
+
+        var company_id = $('#company').val();
+        query.company_id = company_id;
 
         var project_id = $('#project').val();
         query.project_id = project_id;
@@ -288,7 +291,7 @@ var DailyTracking = function () {
             var project_id = $('#project').val();
             if ($('#item-form').valid() && item_id != '' && project_id != '') {
 
-                var item_details_id = $('#item_details_id').val();
+                var data_tracking_id = $('#data_tracking_id').val();
 
                 var quantity = $('#item-quantity').val();
                 var price = $('#item-price').val();
@@ -298,10 +301,10 @@ var DailyTracking = function () {
 
                 $.ajax({
                     type: "POST",
-                    url: "project/salvarItemDetails",
+                    url: "project/salvarDataTracking",
                     dataType: "json",
                     data: {
-                        'item_details_id': item_details_id,
+                        'data_tracking_id': data_tracking_id,
                         'project_id': project_id,
                         'item_id': item_id,
                         'quantity': quantity,
@@ -350,8 +353,8 @@ var DailyTracking = function () {
 
     //Editar
     var initAccionEditar = function () {
-        $(document).off('click', "#daily-tracking-table-editable a.edit");
-        $(document).on('click', "#daily-tracking-table-editable a.edit", function (e) {
+        $(document).off('click', "#data-tracking-table-editable a.edit");
+        $(document).on('click', "#data-tracking-table-editable a.edit", function (e) {
             e.preventDefault();
             resetForms();
 
@@ -359,22 +362,22 @@ var DailyTracking = function () {
                 'show': true
             });
 
-            var item_details_id = $(this).data('id');
-            $('#item_details_id').val(item_details_id);
+            var data_tracking_id = $(this).data('id');
+            $('#data_tracking_id').val(data_tracking_id);
 
-            editRow(item_details_id);
+            editRow(data_tracking_id);
         });
 
-        function editRow(item_details_id) {
+        function editRow(data_tracking_id) {
 
             MyApp.block('#modal-item .modal-content');
 
             $.ajax({
                 type: "POST",
-                url: "project/cargarDatosItemDetails",
+                url: "project/cargarDatosDataTracking",
                 dataType: "json",
                 data: {
-                    'item_details_id': item_details_id
+                    'data_tracking_id': data_tracking_id
                 },
                 success: function (response) {
                     mApp.unblock('#modal-item .modal-content');
@@ -414,8 +417,8 @@ var DailyTracking = function () {
     };
     //Eliminar
     var initAccionEliminar = function () {
-        $(document).off('click', "#daily-tracking-table-editable a.delete");
-        $(document).on('click', "#daily-tracking-table-editable a.delete", function (e) {
+        $(document).off('click', "#data-tracking-table-editable a.delete");
+        $(document).on('click', "#data-tracking-table-editable a.delete", function (e) {
             e.preventDefault();
 
             rowDelete = $(this).data('id');
@@ -424,8 +427,8 @@ var DailyTracking = function () {
             });
         });
 
-        $(document).off('click', "#btn-eliminar-daily-tracking");
-        $(document).on('click', "#btn-eliminar-daily-tracking", function (e) {
+        $(document).off('click', "#btn-eliminar-data-tracking");
+        $(document).on('click', "#btn-eliminar-data-tracking", function (e) {
             btnClickEliminar();
         });
 
@@ -460,19 +463,19 @@ var DailyTracking = function () {
         };
 
         function btnClickModalEliminar() {
-            var item_details_id = rowDelete;
+            var data_tracking_id = rowDelete;
 
-            MyApp.block('#daily-tracking-table-editable');
+            MyApp.block('#data-tracking-table-editable');
 
             $.ajax({
                 type: "POST",
-                url: "project/eliminarItemDetails",
+                url: "project/eliminarDataTracking",
                 dataType: "json",
                 data: {
-                    'item_details_id': item_details_id
+                    'data_tracking_id': data_tracking_id
                 },
                 success: function (response) {
-                    mApp.unblock('#daily-tracking-table-editable');
+                    mApp.unblock('#data-tracking-table-editable');
 
                     if (response.success) {
 
@@ -485,7 +488,7 @@ var DailyTracking = function () {
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#daily-tracking-table-editable');
+                    mApp.unblock('#data-tracking-table-editable');
 
                     toastr.error(response.error, "Error !!!");
                 }
@@ -503,17 +506,17 @@ var DailyTracking = function () {
                 }
             });
 
-            MyApp.block('#daily-tracking-table-editable');
+            MyApp.block('#data-tracking-table-editable');
 
             $.ajax({
                 type: "POST",
-                url: "daily-tracking/eliminarDailyTrackings",
+                url: "data-tracking/eliminarDataTrackings",
                 dataType: "json",
                 data: {
                     'ids': ids
                 },
                 success: function (response) {
-                    mApp.unblock('#daily-tracking-table-editable');
+                    mApp.unblock('#data-tracking-table-editable');
                     if (response.success) {
 
                         btnClickFiltrar();
@@ -525,7 +528,7 @@ var DailyTracking = function () {
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#daily-tracking-table-editable');
+                    mApp.unblock('#data-tracking-table-editable');
 
                     toastr.error(response.error, "Error !!!");
                 }
@@ -541,14 +544,14 @@ var DailyTracking = function () {
         $('.m-select2').select2();
 
         // change
-        $('#contractor').change(changeContractor);
+        $('#company').change(changeCompany);
         $('#item').change(changeItem);
         $('#item-quantity').change(calcularTotalItem);
         $('#item-price').change(calcularTotalItem);
     }
 
-    var changeContractor = function () {
-        var contractor_id = $('#contractor').val();
+    var changeCompany = function () {
+        var company_id = $('#company').val();
 
         // reset
         $('#project option').each(function (e) {
@@ -557,7 +560,7 @@ var DailyTracking = function () {
         });
         $('#project').select2();
 
-        if (contractor_id != '') {
+        if (company_id != '') {
 
             MyApp.block('#form-group-project');
 
@@ -566,7 +569,7 @@ var DailyTracking = function () {
                 url: "project/listarOrdenados",
                 dataType: "json",
                 data: {
-                    'contractor_id': contractor_id
+                    'company_id': company_id
                 },
                 success: function (response) {
                     mApp.unblock('#form-group-project');
@@ -618,7 +621,7 @@ var DailyTracking = function () {
     }
 
     var initPortlets = function () {
-        var portlet = new mPortlet('lista-daily-tracking');
+        var portlet = new mPortlet('lista-data-tracking');
         portlet.on('afterFullscreenOn', function (portlet) {
             $('.m-portlet').addClass('m-portlet--fullscreen');
         });

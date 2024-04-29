@@ -6,6 +6,10 @@ listarProjectAdmin:
   path: /project/listarProject
   defaults: { _controller: App\Controller\Admin\ProjectController::listar, _format: json }
 
+salvarProjectAdmin:
+  path: /project/salvarProject
+  defaults: { _controller: App\Controller\Admin\ProjectController::salvar, _format: json }
+
 eliminarProjectAdmin:
   path: /project/eliminarProject
   defaults: { _controller: App\Controller\Admin\ProjectController::eliminar, _format: json }
@@ -13,10 +17,6 @@ eliminarProjectAdmin:
 eliminarProjectsAdmin:
   path: /project/eliminarProjects
   defaults: { _controller: App\Controller\Admin\ProjectController::eliminarProjects, _format: json }
-
-salvarProjectAdmin:
-  path: /project/salvarProject
-  defaults: { _controller: App\Controller\Admin\ProjectController::salvar, _format: json }
 
 cargarDatosProjectAdmin:
   path: /project/cargarDatos
@@ -26,26 +26,26 @@ listarProjectsOrdenadosAdmin:
   path: /project/listarOrdenados
   defaults: { _controller: App\Controller\Admin\ProjectController::listarOrdenados, _format: json }
 
-#items details
-listarItemDetailsProjectAdmin:
-  path: /project/listarItemDetails
-  defaults: { _controller: App\Controller\Admin\ProjectController::listarItemDetails, _format: json }
+#data tracking
+listarDataTrackingProjectAdmin:
+  path: /project/listarDataTracking
+  defaults: { _controller: App\Controller\Admin\ProjectController::listarDataTracking, _format: json }
 
-salvarItemDetailsProjectAdmin:
-  path: /project/salvarItemDetails
-  defaults: { _controller: App\Controller\Admin\ProjectController::salvarItemDetails, _format: json }
+salvarDataTrackingProjectAdmin:
+  path: /project/salvarDataTracking
+  defaults: { _controller: App\Controller\Admin\ProjectController::salvarDataTracking, _format: json }
 
-cargarDatosItemDetailsProjectAdmin:
-  path: /project/cargarDatosItemDetails
-  defaults: { _controller: App\Controller\Admin\ProjectController::cargarDatosItemDetails, _format: json }
+cargarDatosDataTrackingProjectAdmin:
+  path: /project/cargarDatosDataTracking
+  defaults: { _controller: App\Controller\Admin\ProjectController::cargarDatosDataTracking, _format: json }
 
-eliminarItemDetailsProjectAdmin:
-  path: /project/eliminarItemDetails
-  defaults: { _controller: App\Controller\Admin\ProjectController::eliminarItemDetails, _format: json }
+eliminarDataTrackingProjectAdmin:
+  path: /project/eliminarDataTracking
+  defaults: { _controller: App\Controller\Admin\ProjectController::eliminarDataTracking, _format: json }
 
-listarItemDetailsParaInvoiceProjectAdmin:
-  path: /project/listarItemDetailsParaInvoice
-  defaults: { _controller: App\Controller\Admin\ProjectController::listarItemDetailsParaInvoice, _format: json }
+listarDataTrackingParaInvoiceProjectAdmin:
+  path: /project/listarDataTrackingParaInvoice
+  defaults: { _controller: App\Controller\Admin\ProjectController::listarDataTrackingParaInvoice, _format: json }
 
 #notes
 listarNotesProjectAdmin:
@@ -63,3 +63,8 @@ cargarDatosNotesProjectAdmin:
 eliminarNotesProjectAdmin:
   path: /project/eliminarNotes
   defaults: { _controller: App\Controller\Admin\ProjectController::eliminarNotes, _format: json }
+
+#items
+eliminarItemProjectAdmin:
+  path: /project/eliminarItem
+  defaults: { _controller: App\Controller\Admin\ProjectController::eliminarItem, _format: json }

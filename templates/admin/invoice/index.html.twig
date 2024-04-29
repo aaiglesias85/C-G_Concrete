@@ -99,10 +99,10 @@
                         <div class="col-xl-12 order-1">
                             <div class="form-group m-form__group row align-items-center">
                                 <div class="col-md-2">
-                                    <select class="form-control m-select2" id="filtro-contractor">
-                                        <option value="">Contractor</option>
-                                        {% for item in contractors %}
-                                            <option value="{{ item.contractorId }}">{{ item.name }}
+                                    <select class="form-control m-select2" id="filtro-company">
+                                        <option value="">Company</option>
+                                        {% for item in companies %}
+                                            <option value="{{ item.companyId }}">{{ item.name }}
                                             </option>
                                         {% endfor %}
                                     </select>
@@ -213,17 +213,17 @@
 
                                 <div class="form-group m-form__group ic-form-group">
                                     <div class="row">
-                                        <div class="col-md-4" id="select-contractor">
+                                        <div class="col-md-4" id="select-company">
                                             <label>
                                                 <span class="ic-step-number">1</span>
-                                                Contractor
+                                                Company
                                                 <span class="ic-small italic">(required)</span>
                                             </label>
-                                            <select class="form-control m-select2 event-change" id="contractor"
-                                                    name="contractor">
+                                            <select class="form-control m-select2 event-change" id="company"
+                                                    name="company">
                                                 <option value="">Select</option>
-                                                {% for item in contractors %}
-                                                    <option value="{{ item.contractorId }}">{{ item.name }}</option>
+                                                {% for item in companies %}
+                                                    <option value="{{ item.companyId }}">{{ item.name }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>

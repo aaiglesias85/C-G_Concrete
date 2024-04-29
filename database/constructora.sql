@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 27-04-2024 a las 02:46:05
+-- Tiempo de generación: 29-04-2024 a las 23:47:31
 -- Versión del servidor: 11.2.2-MariaDB
 -- Versión de PHP: 8.1.12
 
@@ -24,11 +24,11 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `contractor`
+-- Estructura de tabla para la tabla `company`
 --
 
-CREATE TABLE `contractor` (
-  `contractor_id` int(11) NOT NULL,
+CREATE TABLE `company` (
+  `company_id` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `phone` varchar(50) DEFAULT NULL,
   `contact_name` varchar(255) DEFAULT NULL,
@@ -38,33 +38,75 @@ CREATE TABLE `contractor` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `contractor`
+-- Volcado de datos para la tabla `company`
 --
 
-INSERT INTO `contractor` (`contractor_id`, `name`, `phone`, `contact_name`, `contact_email`, `created_at`, `updated_at`) VALUES
-(1, 'CONTRACTOR, INC', '(618)985-7850', 'Dan Schamerhorn', 'merhorn@earsnel.com', '2024-04-13 19:10:40', '2024-04-13 19:54:24'),
+INSERT INTO `company` (`company_id`, `name`, `phone`, `contact_name`, `contact_email`, `created_at`, `updated_at`) VALUES
+(1, 'CONTRACTOR, INC', '(618)985-7850', 'Dan Schamerhorn', 'merhorn@earsnel.com', '2024-04-13 19:10:40', '2024-04-29 14:51:27'),
 (3, 'CONTRACTOR TWO , INC', '(653)289-6532', 'Dan Smith', 'dan@gmail.com', '2024-04-24 04:23:31', NULL);
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `contractor_contact`
+-- Estructura de tabla para la tabla `company_contact`
 --
 
-CREATE TABLE `contractor_contact` (
+CREATE TABLE `company_contact` (
   `contact_id` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `phone` varchar(50) DEFAULT NULL,
-  `contractor_id` int(11) DEFAULT NULL
+  `company_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `contractor_contact`
+-- Volcado de datos para la tabla `company_contact`
 --
 
-INSERT INTO `contractor_contact` (`contact_id`, `name`, `email`, `phone`, `contractor_id`) VALUES
+INSERT INTO `company_contact` (`contact_id`, `name`, `email`, `phone`, `company_id`) VALUES
 (1, 'Dan Schamerhorn', 'merhorn@earsnel.com', '(618)985-7850', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `data_tracking`
+--
+
+CREATE TABLE `data_tracking` (
+  `id` int(11) NOT NULL,
+  `quantity` float(8,2) DEFAULT NULL,
+  `price` float(8,2) DEFAULT NULL,
+  `date` date DEFAULT NULL,
+  `project_id` int(11) DEFAULT NULL,
+  `item_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `data_tracking`
+--
+
+INSERT INTO `data_tracking` (`id`, `quantity`, `price`, `date`, `project_id`, `item_id`) VALUES
+(1, 130.00, 16.50, '2024-03-25', 1, 6),
+(2, 159.00, 47.18, '2024-03-18', 1, 17),
+(6, 3.00, 700.00, '2024-04-16', 1, 8),
+(7, 5.00, 29.00, '2024-04-16', 1, 1),
+(8, 6.00, 29.00, '2024-04-15', 1, 1),
+(9, 5.00, 2100.00, '2024-04-16', 1, 16),
+(10, 5.00, 1500.00, '2024-04-10', 1, 19),
+(11, 5.00, 700.00, '2024-03-13', 1, 8),
+(12, 50.00, 70.00, '2024-03-01', 1, 2),
+(13, 25.00, 16.50, '2024-02-01', 1, 6),
+(14, 12.00, 700.00, '2024-02-07', 1, 8),
+(15, 2.00, 2100.00, '2024-02-20', 1, 16),
+(16, 15.00, 150.00, '2024-02-29', 1, 20),
+(17, 25.00, 16.50, '2024-01-01', 1, 7),
+(18, 20.00, 30.00, '2024-01-08', 1, 14),
+(19, 10.00, 70.00, '2024-01-15', 1, 12),
+(20, 22.00, 150.00, '2024-01-22', 1, 20),
+(21, 50.00, 100.00, '2024-04-01', 2, 13),
+(22, 15.00, 16.50, '2024-04-17', 2, 6),
+(23, 100.00, 16.50, '2024-04-01', 3, 6),
+(24, 20.00, 58.00, '2024-04-16', 3, 4);
 
 -- --------------------------------------------------------
 
@@ -90,9 +132,9 @@ INSERT INTO `function` (`function_id`, `url`, `description`) VALUES
 (5, 'unit', 'Unit of Measurement'),
 (6, 'item', 'Items'),
 (7, 'inspectors', 'Inspectors'),
-(8, 'contractors', 'Contractors'),
+(8, 'company', 'Companies'),
 (9, 'projects', 'Projects'),
-(10, 'daily_tracking', 'Daily Tracking'),
+(10, 'data_tracking', 'Data Tracking'),
 (11, 'invoice', 'Invoices'),
 (12, 'notification', 'Notifications');
 
@@ -337,7 +379,22 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (82, 'Add', 'Project Item Details', 'The item is add: CONC VALLEY GUTTER 6IN', '::1', '2024-04-24 04:24:33', 1),
 (83, 'Add', 'Invoice', 'The invoice #6 is added', '::1', '2024-04-24 04:24:52', 1),
 (84, 'Update', 'Invoice', 'The invoice #6 is modified', '::1', '2024-04-24 16:59:17', 1),
-(85, 'Update', 'Invoice', 'The invoice #5 is modified', '::1', '2024-04-24 16:59:59', 1);
+(85, 'Update', 'Invoice', 'The invoice #5 is modified', '::1', '2024-04-24 16:59:59', 1),
+(86, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-04-27 18:37:14', 1),
+(87, 'Update', 'Project', 'The project is modified: FL MIAMI', '::1', '2024-04-27 18:37:22', 1),
+(88, 'Update', 'Project', 'The project is modified: FL COUNTY', '::1', '2024-04-27 18:37:31', 1),
+(89, 'Add', 'Project Notes', 'The notes: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. is add to the project: Houston Texas', '::1', '2024-04-27 21:15:21', 1),
+(90, 'Update', 'Project Notes', 'The notes: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. is modified to the project: Houston Texas', '::1', '2024-04-27 21:15:35', 1),
+(91, 'Delete', 'Project Notes', 'The notes: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. is delete from project: Houston Texas', '::1', '2024-04-27 21:16:03', 1),
+(92, 'Update', 'Company', 'The company is modified: CONTRACTOR, INC', '::1', '2024-04-29 14:51:27', 1),
+(93, 'Add', 'Company', 'The company is added: gjhjkl', '::1', '2024-04-29 14:52:29', 1),
+(94, 'Delete', 'Company', 'The company is deleted: gjhjkl', '::1', '2024-04-29 14:52:36', 1),
+(95, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-04-29 14:53:41', 1),
+(96, 'Update', 'Data Tracking', 'The data tracking is modified: CONC VALLEY GUTTER 6IN', '::1', '2024-04-29 14:53:58', 1),
+(97, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-04-29 23:38:38', 1),
+(98, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-04-29 23:39:10', 1),
+(99, 'Delete', 'Project Item', 'The item: CONCRETE V GUTTER of the project is deleted', '::1', '2024-04-29 23:39:45', 1),
+(100, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-04-29 23:41:10', 1);
 
 -- --------------------------------------------------------
 
@@ -371,13 +428,22 @@ CREATE TABLE `project` (
   `project_number` varchar(50) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   `location` varchar(255) DEFAULT NULL,
+  `owner` varchar(255) DEFAULT NULL,
+  `subcontract` varchar(255) DEFAULT NULL,
+  `federal_funding` tinyint(1) DEFAULT NULL,
+  `county` varchar(255) DEFAULT NULL,
+  `resurfacing` tinyint(1) DEFAULT NULL,
+  `invoice_contact` varchar(255) DEFAULT NULL,
+  `certified_payrolls` tinyint(1) DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
   `manager` varchar(255) DEFAULT NULL,
   `status` tinyint(1) DEFAULT NULL,
   `po_number` varchar(255) DEFAULT NULL,
   `po_cg` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `contractor_id` int(11) DEFAULT NULL,
+  `company_id` int(11) DEFAULT NULL,
   `inspector_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -385,52 +451,33 @@ CREATE TABLE `project` (
 -- Volcado de datos para la tabla `project`
 --
 
-INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `contractor_id`, `inspector_id`) VALUES
-(1, '0009001', 'FL COUNTY', 'FL COUNTY', NULL, 1, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', NULL, 1, 1),
-(2, '0009002', 'FL MIAMI', 'FL MIAMI', NULL, 1, '896532', '896532', '2024-04-24 04:20:22', NULL, 1, 1),
-(3, '0009003', 'Houston Texas', 'Houston Texas', NULL, 1, '86532', '89653', '2024-04-24 04:24:02', NULL, 3, 1);
+INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `owner`, `subcontract`, `federal_funding`, `county`, `resurfacing`, `invoice_contact`, `certified_payrolls`, `start_date`, `end_date`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `company_id`, `inspector_id`) VALUES
+(1, '0009001', 'FL COUNTY', 'FL COUNTY', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-04-27 18:37:31', 1, 1),
+(2, '0009002', 'FL MIAMI', 'FL MIAMI', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-04-27 18:37:22', 1, 1),
+(3, '0009003', 'Houston Texas', 'Houston Texas', 'Marcel', '896532', 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', 'Carlos', 1, '86532', '89653', '2024-04-24 04:24:02', '2024-04-29 23:41:10', 3, 1);
 
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `project_item_details`
+-- Estructura de tabla para la tabla `project_item`
 --
 
-CREATE TABLE `project_item_details` (
+CREATE TABLE `project_item` (
   `id` int(11) NOT NULL,
   `quantity` float(8,2) DEFAULT NULL,
   `price` float(8,2) DEFAULT NULL,
-  `date` date DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL,
   `item_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `project_item_details`
+-- Volcado de datos para la tabla `project_item`
 --
 
-INSERT INTO `project_item_details` (`id`, `quantity`, `price`, `date`, `project_id`, `item_id`) VALUES
-(1, 130.00, 16.50, '2024-03-25', 1, 6),
-(2, 159.00, 47.18, '2024-03-18', 1, 17),
-(6, 3.00, 700.00, '2024-04-16', 1, 8),
-(7, 5.00, 29.00, '2024-04-16', 1, 1),
-(8, 6.00, 29.00, '2024-04-15', 1, 1),
-(9, 5.00, 2100.00, '2024-04-16', 1, 16),
-(10, 5.00, 1500.00, '2024-04-10', 1, 19),
-(11, 5.00, 700.00, '2024-03-13', 1, 8),
-(12, 50.00, 70.00, '2024-03-01', 1, 2),
-(13, 25.00, 16.50, '2024-02-01', 1, 6),
-(14, 12.00, 700.00, '2024-02-07', 1, 8),
-(15, 2.00, 2100.00, '2024-02-20', 1, 16),
-(16, 15.00, 150.00, '2024-02-29', 1, 20),
-(17, 25.00, 16.50, '2024-01-01', 1, 7),
-(18, 20.00, 30.00, '2024-01-08', 1, 14),
-(19, 10.00, 70.00, '2024-01-15', 1, 12),
-(20, 22.00, 150.00, '2024-01-22', 1, 20),
-(21, 50.00, 100.00, '2024-04-01', 2, 13),
-(22, 15.00, 16.50, '2024-04-17', 2, 6),
-(23, 100.00, 16.50, '2024-04-01', 3, 6),
-(24, 20.00, 58.00, '2024-04-16', 3, 4);
+INSERT INTO `project_item` (`id`, `quantity`, `price`, `project_id`, `item_id`) VALUES
+(1, 50.00, 16.50, 3, 6),
+(2, 10.00, 63.00, 3, 15),
+(4, 50.00, 150.00, 3, 20);
 
 -- --------------------------------------------------------
 
@@ -590,17 +637,25 @@ INSERT INTO `user_permission` (`id`, `view_permission`, `add_permission`, `edit_
 --
 
 --
--- Indices de la tabla `contractor`
+-- Indices de la tabla `company`
 --
-ALTER TABLE `contractor`
-  ADD PRIMARY KEY (`contractor_id`);
+ALTER TABLE `company`
+  ADD PRIMARY KEY (`company_id`);
 
 --
--- Indices de la tabla `contractor_contact`
+-- Indices de la tabla `company_contact`
 --
-ALTER TABLE `contractor_contact`
+ALTER TABLE `company_contact`
   ADD PRIMARY KEY (`contact_id`),
-  ADD KEY `Ref6474` (`contractor_id`);
+  ADD KEY `Ref6474` (`company_id`);
+
+--
+-- Indices de la tabla `data_tracking`
+--
+ALTER TABLE `data_tracking`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `Ref6675` (`project_id`),
+  ADD KEY `Ref6776` (`item_id`);
 
 --
 -- Indices de la tabla `function`
@@ -655,16 +710,16 @@ ALTER TABLE `notification`
 --
 ALTER TABLE `project`
   ADD PRIMARY KEY (`project_id`),
-  ADD KEY `Ref6467` (`contractor_id`),
+  ADD KEY `Ref6467` (`company_id`),
   ADD KEY `Ref6573` (`inspector_id`);
 
 --
--- Indices de la tabla `project_item_details`
+-- Indices de la tabla `project_item`
 --
-ALTER TABLE `project_item_details`
+ALTER TABLE `project_item`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `Ref6675` (`project_id`),
-  ADD KEY `Ref6776` (`item_id`);
+  ADD KEY `Ref6679` (`project_id`),
+  ADD KEY `Ref6780` (`item_id`);
 
 --
 -- Indices de la tabla `project_notes`
@@ -713,16 +768,22 @@ ALTER TABLE `user_permission`
 --
 
 --
--- AUTO_INCREMENT de la tabla `contractor`
+-- AUTO_INCREMENT de la tabla `company`
 --
-ALTER TABLE `contractor`
-  MODIFY `contractor_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+ALTER TABLE `company`
+  MODIFY `company_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT de la tabla `contractor_contact`
+-- AUTO_INCREMENT de la tabla `company_contact`
 --
-ALTER TABLE `contractor_contact`
+ALTER TABLE `company_contact`
   MODIFY `contact_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `data_tracking`
+--
+ALTER TABLE `data_tracking`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT de la tabla `function`
@@ -758,7 +819,7 @@ ALTER TABLE `item`
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
 
 --
 -- AUTO_INCREMENT de la tabla `notification`
@@ -773,16 +834,16 @@ ALTER TABLE `project`
   MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT de la tabla `project_item_details`
+-- AUTO_INCREMENT de la tabla `project_item`
 --
-ALTER TABLE `project_item_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+ALTER TABLE `project_item`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `project_notes`
 --
 ALTER TABLE `project_notes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `rol`
@@ -819,10 +880,17 @@ ALTER TABLE `user_permission`
 --
 
 --
--- Filtros para la tabla `contractor_contact`
+-- Filtros para la tabla `company_contact`
 --
-ALTER TABLE `contractor_contact`
-  ADD CONSTRAINT `Refcontractor74` FOREIGN KEY (`contractor_id`) REFERENCES `contractor` (`contractor_id`);
+ALTER TABLE `company_contact`
+  ADD CONSTRAINT `Refcontractor74` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`);
+
+--
+-- Filtros para la tabla `data_tracking`
+--
+ALTER TABLE `data_tracking`
+  ADD CONSTRAINT `Refitem76` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`),
+  ADD CONSTRAINT `Refproject75` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`);
 
 --
 -- Filtros para la tabla `invoice`
@@ -859,15 +927,15 @@ ALTER TABLE `notification`
 -- Filtros para la tabla `project`
 --
 ALTER TABLE `project`
-  ADD CONSTRAINT `Refcontractor67` FOREIGN KEY (`contractor_id`) REFERENCES `contractor` (`contractor_id`),
+  ADD CONSTRAINT `Refcontractor67` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`),
   ADD CONSTRAINT `Refinspector73` FOREIGN KEY (`inspector_id`) REFERENCES `inspector` (`inspector_id`);
 
 --
--- Filtros para la tabla `project_item_details`
+-- Filtros para la tabla `project_item`
 --
-ALTER TABLE `project_item_details`
-  ADD CONSTRAINT `Refitem76` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`),
-  ADD CONSTRAINT `Refproject75` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`);
+ALTER TABLE `project_item`
+  ADD CONSTRAINT `Refitem80` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`),
+  ADD CONSTRAINT `Refproject79` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`);
 
 --
 -- Filtros para la tabla `project_notes`

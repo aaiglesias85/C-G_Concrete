@@ -2,43 +2,29 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Contractor;
-use App\Entity\Item;
-use App\Utils\Admin\DailyTrackingService;
-use App\Utils\Admin\ProjectService;
+use App\Utils\Admin\CompanyService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class DailyTrackingController extends AbstractController
+class CompanyController extends AbstractController
 {
 
-    private $dailyTrackingService;
-    private $projectService;
-    public function __construct(DailyTrackingService $dailyTrackingService, ProjectService $projectService)
+    private $companyService;
+
+    public function __construct(CompanyService $companyService)
     {
-        $this->dailyTrackingService = $dailyTrackingService;
-        $this->projectService = $projectService;
+        $this->companyService = $companyService;
     }
 
     public function index()
     {
         $usuario = $this->getUser();
-        $permiso = $this->dailyTrackingService->BuscarPermiso($usuario->getUsuarioId(), 10);
+        $permiso = $this->companyService->BuscarPermiso($usuario->getUsuarioId(), 8);
         if (count($permiso) > 0) {
             if ($permiso[0]['ver']) {
 
-                // contractors
-                $contractors = $this->dailyTrackingService->getDoctrine()->getRepository(Contractor::class)
-                    ->ListarOrdenados();
-
-                // items
-                $items = $this->dailyTrackingService->getDoctrine()->getRepository(Item::class)
-                    ->ListarOrdenados();
-
-                return $this->render('admin/daily-tracking/index.html.twig', array(
-                    'permiso' => $permiso[0],
-                    'contractors' => $contractors,
-                    'items' => $items
+                return $this->render('admin/company/index.html.twig', array(
+                    'permiso' => $permiso[0]
                 ));
             }
         } else {
@@ -47,7 +33,7 @@ class DailyTrackingController extends AbstractController
     }
 
     /**
-     * listar Acción que lista los dailyTrackings
+     * listar Acción que lista los companies
      *
      */
     public function listar(Request $request)
@@ -56,15 +42,10 @@ class DailyTrackingController extends AbstractController
         // search filter by keywords
         $query = !empty($request->get('query')) ? $request->get('query') : array();
         $sSearch = isset($query['generalSearch']) && is_string($query['generalSearch']) ? $query['generalSearch'] : '';
-        $project_id = isset($query['project_id']) && is_string($query['project_id']) ? $query['project_id'] : '';
-        $item_id = isset($query['item_id']) && is_string($query['item_id']) ? $query['item_id'] : '';
-        $fecha_inicial = isset($query['fechaInicial']) && is_string($query['fechaInicial']) ? $query['fechaInicial'] : '';
-        $fecha_fin = isset($query['fechaFin']) && is_string($query['fechaFin']) ? $query['fechaFin'] : '';
-
         //Sort
         $sort = !empty($request->get('sort')) ? $request->get('sort') : array();
         $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'desc';
-        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'date';
+        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'createdAt';
         //$start and $limit
         $pagination = !empty($request->get('pagination')) ? $request->get('pagination') : array();
         $page = !empty($pagination['page']) ? (int)$pagination['page'] : 1;
@@ -73,7 +54,7 @@ class DailyTrackingController extends AbstractController
 
         try {
             $pages = 1;
-            $total = $this->dailyTrackingService->TotalItemDetails($sSearch, $project_id, $item_id, $fecha_inicial, $fecha_fin);
+            $total = $this->companyService->TotalCompanies($sSearch);
             if ($limit > 0) {
                 $pages = ceil($total / $limit); // calculate total pages
                 $page = max($page, 1); // get 1 page when $_REQUEST['page'] <= 0
@@ -93,7 +74,7 @@ class DailyTrackingController extends AbstractController
                 'sort' => $sSortDir_0
             );
 
-            $data = $this->dailyTrackingService->ListarItemDetails($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $item_id, $fecha_inicial, $fecha_fin);
+            $data = $this->companyService->ListarCompanies($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0);
 
             $resultadoJson = array(
                 'meta' => $meta,
@@ -116,17 +97,24 @@ class DailyTrackingController extends AbstractController
      */
     public function salvar(Request $request)
     {
-        $item_details_id = $request->get('item_details_id');
+        $company_id = $request->get('company_id');
 
-        $project_id = $request->get('project_id');
-        $item_id = $request->get('item_id');
-        $quantity = $request->get('quantity');
-        $price = $request->get('price');
-        $date = $request->get('date');
+        $name = $request->get('name');
+        $phone = $request->get('phone');
+        $contactName = $request->get('contactName');
+        $contactEmail = $request->get('contactEmail');
+
+        // contacts
+        $contacts = $request->get('contacts');
+        $contacts = json_decode($contacts);
 
         try {
 
-            $resultado = $this->projectService->SalvarItemDetails($item_details_id, $project_id, $item_id, $quantity, $price, $date);
+            if ($company_id == "") {
+                $resultado = $this->companyService->SalvarCompany($name, $phone, $contactName, $contactEmail, $contacts);
+            } else {
+                $resultado = $this->companyService->ActualizarCompany($company_id, $name, $phone, $contactName, $contactEmail, $contacts);
+            }
 
             if ($resultado['success']) {
 
@@ -149,15 +137,15 @@ class DailyTrackingController extends AbstractController
     }
 
     /**
-     * eliminar Acción que elimina un dailyTracking en la BD
+     * eliminar Acción que elimina un company en la BD
      *
      */
     public function eliminar(Request $request)
     {
-        $item_details_id = $request->get('item_details_id');
+        $company_id = $request->get('company_id');
 
         try {
-            $resultado = $this->projectService->EliminarItemDetails($item_details_id);
+            $resultado = $this->companyService->EliminarCompany($company_id);
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
@@ -173,18 +161,20 @@ class DailyTrackingController extends AbstractController
 
             return $this->json($resultadoJson);
         }
+
+
     }
 
     /**
-     * eliminarDailyTrackings Acción que elimina los dailyTrackings seleccionados en la BD
+     * eliminarCompanies Acción que elimina los companies seleccionados en la BD
      *
      */
-    public function eliminarDailyTrackings(Request $request)
+    public function eliminarCompanies(Request $request)
     {
         $ids = $request->get('ids');
 
         try {
-            $resultado = $this->dailyTrackingService->EliminarDailyTrackings($ids);
+            $resultado = $this->companyService->EliminarCompanies($ids);
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
@@ -205,19 +195,19 @@ class DailyTrackingController extends AbstractController
     }
 
     /**
-     * cargarDatos Acción que carga los datos del dailyTracking en la BD
+     * cargarDatos Acción que carga los datos del company en la BD
      *
      */
     public function cargarDatos(Request $request)
     {
-        $item_details_id = $request->get('item_details_id');
+        $company_id = $request->get('company_id');
 
         try {
-            $resultado = $this->projectService->CargarDatosItemDetails($item_details_id);
+            $resultado = $this->companyService->CargarDatosCompany($company_id);
             if ($resultado['success']) {
 
                 $resultadoJson['success'] = $resultado['success'];
-                $resultadoJson['item'] = $resultado['item'];
+                $resultadoJson['company'] = $resultado['company'];
 
                 return $this->json($resultadoJson);
             } else {
@@ -232,5 +222,35 @@ class DailyTrackingController extends AbstractController
 
             return $this->json($resultadoJson);
         }
+
+    }
+
+    /**
+     * eliminarContact Acción que elimina un contact en la BD
+     *
+     */
+    public function eliminarContact(Request $request)
+    {
+        $contact_id = $request->get('contact_id');
+
+        try {
+            $resultado = $this->companyService->EliminarContact($contact_id);
+            if ($resultado['success']) {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['message'] = "The operation was successful";
+                return $this->json($resultadoJson);
+            } else {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['error'] = $resultado['error'];
+                return $this->json($resultadoJson);
+            }
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+
+
     }
 }

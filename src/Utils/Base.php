@@ -507,9 +507,9 @@ class Base
             $menuUnit = false;
             $menuItem = false;
             $menuInspector = false;
-            $menuContractor = false;
+            $menuCompany = false;
             $menuProject = false;
-            $menuDailyTracking = false;
+            $menuDataTracking = false;
             $menuInvoice = false;
             $menuNotification = false;
 
@@ -536,13 +536,13 @@ class Base
                     $menuInspector = true;
                 }
                 if ($permiso['funcion_id'] == 8 && $permiso['ver']) {
-                    $menuContractor = true;
+                    $menuCompany = true;
                 }
                 if ($permiso['funcion_id'] == 9 && $permiso['ver']) {
                     $menuProject = true;
                 }
                 if ($permiso['funcion_id'] == 10 && $permiso['ver']) {
-                    $menuDailyTracking = true;
+                    $menuDataTracking = true;
                 }
                 if ($permiso['funcion_id'] == 11 && $permiso['ver']) {
                     $menuInvoice = true;
@@ -559,9 +559,9 @@ class Base
                 'menuUnit' => $menuUnit,
                 'menuItem' => $menuItem,
                 'menuInspector' => $menuInspector,
-                'menuContractor' => $menuContractor,
+                'menuCompany' => $menuCompany,
                 'menuProject' => $menuProject,
-                'menuDailyTracking' => $menuDailyTracking,
+                'menuDataTracking' => $menuDataTracking,
                 'menuInvoice' => $menuInvoice,
                 'menuNotification' => $menuNotification
             );

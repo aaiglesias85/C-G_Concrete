@@ -2,12 +2,12 @@
 
 namespace App\Utils\Admin;
 
-use App\Entity\Contractor;
-use App\Entity\ContractorContact;
+use App\Entity\Company;
+use App\Entity\CompanyContact;
 use App\Entity\Project;
 use App\Utils\Base;
 
-class ContractorService extends Base
+class CompanyService extends Base
 {
 
     /**
@@ -19,9 +19,9 @@ class ContractorService extends Base
     {
         $em = $this->getDoctrine()->getManager();
 
-        $entity = $this->getDoctrine()->getRepository(ContractorContact::class)
+        $entity = $this->getDoctrine()->getRepository(CompanyContact::class)
             ->find($contact_id);
-        /**@var ContractorContact $entity */
+        /**@var CompanyContact $entity */
         if ($entity != null) {
 
             $contact_name = $entity->getName();
@@ -32,7 +32,7 @@ class ContractorService extends Base
             //Salvar log
             $log_operacion = "Delete";
             $log_categoria = "Contact";
-            $log_descripcion = "The contractor contact is deleted: $contact_name";
+            $log_descripcion = "The company contact is deleted: $contact_name";
             $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
             $resultado['success'] = true;
@@ -45,20 +45,20 @@ class ContractorService extends Base
     }
 
     /**
-     * CargarDatosContractor: Carga los datos de un contractor
+     * CargarDatosCompany: Carga los datos de un company
      *
-     * @param int $contractor_id Id
+     * @param int $company_id Id
      *
      * @author Marcel
      */
-    public function CargarDatosContractor($contractor_id)
+    public function CargarDatosCompany($company_id)
     {
         $resultado = array();
         $arreglo_resultado = array();
 
-        $entity = $this->getDoctrine()->getRepository(Contractor::class)
-            ->find($contractor_id);
-        /** @var Contractor $entity */
+        $entity = $this->getDoctrine()->getRepository(Company::class)
+            ->find($company_id);
+        /** @var Company $entity */
         if ($entity != null) {
 
             $arreglo_resultado['name'] = $entity->getName();
@@ -67,11 +67,11 @@ class ContractorService extends Base
             $arreglo_resultado['contactEmail'] = $entity->getContactEmail();
 
             // contacts
-            $contacts = $this->ListarContacts($contractor_id);
+            $contacts = $this->ListarContacts($company_id);
             $arreglo_resultado['contacts'] = $contacts;
 
             $resultado['success'] = true;
-            $resultado['contractor'] = $arreglo_resultado;
+            $resultado['company'] = $arreglo_resultado;
         }
 
         return $resultado;
@@ -79,16 +79,16 @@ class ContractorService extends Base
 
     /**
      * ListarContacts
-     * @param $contractor_id
+     * @param $company_id
      * @return array
      */
-    public function ListarContacts($contractor_id)
+    public function ListarContacts($company_id)
     {
         $contacts = [];
 
-        $contractor_contacts = $this->getDoctrine()->getRepository(ContractorContact::class)
-            ->ListarContacts($contractor_id);
-        foreach ($contractor_contacts as $key => $contact) {
+        $company_contacts = $this->getDoctrine()->getRepository(CompanyContact::class)
+            ->ListarContacts($company_id);
+        foreach ($company_contacts as $key => $contact) {
             $contacts[] = [
                 'contact_id' => $contact->getContactId(),
                 'name' => $contact->getName(),
@@ -102,36 +102,36 @@ class ContractorService extends Base
     }
 
     /**
-     * EliminarContractor: Elimina un rol en la BD
-     * @param int $contractor_id Id
+     * EliminarCompany: Elimina un rol en la BD
+     * @param int $company_id Id
      * @author Marcel
      */
-    public function EliminarContractor($contractor_id)
+    public function EliminarCompany($company_id)
     {
         $em = $this->getDoctrine()->getManager();
 
-        $entity = $this->getDoctrine()->getRepository(Contractor::class)
-            ->find($contractor_id);
-        /**@var Contractor $entity */
+        $entity = $this->getDoctrine()->getRepository(Company::class)
+            ->find($company_id);
+        /**@var Company $entity */
         if ($entity != null) {
 
             // projects
             $projects = $this->getDoctrine()->getRepository(Project::class)
-                ->ListarProjectsDeContractor($contractor_id);
+                ->ListarProjectsDeCompany($company_id);
             if (count($projects) > 0) {
                 $resultado['success'] = false;
-                $resultado['error'] = "The contractor could not be deleted, because it is related to a project";
+                $resultado['error'] = "The company could not be deleted, because it is related to a project";
                 return $resultado;
             }
 
             // contacts
-            $contacts = $this->getDoctrine()->getRepository(ContractorContact::class)
-                ->ListarContacts($contractor_id);
+            $contacts = $this->getDoctrine()->getRepository(CompanyContact::class)
+                ->ListarContacts($company_id);
             foreach ($contacts as $contact) {
                 $em->remove($contact);
             }
 
-            $contractor_descripcion = $entity->getName();
+            $company_descripcion = $entity->getName();
 
 
             $em->remove($entity);
@@ -139,8 +139,8 @@ class ContractorService extends Base
 
             //Salvar log
             $log_operacion = "Delete";
-            $log_categoria = "Contractor";
-            $log_descripcion = "The contractor is deleted: $contractor_descripcion";
+            $log_categoria = "Company";
+            $log_descripcion = "The company is deleted: $company_descripcion";
             $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
             $resultado['success'] = true;
@@ -153,11 +153,11 @@ class ContractorService extends Base
     }
 
     /**
-     * EliminarContractors: Elimina los contractors seleccionados en la BD
+     * EliminarCompanies: Elimina los companies seleccionados en la BD
      * @param int $ids Ids
      * @author Marcel
      */
-    public function EliminarContractors($ids)
+    public function EliminarCompanies($ids)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -165,34 +165,34 @@ class ContractorService extends Base
             $ids = explode(',', $ids);
             $cant_eliminada = 0;
             $cant_total = 0;
-            foreach ($ids as $contractor_id) {
-                if ($contractor_id != "") {
+            foreach ($ids as $company_id) {
+                if ($company_id != "") {
                     $cant_total++;
-                    $entity = $this->getDoctrine()->getRepository(Contractor::class)
-                        ->find($contractor_id);
-                    /**@var Contractor $entity */
+                    $entity = $this->getDoctrine()->getRepository(Company::class)
+                        ->find($company_id);
+                    /**@var Company $entity */
                     if ($entity != null) {
 
                         // projects
                         $projects = $this->getDoctrine()->getRepository(Project::class)
-                            ->ListarProjectsDeContractor($contractor_id);
+                            ->ListarProjectsDeCompany($company_id);
                         if (count($projects) == 0) {
                             // contacts
-                            $contacts = $this->getDoctrine()->getRepository(ContractorContact::class)
-                                ->ListarContacts($contractor_id);
+                            $contacts = $this->getDoctrine()->getRepository(CompanyContact::class)
+                                ->ListarContacts($company_id);
                             foreach ($contacts as $contact) {
                                 $em->remove($contact);
                             }
 
-                            $contractor_descripcion = $entity->getName();
+                            $company_descripcion = $entity->getName();
 
                             $em->remove($entity);
                             $cant_eliminada++;
 
                             //Salvar log
                             $log_operacion = "Delete";
-                            $log_categoria = "Contractor";
-                            $log_descripcion = "The contractor is deleted: $contractor_descripcion";
+                            $log_categoria = "Company";
+                            $log_descripcion = "The company is deleted: $company_descripcion";
                             $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
                         }
 
@@ -204,11 +204,11 @@ class ContractorService extends Base
 
         if ($cant_eliminada == 0) {
             $resultado['success'] = false;
-            $resultado['error'] = "The contractors could not be deleted, because they are associated with a project";
+            $resultado['error'] = "The companies could not be deleted, because they are associated with a project";
         } else {
             $resultado['success'] = true;
 
-            $mensaje = ($cant_eliminada == $cant_total) ? "The operation was successful" : "The operation was successful. But attention, it was not possible to delete all the selected contractors because they are associated with a project";
+            $mensaje = ($cant_eliminada == $cant_total) ? "The operation was successful" : "The operation was successful. But attention, it was not possible to delete all the selected companies because they are associated with a project";
             $resultado['message'] = $mensaje;
         }
 
@@ -216,24 +216,24 @@ class ContractorService extends Base
     }
 
     /**
-     * ActualizarContractor: Actuializa los datos del rol en la BD
-     * @param int $contractor_id Id
+     * ActualizarCompany: Actuializa los datos del rol en la BD
+     * @param int $company_id Id
      * @author Marcel
      */
-    public function ActualizarContractor($contractor_id, $name, $phone, $contactName, $contactEmail, $contacts)
+    public function ActualizarCompany($company_id, $name, $phone, $contactName, $contactEmail, $contacts)
     {
         $em = $this->getDoctrine()->getManager();
 
-        $entity = $this->getDoctrine()->getRepository(Contractor::class)
-            ->find($contractor_id);
-        /** @var Contractor $entity */
+        $entity = $this->getDoctrine()->getRepository(Company::class)
+            ->find($company_id);
+        /** @var Company $entity */
         if ($entity != null) {
             //Verificar description
-            $contractor = $this->getDoctrine()->getRepository(Contractor::class)
+            $company = $this->getDoctrine()->getRepository(Company::class)
                 ->findOneBy(['name' => $name]);
-            if ($contractor != null && $entity->getContractorId() != $contractor->getContractorId()) {
+            if ($company != null && $entity->getCompanyId() != $company->getCompanyId()) {
                 $resultado['success'] = false;
-                $resultado['error'] = "The contractor name is in use, please try entering another one.";
+                $resultado['error'] = "The company name is in use, please try entering another one.";
                 return $resultado;
             }
 
@@ -251,8 +251,8 @@ class ContractorService extends Base
 
             //Salvar log
             $log_operacion = "Update";
-            $log_categoria = "Contractor";
-            $log_descripcion = "The contractor is modified: $name";
+            $log_categoria = "Company";
+            $log_descripcion = "The company is modified: $name";
             $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
             $resultado['success'] = true;
@@ -262,24 +262,24 @@ class ContractorService extends Base
     }
 
     /**
-     * SalvarContractor: Guarda los datos de contractor en la BD
+     * SalvarCompany: Guarda los datos de company en la BD
      * @param string $description Nombre
      * @author Marcel
      */
-    public function SalvarContractor($name, $phone, $contactName, $contactEmail, $contacts)
+    public function SalvarCompany($name, $phone, $contactName, $contactEmail, $contacts)
     {
         $em = $this->getDoctrine()->getManager();
 
         //Verificar email
-        $contractor = $this->getDoctrine()->getRepository(Contractor::class)
+        $company = $this->getDoctrine()->getRepository(Company::class)
             ->findOneBy(['name' => $name]);
-        if ($contractor != null) {
+        if ($company != null) {
             $resultado['success'] = false;
-            $resultado['error'] = "The contractor name is in use, please try entering another one.";
+            $resultado['error'] = "The company name is in use, please try entering another one.";
             return $resultado;
         }
 
-        $entity = new Contractor();
+        $entity = new Company();
 
         $entity->setName($name);
         $entity->setPhone($phone);
@@ -297,8 +297,8 @@ class ContractorService extends Base
 
         //Salvar log
         $log_operacion = "Add";
-        $log_categoria = "Contractor";
-        $log_descripcion = "The contractor is added: $name";
+        $log_categoria = "Company";
+        $log_descripcion = "The company is added: $name";
         $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
         $resultado['success'] = true;
@@ -309,7 +309,7 @@ class ContractorService extends Base
     /**
      * SalvarContacts
      * @param $contacts
-     * @param Contractor $entity
+     * @param Company $entity
      * @return void
      */
     public function SalvarContacts($entity, $contacts)
@@ -322,13 +322,13 @@ class ContractorService extends Base
             $contact_entity = null;
 
             if (is_numeric($value->contact_id)) {
-                $contact_entity = $this->getDoctrine()->getRepository(ContractorContact::class)
+                $contact_entity = $this->getDoctrine()->getRepository(CompanyContact::class)
                     ->find($value->contact_id);
             }
 
             $is_new_contact = false;
             if ($contact_entity == null) {
-                $contact_entity = new ContractorContact();
+                $contact_entity = new CompanyContact();
                 $is_new_contact = true;
             }
 
@@ -337,7 +337,7 @@ class ContractorService extends Base
             $contact_entity->setPhone($value->phone);
 
             if ($is_new_contact) {
-                $contact_entity->setContractor($entity);
+                $contact_entity->setCompany($entity);
 
                 $em->persist($contact_entity);
             }
@@ -345,7 +345,7 @@ class ContractorService extends Base
     }
 
     /**
-     * ListarContractors: Listar los contractors
+     * ListarCompanies: Listar los companies
      *
      * @param int $start Inicio
      * @param int $limit Limite
@@ -353,21 +353,21 @@ class ContractorService extends Base
      *
      * @author Marcel
      */
-    public function ListarContractors($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0)
+    public function ListarCompanies($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0)
     {
         $arreglo_resultado = array();
         $cont = 0;
 
-        $lista = $this->getDoctrine()->getRepository(Contractor::class)
-            ->ListarContractors($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0);
+        $lista = $this->getDoctrine()->getRepository(Company::class)
+            ->ListarCompanies($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0);
 
         foreach ($lista as $value) {
-            $contractor_id = $value->getContractorId();
+            $company_id = $value->getCompanyId();
 
-            $acciones = $this->ListarAcciones($contractor_id);
+            $acciones = $this->ListarAcciones($company_id);
 
             $arreglo_resultado[$cont] = array(
-                "id" => $contractor_id,
+                "id" => $company_id,
                 "name" => $value->getName(),
                 "phone" => $value->getPhone(),
                 "contactName" => $value->getContactName(),
@@ -382,14 +382,14 @@ class ContractorService extends Base
     }
 
     /**
-     * TotalContractors: Total de contractors
+     * TotalCompanies: Total de companies
      * @param string $sSearch Para buscar
      * @author Marcel
      */
-    public function TotalContractors($sSearch)
+    public function TotalCompanies($sSearch)
     {
-        $total = $this->getDoctrine()->getRepository(Contractor::class)
-            ->TotalContractors($sSearch);
+        $total = $this->getDoctrine()->getRepository(Company::class)
+            ->TotalCompanies($sSearch);
 
         return $total;
     }

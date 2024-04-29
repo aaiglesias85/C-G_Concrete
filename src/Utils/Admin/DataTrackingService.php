@@ -2,18 +2,18 @@
 
 namespace App\Utils\Admin;
 
-use App\Entity\ProjectItemDetails;
+use App\Entity\DataTracking;
 use App\Utils\Base;
 
-class DailyTrackingService extends Base
+class DataTrackingService extends Base
 {
 
     /**
-     * EliminarDailyTrackings: Elimina los items details
+     * EliminarDataTrackings: Elimina los data trackings
      * @param int $ids Ids
      * @author Marcel
      */
-    public function EliminarDailyTrackings($ids)
+    public function EliminarDataTrackings($ids)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -21,12 +21,12 @@ class DailyTrackingService extends Base
             $ids = explode(',', $ids);
             $cant_eliminada = 0;
             $cant_total = 0;
-            foreach ($ids as $item_details_id) {
-                if ($item_details_id != "") {
+            foreach ($ids as $data_tracking_id) {
+                if ($data_tracking_id != "") {
                     $cant_total++;
-                    $entity = $this->getDoctrine()->getRepository(ProjectItemDetails::class)
-                        ->find($item_details_id);
-                    /**@var ProjectItemDetails $entity */
+                    $entity = $this->getDoctrine()->getRepository(DataTracking::class)
+                        ->find($data_tracking_id);
+                    /**@var DataTracking $entity */
                     if ($entity != null) {
 
                         $item_name = $entity->getItem()->getDescription();
@@ -60,7 +60,7 @@ class DailyTrackingService extends Base
     }
 
     /**
-     * ListarItemDetails: Listar los items details
+     * ListarDataTrackings: Listar los items details
      *
      * @param int $start Inicio
      * @param int $limit Limite
@@ -68,25 +68,26 @@ class DailyTrackingService extends Base
      *
      * @author Marcel
      */
-    public function ListarItemDetails($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $item_id, $fecha_inicial, $fecha_fin)
+    public function ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $company_id,
+                                        $project_id, $item_id, $fecha_inicial, $fecha_fin)
     {
         $arreglo_resultado = array();
         $cont = 0;
 
-        $lista = $this->getDoctrine()->getRepository(ProjectItemDetails::class)
-            ->ListarItems($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $item_id, $fecha_inicial, $fecha_fin);
+        $lista = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin);
 
         foreach ($lista as $value) {
-            $item_details_id = $value->getId();
+            $data_tracking_id = $value->getId();
 
-            $acciones = $this->ListarAcciones($item_details_id);
+            $acciones = $this->ListarAcciones($data_tracking_id);
 
             $quantity = $value->getQuantity();
             $price = $value->getPrice();
             $total = $quantity * $price;
 
             $arreglo_resultado[$cont] = array(
-                "id" => $item_details_id,
+                "id" => $data_tracking_id,
                 "item" => $value->getItem()->getDescription(),
                 "unit" => $value->getItem()->getUnit()->getDescription(),
                 "quantity" => $quantity,
@@ -103,14 +104,14 @@ class DailyTrackingService extends Base
     }
 
     /**
-     * TotalItemDetails: Total de items
+     * TotalDataTrackings: Total de items
      * @param string $sSearch Para buscar
      * @author Marcel
      */
-    public function TotalItemDetails($sSearch, $project_id, $item_id, $fecha_inicial, $fecha_fin)
+    public function TotalDataTrackings($sSearch, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin)
     {
-        $total = $this->getDoctrine()->getRepository(ProjectItemDetails::class)
-            ->TotalItems($sSearch, $project_id, $item_id, $fecha_inicial, $fecha_fin);
+        $total = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->TotalDataTrackings($sSearch, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin);
 
         return $total;
     }

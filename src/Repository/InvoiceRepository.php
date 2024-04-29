@@ -34,11 +34,12 @@ class InvoiceRepository extends EntityRepository
      *
      * @return Invoice[]
      */
-    public function ListarInvoices($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $contractor_id = '', $project_id = '', $fecha_inicial = '', $fecha_fin = '')
+    public function ListarInvoices($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
+                                   $company_id = '', $project_id = '', $fecha_inicial = '', $fecha_fin = '')
     {
         $consulta = $this->createQueryBuilder('i')
             ->leftJoin('i.project', 'p')
-            ->leftJoin('p.contractor', 'c');
+            ->leftJoin('p.company', 'c');
 
         if ($sSearch != "") {
             $consulta->andWhere('i.number LIKE :number OR i.notes LIKE :notes')
@@ -46,9 +47,9 @@ class InvoiceRepository extends EntityRepository
                 ->setParameter('notes', "%${sSearch}%");
         }
 
-        if ($contractor_id != '') {
-            $consulta->andWhere('c.contractorId = :contractor_id')
-                ->setParameter('contractor_id', $contractor_id);
+        if ($company_id != '') {
+            $consulta->andWhere('c.companyId = :company_id')
+                ->setParameter('company_id', $company_id);
         }
 
         if ($project_id != '') {
@@ -77,7 +78,7 @@ class InvoiceRepository extends EntityRepository
             case "project":
                 $consulta->orderBy("p.name", $sSortDir_0);
                 break;
-            case "contractor":
+            case "company":
                 $consulta->orderBy("c.name", $sSortDir_0);
                 break;
             case "total":
@@ -102,11 +103,11 @@ class InvoiceRepository extends EntityRepository
      *
      * @author Marcel
      */
-    public function TotalInvoices($sSearch = '', $contractor_id = '', $project_id = '', $fecha_inicial = '', $fecha_fin = '')
+    public function TotalInvoices($sSearch = '', $company_id = '', $project_id = '', $fecha_inicial = '', $fecha_fin = '')
     {
         $em = $this->getEntityManager();
         $consulta = 'SELECT COUNT(i.invoiceId) FROM App\Entity\Invoice i ';
-        $join = ' LEFT JOIN i.project p LEFT JOIN p.contractor c ';
+        $join = ' LEFT JOIN i.project p LEFT JOIN p.company c ';
         $where = '';
 
         if ($sSearch != "") {
@@ -125,12 +126,12 @@ class InvoiceRepository extends EntityRepository
                 $where .= 'AND (p.projectId = :project_id) ';
         }
 
-        if ($contractor_id != '') {
+        if ($company_id != '') {
             $esta_query = explode("WHERE", $where);
             if (count($esta_query) == 1)
-                $where .= 'WHERE (c.contractorId = :contractor_id) ';
+                $where .= 'WHERE (c.companyId = :company_id) ';
             else
-                $where .= 'AND (c.contractorId = :contractor_id) ';
+                $where .= 'AND (c.companyId = :company_id) ';
         }
 
         if ($fecha_inicial != "") {
@@ -177,9 +178,9 @@ class InvoiceRepository extends EntityRepository
             $query->setParameter('project_id', $project_id);
         }
 
-        $esta_query_contractor_id = substr_count($consulta, ':contractor_id');
-        if ($esta_query_contractor_id == 1) {
-            $query->setParameter('contractor_id', $contractor_id);
+        $esta_query_company_id = substr_count($consulta, ':company_id');
+        if ($esta_query_company_id == 1) {
+            $query->setParameter('company_id', $company_id);
         }
 
         $esta_query_inicio = substr_count($consulta, ':inicio');
@@ -204,15 +205,15 @@ class InvoiceRepository extends EntityRepository
      *
      * @return Invoice[]
      */
-    public function ListarInvoicesRangoFecha($contractor_id = '', $project_id = '', $fecha_inicial = '', $fecha_fin = '')
+    public function ListarInvoicesRangoFecha($company_id = '', $project_id = '', $fecha_inicial = '', $fecha_fin = '')
     {
         $consulta = $this->createQueryBuilder('i')
             ->leftJoin('i.project', 'p')
-            ->leftJoin('p.contractor', 'c');
+            ->leftJoin('p.company', 'c');
 
-        if ($contractor_id != '') {
-            $consulta->andWhere('c.contractorId = :contractor_id')
-                ->setParameter('contractor_id', $contractor_id);
+        if ($company_id != '') {
+            $consulta->andWhere('c.companyId = :company_id')
+                ->setParameter('company_id', $company_id);
         }
 
         if ($project_id != '') {

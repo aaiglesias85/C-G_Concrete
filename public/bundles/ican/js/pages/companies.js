@@ -1,13 +1,13 @@
-var Contractors = function () {
+var Companies = function () {
 
     var oTable;
     var rowDelete = null;
 
     //Inicializar table
     var initTable = function () {
-        MyApp.block('#contractor-table-editable');
+        MyApp.block('#company-table-editable');
 
-        var table = $('#contractor-table-editable');
+        var table = $('#company-table-editable');
 
         var aoColumns = [];
 
@@ -60,7 +60,7 @@ var Contractors = function () {
                 type: 'remote',
                 source: {
                     read: {
-                        url: 'contractor/listarContractor',
+                        url: 'company/listarCompany',
                     }
                 },
                 pageSize: 10,
@@ -87,8 +87,8 @@ var Contractors = function () {
             columns: aoColumns,
             // toolbar
             toolbar: {
-                // toolbar contractors
-                contractors: {
+                // toolbar items
+                items: {
                     // pagination
                     pagination: {
                         // page size select
@@ -101,19 +101,19 @@ var Contractors = function () {
         //Events
         oTable
             .on('m-datatable--on-ajax-done', function () {
-                mApp.unblock('#contractor-table-editable');
+                mApp.unblock('#company-table-editable');
             })
             .on('m-datatable--on-ajax-fail', function (e, jqXHR) {
-                mApp.unblock('#contractor-table-editable');
+                mApp.unblock('#company-table-editable');
             })
             .on('m-datatable--on-goto-page', function (e, args) {
-                MyApp.block('#contractor-table-editable');
+                MyApp.block('#company-table-editable');
             })
             .on('m-datatable--on-reloaded', function (e) {
-                MyApp.block('#contractor-table-editable');
+                MyApp.block('#company-table-editable');
             })
             .on('m-datatable--on-sort', function (e, args) {
-                MyApp.block('#contractor-table-editable');
+                MyApp.block('#company-table-editable');
             })
             .on('m-datatable--on-check', function (e, args) {
                 //eventsWriter('Checkbox active: ' + args.toString());
@@ -124,7 +124,7 @@ var Contractors = function () {
 
         //Busqueda
         var query = oTable.getDataSourceQuery();
-        $('#lista-contractor .m_form_search').on('keyup', function (e) {
+        $('#lista-company .m_form_search').on('keyup', function (e) {
             // shortcode to datatable.getDataSourceParam('query');
             var query = oTable.getDataSourceQuery();
             query.generalSearch = $(this).val().toLowerCase();
@@ -136,7 +136,7 @@ var Contractors = function () {
 
     //Reset forms
     var resetForms = function () {
-        $('#contractor-form input').each(function (e) {
+        $('#company-form input').each(function (e) {
             $element = $(this);
             $element.val('');
 
@@ -158,7 +158,7 @@ var Contractors = function () {
     //Validacion
     var initForm = function () {
         //Validacion
-        $("#contractor-form").validate({
+        $("#company-form").validate({
             rules: {
                 name: {
                     required: true
@@ -203,17 +203,17 @@ var Contractors = function () {
 
     //Nuevo
     var initAccionNuevo = function () {
-        $(document).off('click', "#btn-nuevo-contractor");
-        $(document).on('click', "#btn-nuevo-contractor", function (e) {
+        $(document).off('click', "#btn-nuevo-company");
+        $(document).on('click', "#btn-nuevo-company", function (e) {
             btnClickNuevo();
         });
 
         function btnClickNuevo() {
             resetForms();
-            var formTitle = "Do you want to create a new contractor? Follow the next steps:";
-            $('#form-contractor-title').html(formTitle);
-            $('#form-contractor').removeClass('m--hide');
-            $('#lista-contractor').addClass('m--hide');
+            var formTitle = "Do you want to create a new company? Follow the next steps:";
+            $('#form-company-title').html(formTitle);
+            $('#form-company').removeClass('m--hide');
+            $('#lista-company').addClass('m--hide');
         };
     };
     //Salvar
@@ -228,23 +228,23 @@ var Contractors = function () {
 
             event_change = false;
 
-            if ($('#contractor-form').valid()) {
+            if ($('#company-form').valid()) {
 
-                var contractor_id = $('#contractor_id').val();
+                var company_id = $('#company_id').val();
 
                 var name = $('#name').val();
                 var phone = $('#phone').val();
                 var contactName = $('#contactName').val();
                 var contactEmail = $('#contactEmail').val();
 
-                MyApp.block('#form-contractor');
+                MyApp.block('#form-company');
 
                 $.ajax({
                     type: "POST",
-                    url: "contractor/salvarContractor",
+                    url: "company/salvarCompany",
                     dataType: "json",
                     data: {
-                        'contractor_id': contractor_id,
+                        'company_id': company_id,
                         'name': name,
                         'phone': phone,
                         'contactName': contactName,
@@ -252,7 +252,7 @@ var Contractors = function () {
                         'contacts': JSON.stringify(contacts)
                     },
                     success: function (response) {
-                        mApp.unblock('#form-contractor');
+                        mApp.unblock('#form-company');
                         if (response.success) {
 
                             toastr.success(response.message, "Success !!!");
@@ -263,7 +263,7 @@ var Contractors = function () {
                         }
                     },
                     failure: function (response) {
-                        mApp.unblock('#form-contractor');
+                        mApp.unblock('#form-company');
 
                         toastr.error(response.error, "Error !!!");
                     }
@@ -273,8 +273,8 @@ var Contractors = function () {
     }
     //Cerrar form
     var initAccionCerrar = function () {
-        $(document).off('click', ".cerrar-form-contractor");
-        $(document).on('click', ".cerrar-form-contractor", function (e) {
+        $(document).off('click', ".cerrar-form-company");
+        $(document).on('click', ".cerrar-form-company", function (e) {
             cerrarForms();
         });
     }
@@ -304,52 +304,52 @@ var Contractors = function () {
     };
     var cerrarFormsConfirmated = function () {
         resetForms();
-        $('#form-contractor').addClass('m--hide');
-        $('#lista-contractor').removeClass('m--hide');
+        $('#form-company').addClass('m--hide');
+        $('#lista-company').removeClass('m--hide');
     };
 
     //Editar
     var initAccionEditar = function () {
-        $(document).off('click', "#contractor-table-editable a.edit");
-        $(document).on('click', "#contractor-table-editable a.edit", function (e) {
+        $(document).off('click', "#company-table-editable a.edit");
+        $(document).on('click', "#company-table-editable a.edit", function (e) {
             e.preventDefault();
             resetForms();
 
-            var contractor_id = $(this).data('id');
-            $('#contractor_id').val(contractor_id);
+            var company_id = $(this).data('id');
+            $('#company_id').val(company_id);
 
-            $('#form-contractor').removeClass('m--hide');
-            $('#lista-contractor').addClass('m--hide');
+            $('#form-company').removeClass('m--hide');
+            $('#lista-company').addClass('m--hide');
 
-            editRow(contractor_id);
+            editRow(company_id);
         });
 
-        function editRow(contractor_id) {
+        function editRow(company_id) {
 
-            MyApp.block('#form-contractor');
+            MyApp.block('#form-company');
 
             $.ajax({
                 type: "POST",
-                url: "contractor/cargarDatos",
+                url: "company/cargarDatos",
                 dataType: "json",
                 data: {
-                    'contractor_id': contractor_id
+                    'company_id': company_id
                 },
                 success: function (response) {
-                    mApp.unblock('#form-contractor');
+                    mApp.unblock('#form-company');
                     if (response.success) {
-                        //Datos contractor
+                        //Datos company
 
-                        var formTitle = "You want to update the contractor? Follow the next steps:";
-                        $('#form-contractor-title').html(formTitle);
+                        var formTitle = "You want to update the company? Follow the next steps:";
+                        $('#form-company-title').html(formTitle);
 
-                        $('#name').val(response.contractor.name);
-                        $('#phone').val(response.contractor.phone);
-                        $('#contactName').val(response.contractor.contactName);
-                        $('#contactEmail').val(response.contractor.contactEmail);
+                        $('#name').val(response.company.name);
+                        $('#phone').val(response.company.phone);
+                        $('#contactName').val(response.company.contactName);
+                        $('#contactEmail').val(response.company.contactEmail);
 
                         // contacts
-                        contacts = response.contractor.contacts;
+                        contacts = response.company.contacts;
                         actualizarTableListaContacts();
 
                         event_change = false;
@@ -359,7 +359,7 @@ var Contractors = function () {
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#form-contractor');
+                    mApp.unblock('#form-company');
 
                     toastr.error(response.error, "Error !!!");
                 }
@@ -369,8 +369,8 @@ var Contractors = function () {
     };
     //Eliminar
     var initAccionEliminar = function () {
-        $(document).off('click', "#contractor-table-editable a.delete");
-        $(document).on('click', "#contractor-table-editable a.delete", function (e) {
+        $(document).off('click', "#company-table-editable a.delete");
+        $(document).on('click', "#company-table-editable a.delete", function (e) {
             e.preventDefault();
 
             rowDelete = $(this).data('id');
@@ -379,8 +379,8 @@ var Contractors = function () {
             });
         });
 
-        $(document).off('click', "#btn-eliminar-contractor");
-        $(document).on('click', "#btn-eliminar-contractor", function (e) {
+        $(document).off('click', "#btn-eliminar-company");
+        $(document).on('click', "#btn-eliminar-company", function (e) {
             btnClickEliminar();
         });
 
@@ -410,24 +410,24 @@ var Contractors = function () {
                     'show': true
                 });
             } else {
-                toastr.error('Select contractors to delete', "Error !!!");
+                toastr.error('Select companies to delete', "Error !!!");
             }
         };
 
         function btnClickModalEliminar() {
-            var contractor_id = rowDelete;
+            var company_id = rowDelete;
 
-            MyApp.block('#contractor-table-editable');
+            MyApp.block('#company-table-editable');
 
             $.ajax({
                 type: "POST",
-                url: "contractor/eliminarContractor",
+                url: "company/eliminarCompany",
                 dataType: "json",
                 data: {
-                    'contractor_id': contractor_id
+                    'company_id': company_id
                 },
                 success: function (response) {
-                    mApp.unblock('#contractor-table-editable');
+                    mApp.unblock('#company-table-editable');
 
                     if (response.success) {
                         oTable.load();
@@ -439,7 +439,7 @@ var Contractors = function () {
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#contractor-table-editable');
+                    mApp.unblock('#company-table-editable');
 
                     toastr.error(response.error, "Error !!!");
                 }
@@ -457,17 +457,17 @@ var Contractors = function () {
                 }
             });
 
-            MyApp.block('#contractor-table-editable');
+            MyApp.block('#company-table-editable');
 
             $.ajax({
                 type: "POST",
-                url: "contractor/eliminarContractors",
+                url: "company/eliminarCompanies",
                 dataType: "json",
                 data: {
                     'ids': ids
                 },
                 success: function (response) {
-                    mApp.unblock('#contractor-table-editable');
+                    mApp.unblock('#company-table-editable');
                     if (response.success) {
 
                         oTable.load();
@@ -478,7 +478,7 @@ var Contractors = function () {
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#contractor-table-editable');
+                    mApp.unblock('#company-table-editable');
 
                     toastr.error(response.error, "Error !!!");
                 }
@@ -497,7 +497,7 @@ var Contractors = function () {
     }
 
     var initPortlets = function () {
-        var portlet = new mPortlet('lista-contractor');
+        var portlet = new mPortlet('lista-company');
         portlet.on('afterFullscreenOn', function (portlet) {
             $('.m-portlet').addClass('m-portlet--fullscreen');
         });
@@ -511,8 +511,8 @@ var Contractors = function () {
     var activeTab = 1;
     var totalTabs = 2;
     var initWizard = function () {
-        $(document).off('click', "#form-contractor .wizard-tab");
-        $(document).on('click', "#form-contractor .wizard-tab", function (e) {
+        $(document).off('click', "#form-company .wizard-tab");
+        $(document).on('click', "#form-company .wizard-tab", function (e) {
             e.preventDefault();
             var item = $(this).data('item');
 
@@ -602,7 +602,7 @@ var Contractors = function () {
         var result = true;
         if (activeTab == 1) {
 
-            if (!$('#contractor-form').valid()) {
+            if (!$('#company-form').valid()) {
                 result = false;
             }
 
@@ -860,7 +860,7 @@ var Contractors = function () {
 
                     $.ajax({
                         type: "POST",
-                        url: "contractor/eliminarContact",
+                        url: "company/eliminarContact",
                         dataType: "json",
                         data: {
                             'contact_id': contacts[posicion].contact_id

@@ -45,6 +45,69 @@ class Project
     /**
      * @var string
      *
+     * @ORM\Column(name="owner", type="string", length=255, nullable=false)
+     */
+    private $owner;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="subcontract", type="string", length=255, nullable=false)
+     */
+    private $subcontract;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="federal_funding", type="boolean", nullable=false)
+     */
+    private $federalFunding;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="county", type="string", length=255, nullable=false)
+     */
+    private $county;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="resurfacing", type="boolean", nullable=false)
+     */
+    private $resurfacing;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="invoice_contact", type="string", length=255, nullable=false)
+     */
+    private $invoiceContact;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="certified_payrolls", type="boolean", nullable=false)
+     */
+    private $certifiedPayrolls;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="start_date", type="date", nullable=false)
+     */
+    private $startDate;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="end_date", type="date", nullable=false)
+     */
+    private $endDate;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="manager", type="string", length=255, nullable=false)
      */
     private $manager;
@@ -85,14 +148,14 @@ class Project
     private $updatedAt;
 
     /**
-     * @var Contractor
+     * @var Company
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Contractor")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Company")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="contractor_id", referencedColumnName="contractor_id")
+     *   @ORM\JoinColumn(name="company_id", referencedColumnName="company_id")
      * })
      */
-    private $contractor;
+    private $company;
 
 
     /**
@@ -186,16 +249,16 @@ class Project
     }
 
     /**
-     * @return Contractor
+     * @return Company
      */
-    public function getContractor()
+    public function getCompany()
     {
-        return $this->contractor;
+        return $this->company;
     }
 
-    public function setContractor($contractor)
+    public function setCompany($company)
     {
-        $this->contractor = $contractor;
+        $this->company = $company;
     }
 
     /**
@@ -229,6 +292,108 @@ class Project
     public function setStatus($status)
     {
         $this->status = $status;
+    }
+
+    public function getOwner()
+    {
+        return $this->owner;
+    }
+
+    public function setOwner($owner)
+    {
+        $this->owner = $owner;
+    }
+
+    public function getSubcontract()
+    {
+        return $this->subcontract;
+    }
+
+    public function setSubcontract($subcontract)
+    {
+        $this->subcontract = $subcontract;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getFederalFunding()
+    {
+        return $this->federalFunding;
+    }
+
+    public function setFederalFunding($federalFunding)
+    {
+        $this->federalFunding = $federalFunding;
+    }
+
+    public function getCounty()
+    {
+        return $this->county;
+    }
+
+    public function setCounty($county)
+    {
+        $this->county = $county;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getResurfacing()
+    {
+        return $this->resurfacing;
+    }
+
+    public function setResurfacing($resurfacing)
+    {
+        $this->resurfacing = $resurfacing;
+    }
+
+    public function getInvoiceContact()
+    {
+        return $this->invoiceContact;
+    }
+
+    public function setInvoiceContact($invoiceContact)
+    {
+        $this->invoiceContact = $invoiceContact;
+    }
+
+    public function getCertifiedPayrolls()
+    {
+        return $this->certifiedPayrolls;
+    }
+
+    public function setCertifiedPayrolls($certifiedPayrolls)
+    {
+        $this->certifiedPayrolls = $certifiedPayrolls;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getStartDate()
+    {
+        return $this->startDate;
+    }
+
+    public function setStartDate($startDate)
+    {
+        $this->startDate = $startDate;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getEndDate()
+    {
+        return $this->endDate;
+    }
+
+    public function setEndDate($endDate)
+    {
+        $this->endDate = $endDate;
     }
 
 }

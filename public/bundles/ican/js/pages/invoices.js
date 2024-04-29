@@ -27,8 +27,8 @@ var Invoices = function () {
                 width: 120,
             },
             {
-                field: "contractor",
-                title: "Contractor"
+                field: "company",
+                title: "Company"
             },
             {
                 field: "project",
@@ -158,8 +158,8 @@ var Invoices = function () {
         var generalSearch = $('#lista-invoice .m_form_search').val();
         query.generalSearch = generalSearch;
 
-        var contractor_id = $('#filtro-contractor').val();
-        query.contractor_id = contractor_id;
+        var company_id = $('#filtro-company').val();
+        query.company_id = company_id;
 
         var project_id = $('#filtro-project').val();
         query.project_id = project_id;
@@ -192,8 +192,8 @@ var Invoices = function () {
             $element.closest('.form-group').removeClass('has-error').addClass('success');
         });
 
-        $('#contractor').val('');
-        $('#contractor').trigger('change');
+        $('#company').val('');
+        $('#company').trigger('change');
 
         // reset
         $('#project option').each(function (e) {
@@ -428,14 +428,14 @@ var Invoices = function () {
                         var formTitle = "You want to update the invoice? Follow the next steps:";
                         $('#form-invoice-title').html(formTitle);
 
-                        $('#contractor').off('change', changeContractor);
+                        $('#company').off('change', changeCompany);
                         $('#project').off('change', listarItems);
                         $('#start_date').off('change', listarItems);
                         $('#end_date').off('change', listarItems);
 
 
-                        $('#contractor').val(response.invoice.contractor_id);
-                        $('#contractor').trigger('change');
+                        $('#company').val(response.invoice.company_id);
+                        $('#company').trigger('change');
 
                         //Llenar select
                         var projects = response.invoice.projects;
@@ -454,7 +454,7 @@ var Invoices = function () {
                         $('#notes').val(response.invoice.notes);
 
 
-                        $('#contractor').on('change', changeContractor);
+                        $('#company').on('change', changeCompany);
                         $('#project').on('change', listarItems);
                         $('#start_date').on('change', listarItems);
                         $('#end_date').on('change', listarItems);
@@ -639,8 +639,8 @@ var Invoices = function () {
         $('.m-select2').select2();
 
         // change
-        $('#filtro-contractor').change(changeFiltroContractor);
-        $('#contractor').change(changeContractor);
+        $('#filtro-company').change(changeFiltroCompany);
+        $('#company').change(changeCompany);
         $('#project').change(listarItems);
         $('#start_date').change(listarItems);
         $('#end_date').change(listarItems);
@@ -664,7 +664,7 @@ var Invoices = function () {
 
             $.ajax({
                 type: "POST",
-                url: "project/listarItemDetailsParaInvoice",
+                url: "project/listarDataTrackingParaInvoice",
                 dataType: "json",
                 data: {
                     'project_id': project_id,
@@ -703,8 +703,8 @@ var Invoices = function () {
         }
     }
 
-    var changeContractor = function () {
-        var contractor_id = $('#contractor').val();
+    var changeCompany = function () {
+        var company_id = $('#company').val();
 
         // reset
         $('#project option').each(function (e) {
@@ -713,7 +713,7 @@ var Invoices = function () {
         });
         $('#project').select2();
 
-        if (contractor_id != '') {
+        if (company_id != '') {
 
             MyApp.block('#select-project');
 
@@ -722,7 +722,7 @@ var Invoices = function () {
                 url: "project/listarOrdenados",
                 dataType: "json",
                 data: {
-                    'contractor_id': contractor_id
+                    'company_id': company_id
                 },
                 success: function (response) {
                     mApp.unblock('#select-project');
@@ -748,8 +748,8 @@ var Invoices = function () {
             });
         }
     }
-    var changeFiltroContractor = function () {
-        var contractor_id = $('#filtro-contractor').val();
+    var changeFiltroCompany = function () {
+        var company_id = $('#filtro-company').val();
 
         // reset
         $('#filtro-project option').each(function (e) {
@@ -758,7 +758,7 @@ var Invoices = function () {
         });
         $('#filtro-project').select2();
 
-        if (contractor_id != '') {
+        if (company_id != '') {
 
             MyApp.block('#select-filtro-project');
 
@@ -767,7 +767,7 @@ var Invoices = function () {
                 url: "project/listarOrdenados",
                 dataType: "json",
                 data: {
-                    'contractor_id': contractor_id
+                    'company_id': company_id
                 },
                 success: function (response) {
                     mApp.unblock('#select-filtro-project');
@@ -1306,6 +1306,8 @@ var Invoices = function () {
 
         var $element = $('.select2');
         $element.removeClass('has-error').tooltip("dispose");
+
+        nEditingRowItem = null;
     };
 
 

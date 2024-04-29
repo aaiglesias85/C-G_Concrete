@@ -104,19 +104,10 @@
                         <div class="col-xl-12 order-1">
                             <div class="form-group m-form__group row align-items-center">
                                 <div class="col-md-2">
-                                    <select class="form-control m-select2" id="filtro-contractor">
-                                        <option value="">Contractor</option>
-                                        {% for item in contractors %}
-                                            <option value="{{ item.contractorId }}">{{ item.name }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <select class="form-control m-select2" id="filtro-inspector">
-                                        <option value="">Inspector</option>
-                                        {% for item in inspectors %}
-                                            <option value="{{ item.inspectorId }}">{{ item.name }}
+                                    <select class="form-control m-select2" id="filtro-company">
+                                        <option value="">Company</option>
+                                        {% for item in companies %}
+                                            <option value="{{ item.companyId }}">{{ item.name }}
                                             </option>
                                         {% endfor %}
                                     </select>
@@ -128,7 +119,29 @@
                                         <option value="0">Inactive</option>
                                     </select>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-2">
+                                    <div class='input-group date'>
+                                        <input type='text' class="form-control m-input date-picker"
+                                               placeholder="From" autocomplete="off" id="fechaInicial"/>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">
+                                                <i class="la la-calendar glyphicon-th"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class='input-group date'>
+                                        <input type='text' class="form-control m-input date-picker"
+                                               placeholder="To" autocomplete="off" id="fechaFin"/>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">
+                                                <i class="la la-calendar glyphicon-th"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
                                     <div class="m-input-icon m-input-icon--left">
                                         <input type="text" class="form-control m-input m_form_search"
                                                placeholder="Search...">
@@ -180,7 +193,7 @@
 
             <div class="m-portlet__body">
 
-                <ul class="nav nav-tabs m--hide" role="tablist" id="nav-tabs-project">
+                <ul class="nav nav-tabs" role="tablist">
                     <li class="nav-item" >
                         <a class="nav-link active wizard-tab" data-item="1"
                            data-toggle="tab" href="#tab-content-general" id="tab-general">
@@ -190,15 +203,22 @@
                     <li class="nav-item">
                         <a class="nav-link wizard-tab" data-item="2"
                            data-toggle="tab" href="#tab-content-items" id="tab-items">
-                            Data Tracking
+                            Items
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item  m--hide nav-item-hide">
                         <a class="nav-link wizard-tab" data-item="3"
                            data-toggle="tab" href="#tab-content-notes" id="tab-notes">
                             Notes
                         </a>
                     </li>
+                    <li class="nav-item  m--hide nav-item-hide">
+                        <a class="nav-link wizard-tab" data-item="4"
+                           data-toggle="tab" href="#tab-content-data-tracking" id="tab-data-tracking">
+                            Data Tracking
+                        </a>
+                    </li>
+
                 </ul>
 
                 <div class="tab-content">
@@ -213,17 +233,17 @@
 
                                 <div class="form-group m-form__group ic-form-group">
                                     <div class="row">
-                                        <div class="col-md-4" id="select-contractor">
+                                        <div class="col-md-4" id="select-company">
                                             <label>
                                                 <span class="ic-step-number">1</span>
-                                                Contractor
+                                                Company
                                                 <span class="ic-small italic">(required)</span>
                                             </label>
-                                            <select class="form-control m-select2 event-change" id="contractor"
-                                                    name="contractor">
+                                            <select class="form-control m-select2 event-change" id="company"
+                                                    name="company">
                                                 <option value="">Select</option>
-                                                {% for item in contractors %}
-                                                    <option value="{{ item.contractorId }}">{{ item.name }}</option>
+                                                {% for item in companies %}
+                                                    <option value="{{ item.companyId }}">{{ item.name }}</option>
                                                 {% endfor %}
                                             </select>
                                         </div>
@@ -265,34 +285,63 @@
                                 </div>
 
                                 <div class="form-group m-form__group ic-form-group">
-
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-2">
                                             <label>
                                                 <span class="ic-step-number">3</span>
-                                                Manager
+                                                Start Date
                                                 <span class="ic-small italic">(optional)</span>
                                             </label>
-                                            <input type="text" class="form-control event-change" id="manager"
-                                                   name="manager">
+                                            <div class='input-group date'>
+                                                <input type='text' class="form-control m-input date-picker event-change"
+                                                       placeholder="From" autocomplete="off"
+                                                       id="start_date" name="start_date"/>
+                                                <div class="input-group-append">
+                                                            <span class="input-group-text">
+                                                                <i class="la la-calendar glyphicon-th"></i>
+                                                            </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>
+                                                End Date
+                                            </label>
+                                            <div class='input-group date'>
+                                                <input type='text' class="form-control m-input date-picker event-change"
+                                                       placeholder="To" autocomplete="off"
+                                                       id="end_date" name="end_date"/>
+                                                <div class="input-group-append">
+                                                            <span class="input-group-text">
+                                                                <i class="la la-calendar glyphicon-th"></i>
+                                                            </span>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="col-md-6">
                                             <label>
-                                                Location
+                                                Invoice Contact
                                             </label>
-                                            <input type="text" class="form-control event-change" id="location"
-                                                   name="location">
+                                            <input type="text" class="form-control event-change" id="invoice_contact" name="invoice_contact">
                                         </div>
                                     </div>
+
                                 </div>
 
                                 <div class="form-group m-form__group ic-form-group">
                                     <div class="row">
-                                        <div class="col-md-2">
+                                        <div class="col-md-6">
                                             <label>
                                                 <span class="ic-step-number">4</span>
-                                                PO NUMBER
+                                                Location
                                                 <span class="ic-small italic">(optional)</span>
+                                            </label>
+                                            <input type="text" class="form-control event-change" id="location"
+                                                   name="location">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>
+                                                PO NUMBER
                                             </label>
                                             <input type="text" class="form-control form-control-text event-change"
                                                    id="po_number" name="po_number"/>
@@ -308,7 +357,74 @@
                                 </div>
 
                                 <div class="form-group m-form__group ic-form-group">
-                                    <label><span class="ic-step-number">5</span>Status</label>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label>
+                                                <span class="ic-step-number">5</span>
+                                                Manager
+                                                <span class="ic-small italic">(optional)</span>
+                                            </label>
+                                            <input type="text" class="form-control event-change" id="manager"
+                                                   name="manager">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>
+                                                Owner
+                                            </label>
+                                            <input type="text" class="form-control event-change" id="owner" name="owner">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>
+                                                County
+                                            </label>
+                                            <input type="text" class="form-control event-change" id="county" name="county">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group m-form__group ic-form-group">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label>
+                                                <span class="ic-step-number">6</span>
+                                                Subcontract NO
+                                                <span class="ic-small italic">(optional)</span>
+                                            </label>
+                                            <input type="text" class="form-control event-change" id="subcontract"
+                                                   name="subcontract">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>&nbsp;</label>
+                                            <div>
+                                                <label class="m-checkbox">
+                                                    <input type="checkbox" class="form-control event-change" id="federal_funding" name="federal_funding"> Federal Funding
+                                                    <span></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>&nbsp;</label>
+                                            <div>
+                                                <label class="m-checkbox">
+                                                    <input type="checkbox" class="form-control event-change" id="resurfacing" name="resurfacing"> Resurfacing
+                                                    <span></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label>&nbsp;</label>
+                                            <div>
+                                                <label class="m-checkbox">
+                                                    <input type="checkbox" class="form-control event-change" id="certified_payrolls" name="certified_payrolls"> Certified payrolls
+                                                    <span></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group m-form__group ic-form-group">
+                                    <label><span class="ic-step-number">7</span>Status</label>
                                     <div class="row">
                                         <div class="col-lg-12">
                                             <div class="m-form__group form-group">
@@ -354,40 +470,8 @@
                                                     </div>
                                                 {% endif %}
 
-                                                <div class="col-md-2">
-                                                    <select class="form-control m-select2" id="filtro-item">
-                                                        <option value="">Item</option>
-                                                        {% for item in items %}
-                                                            <option value="{{ item.itemId }}">{{ item.description }}
-                                                            </option>
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <div class='input-group date'>
-                                                        <input type='text' class="form-control m-input date-picker "
-                                                               placeholder="From" autocomplete="off"
-                                                               id="filtro-fecha-inicial-item"/>
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">
-                                                                <i class="la la-calendar glyphicon-th"></i>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <div class='input-group date'>
-                                                        <input type='text' class="form-control m-input date-picker "
-                                                               placeholder="To" autocomplete="off"
-                                                               id="filtro-fecha-fin-item"/>
-                                                        <div class="input-group-append">
-                                                            <span class="input-group-text">
-                                                                <i class="la la-calendar glyphicon-th"></i>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-2">
+                                                <div class="col-md-7"></div>
+                                                <div class="col-md-3">
                                                     <div class="m-input-icon m-input-icon--left">
                                                         <input type="text" class="form-control m-input m_form_search"
                                                                placeholder="Search...">
@@ -395,15 +479,6 @@
                                                         <span><i class="la la-search"></i></span>
                                                     </span>
                                                     </div>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <a href="javascript:;" id="btn-filtrar-items"
-                                                       class="btn btn-info m-btn m-btn--custom m-btn--icon m-btn--air">
-                                                        <span>
-                                                            <i class="la la-search"></i>
-                                                            <span>Search</span>
-                                                        </span>
-                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -490,6 +565,89 @@
                             </div>
                         </div>
                     </div>
+                    <div class="tab-pane" id="tab-content-data-tracking" role="tabpanel">
+                        <div class="row" id="lista-data-tracking">
+                            <div class="col-lg-12">
+                                <!--begin: Search Form -->
+                                <div class="m-form m-form--label-align-right">
+                                    <div class="row align-items-center">
+                                        <div class="col-xl-12 order-1">
+                                            <div class="form-group m-form__group row align-items-center">
+                                                {% if permiso.agregar or permiso.editar %}
+                                                    <div class="col-md-2">
+                                                        <div class="btn-group">
+                                                            <button id="btn-agregar-data-tracking" class="btn btn-success"
+                                                                    style="margin-bottom: 20px; margin-top: 10px;">
+                                                                New <i class="la la-plus"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+
+                                                <div class="col-md-2">
+                                                    <select class="form-control m-select2" id="filtro-item">
+                                                        <option value="">Item</option>
+                                                        {% for item in items %}
+                                                            <option value="{{ item.itemId }}">{{ item.description }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class='input-group date'>
+                                                        <input type='text' class="form-control m-input date-picker "
+                                                               placeholder="From" autocomplete="off"
+                                                               id="filtro-fecha-inicial-data-tracking"/>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">
+                                                                <i class="la la-calendar glyphicon-th"></i>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class='input-group date'>
+                                                        <input type='text' class="form-control m-input date-picker "
+                                                               placeholder="To" autocomplete="off"
+                                                               id="filtro-fecha-fin-data-tracking"/>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text">
+                                                                <i class="la la-calendar glyphicon-th"></i>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="m-input-icon m-input-icon--left">
+                                                        <input type="text" class="form-control m-input m_form_search"
+                                                               placeholder="Search...">
+                                                        <span class="m-input-icon__icon m-input-icon__icon--left">
+                                                        <span><i class="la la-search"></i></span>
+                                                    </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <a href="javascript:;" id="btn-filtrar-data-tracking"
+                                                       class="btn btn-info m-btn m-btn--custom m-btn--icon m-btn--air">
+                                                        <span>
+                                                            <i class="la la-search"></i>
+                                                            <span>Search</span>
+                                                        </span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <!--end: Search Form -->
+                                <!--begin: Datatable -->
+                                <div class="m_datatable" id="data-tracking-table-editable"></div>
+                                <!--end: Datatable -->
+                            </div>
+                        </div>
+                    </div>
+                    
                 </div>
 
                 <div class="m-form">
@@ -500,7 +658,7 @@
                         </button>
 
                         <button id="btn-wizard-siguiente"
-                                class="btn btn-primary m--hide" type="button">
+                                class="btn btn-primary" type="button">
                             Next
                         </button>
                         {% if permiso.agregar or permiso.editar %}
@@ -533,33 +691,11 @@
                     <form class="m-form" id="item-form" action="#"
                           enctype="multipart/form-data" method="post">
 
-                        <input type="hidden" id="item_details_id" name="item_details_id"/>
+                        <input type="hidden" id="project_item_id" name="project_item_id"/>
 
                         <div class="form-group m-form__group ic-form-group">
                             <label>
                                 <span class="ic-step-number">1</span>
-                                Date
-                                <span class="ic-small italic">(required)</span>
-                            </label>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class='input-group date'>
-                                        <input type='text' class="form-control m-input date-picker "
-                                               placeholder="Select" autocomplete="off"
-                                               id="item-date" name="date"/>
-                                        <div class="input-group-append">
-                                            <span class="input-group-text">
-                                                <i class="la la-calendar glyphicon-th"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group m-form__group ic-form-group">
-                            <label>
-                                <span class="ic-step-number">2</span>
                                 Item
                                 <span class="ic-small italic">(required)</span>
                             </label>
@@ -568,7 +704,7 @@
                                     <select class="form-control m-select2" id="item">
                                         <option value="">Select</option>
                                         {% for item in items %}
-                                            <option value="{{ item.itemId }}" data-price="{{ item.price }}">
+                                            <option value="{{ item.itemId }}" data-price="{{ item.price }}" data-unit="{{ item.unit.description }}">
                                                 {{ item.description }} ${{ item.price | number_format(2, ',', '.') }}
                                             </option>
                                         {% endfor %}
@@ -581,7 +717,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <label>
-                                        <span class="ic-step-number">3</span>
+                                        <span class="ic-step-number">2</span>
                                         Quatity
                                         <span class="ic-small italic">(required)</span>
                                     </label>
@@ -593,7 +729,7 @@
                                     </label>
                                     <div class="input-group m-input-group">
                                         <div class="input-group-prepend">
-                                        <span class="input-group-text">$</span>
+                                            <span class="input-group-text">$</span>
                                         </div>
                                         <input type="text" class="form-control form-control-number" id="item-price"
                                                name="price">
@@ -637,6 +773,131 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" data-dismiss="modal" id="btn-delete-item">Yes
+                    </button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- data-tracking -->
+    <div class="modal fade" id="modal-data-tracking" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New data tracking</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="m-form" id="data-tracking-form" action="#"
+                          enctype="multipart/form-data" method="post">
+
+                        <input type="hidden" id="data_tracking_id" name="data_tracking_id"/>
+
+                        <div class="form-group m-form__group ic-form-group">
+                            <label>
+                                <span class="ic-step-number">1</span>
+                                Date
+                                <span class="ic-small italic">(required)</span>
+                            </label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class='input-group date'>
+                                        <input type='text' class="form-control m-input date-picker "
+                                               placeholder="Select" autocomplete="off"
+                                               id="data-tracking-date" name="date"/>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">
+                                                <i class="la la-calendar glyphicon-th"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group ic-form-group">
+                            <label>
+                                <span class="ic-step-number">2</span>
+                                Item
+                                <span class="ic-small italic">(required)</span>
+                            </label>
+                            <div class="row">
+                                <div class="col-md-12" id="select-item-data-tracking">
+                                    <select class="form-control m-select2" id="item-data-tracking">
+                                        <option value="">Select</option>
+                                        {% for item in items %}
+                                            <option value="{{ item.itemId }}" data-price="{{ item.price }}">
+                                                {{ item.description }} ${{ item.price | number_format(2, ',', '.') }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group ic-form-group">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label>
+                                        <span class="ic-step-number">3</span>
+                                        Quatity
+                                        <span class="ic-small italic">(required)</span>
+                                    </label>
+                                    <input type="text" class="form-control form-control-number" id="data-tracking-quantity" name="quantity">
+                                </div>
+                                <div class="col-md-4">
+                                    <label>
+                                        Price
+                                    </label>
+                                    <div class="input-group m-input-group">
+                                        <div class="input-group-prepend">
+                                        <span class="input-group-text">$</span>
+                                        </div>
+                                        <input type="text" class="form-control form-control-number" id="data-tracking-price"
+                                               name="price">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label>
+                                        Total
+                                    </label>
+                                    <div class="input-group m-input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">$</span>
+                                        </div>
+                                        <input type="text" class="form-control form-control-number" id="data-tracking-total"
+                                               name="total" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="btn-salvar-data-tracking">Save</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal-eliminar-data-tracking" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h5>Are you sure you want to delete the selected data tracking?</h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal" id="btn-delete-data-tracking">Yes
                     </button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
                 </div>

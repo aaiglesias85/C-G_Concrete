@@ -2,23 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\Project;
-use App\Entity\ProjectItemDetails;
+use App\Entity\DataTracking;
 use Doctrine\ORM\EntityRepository;
 
 
-class ProjectItemDetailsRepository extends EntityRepository
+class DataTrackingRepository extends EntityRepository
 {
 
     /**
-     * ListarItemDetails: Lista los items
+     * ListarDataTracking: Lista los items
      *
-     * @return ProjectItemDetails[]
+     * @return DataTracking[]
      */
-    public function ListarItemDetails($project_id, $fecha_inicial = '', $fecha_fin = '')
+    public function ListarDataTracking($project_id, $fecha_inicial = '', $fecha_fin = '')
     {
-        $consulta = $this->createQueryBuilder('p_i_d')
-            ->leftJoin('p_i_d.project', 'p');
+        $consulta = $this->createQueryBuilder('d_t')
+            ->leftJoin('d_t.project', 'p');
 
         if ($project_id != '') {
             $consulta->andWhere('p.projectId = :project_id')
@@ -30,7 +29,7 @@ class ProjectItemDetailsRepository extends EntityRepository
             $fecha_inicial = \DateTime::createFromFormat("m/d/Y", $fecha_inicial);
             $fecha_inicial = $fecha_inicial->format("Y-m-d");
 
-            $consulta->andWhere('p_i_d.date >= :fecha_inicial')
+            $consulta->andWhere('d_t.date >= :fecha_inicial')
                 ->setParameter('fecha_inicial', $fecha_inicial);
         }
         if ($fecha_fin != "") {
@@ -38,12 +37,12 @@ class ProjectItemDetailsRepository extends EntityRepository
             $fecha_fin = \DateTime::createFromFormat("m/d/Y", $fecha_fin);
             $fecha_fin = $fecha_fin->format("Y-m-d");
 
-            $consulta->andWhere('p_i_d.date <= :fecha_final')
+            $consulta->andWhere('d_t.date <= :fecha_final')
                 ->setParameter('fecha_final', $fecha_fin);
         }
 
 
-        $consulta->orderBy('p_i_d.date', "ASC");
+        $consulta->orderBy('d_t.date', "ASC");
 
 
         return $consulta->getQuery()->getResult();
@@ -51,14 +50,14 @@ class ProjectItemDetailsRepository extends EntityRepository
 
 
     /**
-     * ListarProjectsDeItem: Lista los projects de item
+     * ListarDataTrackingsDeItem: Lista los projects de item
      *
-     * @return ProjectItemDetails[]
+     * @return DataTracking[]
      */
-    public function ListarProjectsDeItem($item_id)
+    public function ListarDataTrackingsDeItem($item_id)
     {
-        $consulta = $this->createQueryBuilder('p_i_d')
-            ->leftJoin('p_i_d.item', 'i');
+        $consulta = $this->createQueryBuilder('d_t')
+            ->leftJoin('d_t.item', 'i');
 
         if ($item_id != '') {
             $consulta->andWhere('i.itemId = :item_id')
@@ -66,32 +65,38 @@ class ProjectItemDetailsRepository extends EntityRepository
         }
 
 
-        $consulta->orderBy('p_i_d.date', "ASC");
+        $consulta->orderBy('d_t.date', "ASC");
 
 
         return $consulta->getQuery()->getResult();
     }
 
     /**
-     * ListarItems: Lista los items
+     * ListarDataTrackings: Lista los items
      * @param int $start Inicio
      * @param int $limit Limite
      * @param string $sSearch Para buscar
      *
-     * @return ProjectItemDetails[]
+     * @return DataTracking[]
      */
-    public function ListarItems($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
-                                $project_id = '', $item_id = '', $fecha_inicial = '', $fecha_fin = '')
+    public function ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
+                                $company_id = '', $project_id = '', $item_id = '', $fecha_inicial = '', $fecha_fin = '')
     {
-        $consulta = $this->createQueryBuilder('p_i_d')
-            ->leftJoin('p_i_d.project', 'p')
-            ->leftJoin('p_i_d.item', 'i')
+        $consulta = $this->createQueryBuilder('d_t')
+            ->leftJoin('d_t.project', 'p')
+            ->leftJoin('p.company', 'c')
+            ->leftJoin('d_t.item', 'i')
             ->leftJoin('i.unit', 'u');
 
         if ($sSearch != "") {
-            $consulta->andWhere('p_i_d.quantity LIKE :quantity OR p_i_d.price LIKE :price')
+            $consulta->andWhere('d_t.quantity LIKE :quantity OR d_t.price LIKE :price')
                 ->setParameter('quantity', "%${sSearch}%")
                 ->setParameter('price', "%${sSearch}%");
+        }
+
+        if ($company_id != '') {
+            $consulta->andWhere('c.companyId = :company_id')
+                ->setParameter('company_id', $company_id);
         }
 
         if ($project_id != '') {
@@ -109,7 +114,7 @@ class ProjectItemDetailsRepository extends EntityRepository
             $fecha_inicial = \DateTime::createFromFormat("m/d/Y", $fecha_inicial);
             $fecha_inicial = $fecha_inicial->format("Y-m-d");
 
-            $consulta->andWhere('p_i_d.date >= :fecha_inicial')
+            $consulta->andWhere('d_t.date >= :fecha_inicial')
                 ->setParameter('fecha_inicial', $fecha_inicial);
         }
         if ($fecha_fin != "") {
@@ -117,7 +122,7 @@ class ProjectItemDetailsRepository extends EntityRepository
             $fecha_fin = \DateTime::createFromFormat("m/d/Y", $fecha_fin);
             $fecha_fin = $fecha_fin->format("Y-m-d");
 
-            $consulta->andWhere('p_i_d.date <= :fecha_final')
+            $consulta->andWhere('d_t.date <= :fecha_final')
                 ->setParameter('fecha_final', $fecha_fin);
         }
 
@@ -129,10 +134,10 @@ class ProjectItemDetailsRepository extends EntityRepository
                 $consulta->orderBy("u.description", $sSortDir_0);
                 break;
             case "total":
-                $consulta->orderBy("p_i_d.price", $sSortDir_0);
+                $consulta->orderBy("d_t.price", $sSortDir_0);
                 break;
             default:
-                $consulta->orderBy("p_i_d.$iSortCol_0", $sSortDir_0);
+                $consulta->orderBy("d_t.$iSortCol_0", $sSortDir_0);
                 break;
         }
 
@@ -146,24 +151,32 @@ class ProjectItemDetailsRepository extends EntityRepository
     }
 
     /**
-     * TotalItems: Total de items de la BD
+     * TotalDataTrackings: Total de items de la BD
      * @param string $sSearch Para buscar
      *
      * @author Marcel
      */
-    public function TotalItems($sSearch, $project_id = '', $item_id = '', $fecha_inicial = '', $fecha_fin = '')
+    public function TotalDataTrackings($sSearch, $company_id = '', $project_id = '', $item_id = '', $fecha_inicial = '', $fecha_fin = '')
     {
         $em = $this->getEntityManager();
-        $consulta = 'SELECT COUNT(p_i_d.id) FROM App\Entity\ProjectItemDetails p_i_d ';
-        $join = ' LEFT JOIN p_i_d.project p LEFT JOIN p_i_d.item i ';
+        $consulta = 'SELECT COUNT(d_t.id) FROM App\Entity\DataTracking d_t ';
+        $join = ' LEFT JOIN d_t.project p LEFT JOIN p.company c LEFT JOIN d_t.item i ';
         $where = '';
 
         if ($sSearch != "") {
             $esta_query = explode("WHERE", $where);
             if (count($esta_query) == 1)
-                $where .= 'WHERE (p_i_d.quantity LIKE :quantity OR p_i_d.price LIKE :price) ';
+                $where .= 'WHERE (d_t.quantity LIKE :quantity OR d_t.price LIKE :price) ';
             else
-                $where .= 'AND (p_i_d.quantity LIKE :quantity OR p_i_d.price LIKE :price) ';
+                $where .= 'AND (d_t.quantity LIKE :quantity OR d_t.price LIKE :price) ';
+        }
+
+        if ($company_id != '') {
+            $esta_query = explode("WHERE", $where);
+            if (count($esta_query) == 1)
+                $where .= 'WHERE (c.companyId = :company_id) ';
+            else
+                $where .= 'AND (c.companyId = :company_id) ';
         }
 
         if ($project_id != '') {
@@ -189,9 +202,9 @@ class ProjectItemDetailsRepository extends EntityRepository
 
             $esta_query = explode("WHERE", $where);
             if (count($esta_query) == 1) {
-                $where .= 'WHERE (p_i_d.date >= :inicio) ';
+                $where .= 'WHERE (d_t.date >= :inicio) ';
             } else {
-                $where .= ' AND (p_i_d.date >= :inicio) ';
+                $where .= ' AND (d_t.date >= :inicio) ';
             }
         }
 
@@ -202,9 +215,9 @@ class ProjectItemDetailsRepository extends EntityRepository
 
             $esta_query = explode("WHERE", $where);
             if (count($esta_query) == 1) {
-                $where .= 'WHERE (p_i_d.date <= :fin) ';
+                $where .= 'WHERE (d_t.date <= :fin) ';
             } else {
-                $where .= ' AND (p_i_d.date <= :fin) ';
+                $where .= ' AND (d_t.date <= :fin) ';
             }
         }
 
@@ -220,6 +233,11 @@ class ProjectItemDetailsRepository extends EntityRepository
         $esta_query_price = substr_count($consulta, ':price');
         if ($esta_query_price == 1)
             $query->setParameter(':price', "%${sSearch}%");
+
+        $esta_query_company_id = substr_count($consulta, ':company_id');
+        if ($esta_query_company_id == 1) {
+            $query->setParameter('company_id', $company_id);
+        }
 
         $esta_query_project_id = substr_count($consulta, ':project_id');
         if ($esta_query_project_id == 1) {

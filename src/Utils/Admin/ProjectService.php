@@ -2,17 +2,52 @@
 
 namespace App\Utils\Admin;
 
-use App\Entity\Contractor;
+use App\Entity\Company;
 use App\Entity\Inspector;
 use App\Entity\Invoice;
 use App\Entity\Item;
 use App\Entity\Project;
-use App\Entity\ProjectItemDetails;
+use App\Entity\DataTracking;
+use App\Entity\ProjectItem;
 use App\Entity\ProjectNotes;
 use App\Utils\Base;
 
 class ProjectService extends Base
 {
+
+    /**
+     * EliminarItem: Elimina un item en la BD
+     * @param int $project_item_id Id
+     * @author Marcel
+     */
+    public function EliminarItem($project_item_id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $this->getDoctrine()->getRepository(ProjectItem::class)
+            ->find($project_item_id);
+        /**@var ProjectItem $entity */
+        if ($entity != null) {
+
+            $item_name = $entity->getItem()->getDescription();
+
+            $em->remove($entity);
+            $em->flush();
+
+            //Salvar log
+            $log_operacion = "Delete";
+            $log_categoria = "Project Item";
+            $log_descripcion = "The item: $item_name of the project is deleted";
+            $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
+
+            $resultado['success'] = true;
+        } else {
+            $resultado['success'] = false;
+            $resultado['error'] = "The requested record does not exist";
+        }
+
+        return $resultado;
+    }
 
     /**
      * EliminarNotes: Elimina un notes en la BD
@@ -217,16 +252,16 @@ class ProjectService extends Base
     /**
      * ListarOrdenados
      * @param $search
-     * @param $contractor_id
+     * @param $company_id
      * @param $inspector_id
      * @return array
      */
-    public function ListarOrdenados($search, $contractor_id, $inspector_id)
+    public function ListarOrdenados($search, $company_id, $inspector_id)
     {
         $projects = [];
 
         $lista = $this->getDoctrine()->getRepository(Project::class)
-            ->ListarOrdenados($search, $contractor_id, $inspector_id);
+            ->ListarOrdenados($search, $company_id, $inspector_id);
         foreach ($lista as $value) {
             $projects[] = [
                 'project_id' => $value->getProjectId(),
@@ -239,28 +274,28 @@ class ProjectService extends Base
     }
 
     /**
-     * ListarItemDetailsParaInvoice
+     * ListarDataTrackingParaInvoice
      * @param $project_id
      * @param $fecha_inicial
      * @param $fecha_fin
      * @return array
      */
-    public function ListarItemDetailsParaInvoice($project_id, $fecha_inicial, $fecha_fin)
+    public function ListarDataTrackingParaInvoice($project_id, $fecha_inicial, $fecha_fin)
     {
         $items = [];
 
-        $project_items = $this->getDoctrine()->getRepository(ProjectItemDetails::class)
-            ->ListarItemDetails($project_id, $fecha_inicial, $fecha_fin);
+        $project_items = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->ListarDataTracking($project_id, $fecha_inicial, $fecha_fin);
         foreach ($project_items as $value) {
 
-            $item_details_id = $value->getId();
+            $data_tracking_id = $value->getId();
 
             $quantity = $value->getQuantity();
             $price = $value->getPrice();
             $total = $quantity * $price;
 
             $items[] = [
-                "id" => $item_details_id,
+                "id" => $data_tracking_id,
                 "item_id" => $value->getItem()->getItemId(),
                 "item" => $value->getItem()->getDescription(),
                 "unit" => $value->getItem()->getUnit()->getDescription(),
@@ -275,20 +310,20 @@ class ProjectService extends Base
     }
 
     /**
-     * CargarDatosItemDetails: Carga los datos de un item project
+     * CargarDatosDataTracking: Carga los datos de un item project
      *
-     * @param int $item_details_id Id
+     * @param int $data_tracking_id Id
      *
      * @author Marcel
      */
-    public function CargarDatosItemDetails($item_details_id)
+    public function CargarDatosDataTracking($data_tracking_id)
     {
         $resultado = array();
         $arreglo_resultado = array();
 
-        $entity = $this->getDoctrine()->getRepository(ProjectItemDetails::class)
-            ->find($item_details_id);
-        /** @var ProjectItemDetails $entity */
+        $entity = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->find($data_tracking_id);
+        /** @var DataTracking $entity */
         if ($entity != null) {
 
             $arreglo_resultado['item_id'] = $entity->getItem()->getItemId();
@@ -304,7 +339,7 @@ class ProjectService extends Base
     }
 
     /**
-     * ListarItemDetails: Listar los items details
+     * ListarDataTracking: Listar los items details
      *
      * @param int $start Inicio
      * @param int $limit Limite
@@ -312,25 +347,25 @@ class ProjectService extends Base
      *
      * @author Marcel
      */
-    public function ListarItemDetails($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $item_id, $fecha_inicial, $fecha_fin)
+    public function ListarDataTracking($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $item_id, $fecha_inicial, $fecha_fin)
     {
         $arreglo_resultado = array();
         $cont = 0;
 
-        $lista = $this->getDoctrine()->getRepository(ProjectItemDetails::class)
-            ->ListarItems($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $item_id, $fecha_inicial, $fecha_fin);
+        $lista = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, '', $project_id, $item_id, $fecha_inicial, $fecha_fin);
 
         foreach ($lista as $value) {
-            $item_details_id = $value->getId();
+            $data_tracking_id = $value->getId();
 
-            $acciones = $this->ListarAccionesItemDetails($item_details_id);
+            $acciones = $this->ListarAccionesDataTracking($data_tracking_id);
 
             $quantity = $value->getQuantity();
             $price = $value->getPrice();
             $total = $quantity * $price;
 
             $arreglo_resultado[$cont] = array(
-                "id" => $item_details_id,
+                "id" => $data_tracking_id,
                 "item" => $value->getItem()->getDescription(),
                 "unit" => $value->getItem()->getUnit()->getDescription(),
                 "quantity" => $quantity,
@@ -347,14 +382,14 @@ class ProjectService extends Base
     }
 
     /**
-     * TotalItemDetails: Total de items
+     * TotalDataTracking: Total de items
      * @param string $sSearch Para buscar
      * @author Marcel
      */
-    public function TotalItemDetails($sSearch, $project_id, $item_id, $fecha_inicial, $fecha_fin)
+    public function TotalDataTracking($sSearch, $project_id, $item_id, $fecha_inicial, $fecha_fin)
     {
-        $total = $this->getDoctrine()->getRepository(ProjectItemDetails::class)
-            ->TotalItems($sSearch, $project_id, $item_id, $fecha_inicial, $fecha_fin);
+        $total = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->TotalDataTrackings($sSearch, '', $project_id, $item_id, $fecha_inicial, $fecha_fin);
 
         return $total;
     }
@@ -364,7 +399,7 @@ class ProjectService extends Base
      *
      * @author Marcel
      */
-    public function ListarAccionesItemDetails($id)
+    public function ListarAccionesDataTracking($id)
     {
         $usuario = $this->getUser();
         $permiso = $this->BuscarPermiso($usuario->getUsuarioId(), 9);
@@ -384,8 +419,8 @@ class ProjectService extends Base
     }
 
     /**
-     * SalvarItemDetails
-     * @param $item_details_id
+     * SalvarDataTracking
+     * @param $data_tracking_id
      * @param $project_id
      * @param $item_id
      * @param $quantity
@@ -393,7 +428,7 @@ class ProjectService extends Base
      * @param $date
      * @return array
      */
-    public function SalvarItemDetails($item_details_id, $project_id, $item_id, $quantity, $price, $date)
+    public function SalvarDataTracking($data_tracking_id, $project_id, $item_id, $quantity, $price, $date)
     {
 
         $em = $this->getDoctrine()->getManager();
@@ -408,13 +443,13 @@ class ProjectService extends Base
             $entity = null;
             $is_new = false;
 
-            if (is_numeric($item_details_id)) {
-                $entity = $this->getDoctrine()->getRepository(ProjectItemDetails::class)
-                    ->find($item_details_id);
+            if (is_numeric($data_tracking_id)) {
+                $entity = $this->getDoctrine()->getRepository(DataTracking::class)
+                    ->find($data_tracking_id);
             }
 
             if ($entity == null) {
-                $entity = new ProjectItemDetails();
+                $entity = new DataTracking();
                 $is_new = true;
             }
 
@@ -430,19 +465,19 @@ class ProjectService extends Base
             $entity->setItem($item_entity);
 
             $log_operacion = "Add";
-            $log_descripcion = "The item is add: " . $item_entity->getDescription();
+            $log_descripcion = "The data tracking is add: " . $item_entity->getDescription();
 
             if ($is_new) {
                 $em->persist($entity);
             } else {
                 $log_operacion = "Update";
-                $log_descripcion = "The item is modified: " . $item_entity->getDescription();
+                $log_descripcion = "The data tracking is modified: " . $item_entity->getDescription();
             }
 
             $em->flush();
 
             //Salvar log
-            $log_categoria = "Project Item Details";
+            $log_categoria = "Data Tracking";
             $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
             $resultado['success'] = true;
@@ -457,17 +492,17 @@ class ProjectService extends Base
     }
 
     /**
-     * EliminarItemDetails: Elimina un item details en la BD
-     * @param int $item_details_id Id
+     * EliminarDataTracking: Elimina un item details en la BD
+     * @param int $data_tracking_id Id
      * @author Marcel
      */
-    public function EliminarItemDetails($item_details_id)
+    public function EliminarDataTracking($data_tracking_id)
     {
         $em = $this->getDoctrine()->getManager();
 
-        $entity = $this->getDoctrine()->getRepository(ProjectItemDetails::class)
-            ->find($item_details_id);
-        /**@var ProjectItemDetails $entity */
+        $entity = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->find($data_tracking_id);
+        /**@var DataTracking $entity */
         if ($entity != null) {
 
             $item_name = $entity->getItem()->getDescription();
@@ -477,8 +512,8 @@ class ProjectService extends Base
 
             //Salvar log
             $log_operacion = "Delete";
-            $log_categoria = "Item Project";
-            $log_descripcion = "The item details project is deleted: $item_name";
+            $log_categoria = "Data Tracking";
+            $log_descripcion = "The data tracking is deleted: $item_name";
             $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
             $resultado['success'] = true;
@@ -507,7 +542,7 @@ class ProjectService extends Base
         /** @var Project $entity */
         if ($entity != null) {
 
-            $arreglo_resultado['contractor_id'] = $entity->getContractor()->getContractorId();
+            $arreglo_resultado['company_id'] = $entity->getCompany()->getCompanyId();
             $arreglo_resultado['inspector_id'] = $entity->getInspector() != null ? $entity->getInspector()->getInspectorId() : '';
 
             $arreglo_resultado['number'] = $entity->getProjectNumber();
@@ -517,12 +552,57 @@ class ProjectService extends Base
             $arreglo_resultado['po_cg'] = $entity->getPoCG();
             $arreglo_resultado['manager'] = $entity->getManager();
             $arreglo_resultado['status'] = $entity->getStatus();
+            $arreglo_resultado['owner'] = $entity->getOwner();
+            $arreglo_resultado['subcontract'] = $entity->getSubcontract();
+            $arreglo_resultado['federal_funding'] = $entity->getFederalFunding();
+            $arreglo_resultado['county'] = $entity->getCounty();
+            $arreglo_resultado['resurfacing'] = $entity->getResurfacing();
+            $arreglo_resultado['invoice_contact'] = $entity->getInvoiceContact();
+            $arreglo_resultado['certified_payrolls'] = $entity->getCertifiedPayrolls();
+            $arreglo_resultado['start_date'] = $entity->getStartDate() != '' ? $entity->getStartDate()->format('m/d/Y') : '';
+            $arreglo_resultado['end_date'] = $entity->getEndDate() != '' ? $entity->getEndDate()->format('m/d/Y') : '';
+
+            // items
+            $items = $this->ListarItemsDeProject($project_id);
+            $arreglo_resultado['items'] = $items;
 
             $resultado['success'] = true;
             $resultado['project'] = $arreglo_resultado;
         }
 
         return $resultado;
+    }
+
+    /**
+     * ListarItemsDeProject
+     * @param $project_id
+     * @return array
+     */
+    public function ListarItemsDeProject($project_id)
+    {
+        $items = [];
+
+        $lista = $this->getDoctrine()->getRepository(ProjectItem::class)
+            ->ListarItemsDeProject($project_id);
+        foreach ($lista as $key => $value) {
+
+            $quantity = $value->getQuantity();
+            $price = $value->getPrice();
+            $total = $quantity * $price;
+
+            $items[] = [
+                'project_item_id' => $value->getId(),
+                "item_id" => $value->getItem()->getItemId(),
+                "item" => $value->getItem()->getDescription(),
+                "unit" => $value->getItem()->getUnit()->getDescription(),
+                "quantity" => $quantity,
+                "price" => $price,
+                "total" => $total,
+                "posicion" => $key
+            ];
+        }
+
+        return $items;
     }
 
     /**
@@ -548,11 +628,18 @@ class ProjectService extends Base
                 return $resultado;
             }
 
-            // details
-            $items = $this->getDoctrine()->getRepository(ProjectItemDetails::class)
-                ->ListarItemDetails($project_id);
+            // items
+            $items = $this->getDoctrine()->getRepository(ProjectItem::class)
+                ->ListarItemsDeProject($project_id);
             foreach ($items as $item) {
                 $em->remove($item);
+            }
+
+            // data tracking
+            $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
+                ->ListarDataTracking($project_id);
+            foreach ($data_tracking as $data) {
+                $em->remove($data);
             }
 
             // notes
@@ -608,11 +695,19 @@ class ProjectService extends Base
                         $invoices = $this->getDoctrine()->getRepository(Invoice::class)
                             ->ListarInvoicesDeProject($project_id);
                         if (count($invoices) == 0) {
-                            // details
-                            $items = $this->getDoctrine()->getRepository(ProjectItemDetails::class)
-                                ->ListarItemDetails($project_id);
+
+                            // items
+                            $items = $this->getDoctrine()->getRepository(ProjectItem::class)
+                                ->ListarItemsDeProject($project_id);
                             foreach ($items as $item) {
                                 $em->remove($item);
+                            }
+
+                            // data tracking
+                            $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
+                                ->ListarDataTracking($project_id);
+                            foreach ($data_tracking as $data) {
+                                $em->remove($data);
                             }
 
                             // notes
@@ -658,7 +753,10 @@ class ProjectService extends Base
      * @param int $project_id Id
      * @author Marcel
      */
-    public function ActualizarProject($project_id, $contractor_id, $inspector_id, $number, $name, $location, $po_number, $po_cg, $manager, $status)
+    public function ActualizarProject($project_id, $company_id, $inspector_id, $number, $name, $location,
+                                      $po_number, $po_cg, $manager, $status, $owner, $subcontract,
+                                      $federal_funding, $county, $resurfacing, $invoice_contact,
+                                      $certified_payrolls, $start_date, $end_date, $items)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -683,10 +781,10 @@ class ProjectService extends Base
             $entity->setManager($manager);
             $entity->setStatus($status);
 
-            if ($contractor_id != '') {
-                $contractor = $this->getDoctrine()->getRepository(Contractor::class)
-                    ->find($contractor_id);
-                $entity->setContractor($contractor);
+            if ($company_id != '') {
+                $company = $this->getDoctrine()->getRepository(Company::class)
+                    ->find($company_id);
+                $entity->setCompany($company);
             }
             if ($inspector_id != '') {
                 $inspector = $this->getDoctrine()->getRepository(Inspector::class)
@@ -694,7 +792,28 @@ class ProjectService extends Base
                 $entity->setInspector($inspector);
             }
 
+            $entity->setOwner($owner);
+            $entity->setSubcontract($subcontract);
+            $entity->setFederalFunding($federal_funding);
+            $entity->setCounty($county);
+            $entity->setResurfacing($resurfacing);
+            $entity->setInvoiceContact($invoice_contact);
+            $entity->setCertifiedPayrolls($certified_payrolls);
+
+            if ($start_date != '') {
+                $start_date = \DateTime::createFromFormat('m/d/Y', $start_date);
+                $entity->setStartDate($start_date);
+            }
+
+            if ($end_date != '') {
+                $end_date = \DateTime::createFromFormat('m/d/Y', $end_date);
+                $entity->setEndDate($end_date);
+            }
+
             $entity->setUpdatedAt(new \DateTime());
+
+            // items
+            $this->SalvarItems($entity, $items);
 
             $em->flush();
 
@@ -715,7 +834,10 @@ class ProjectService extends Base
      * @param string $description Nombre
      * @author Marcel
      */
-    public function SalvarProject($contractor_id, $inspector_id, $number, $name, $location, $po_number, $po_cg, $manager, $status)
+    public function SalvarProject($company_id, $inspector_id, $number, $name, $location,
+                                  $po_number, $po_cg, $manager, $status, $owner, $subcontract,
+                                  $federal_funding, $county, $resurfacing, $invoice_contact,
+                                  $certified_payrolls, $start_date, $end_date, $items)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -738,10 +860,10 @@ class ProjectService extends Base
         $entity->setManager($manager);
         $entity->setStatus($status);
 
-        if ($contractor_id != '') {
-            $contractor = $this->getDoctrine()->getRepository(Contractor::class)
-                ->find($contractor_id);
-            $entity->setContractor($contractor);
+        if ($company_id != '') {
+            $company = $this->getDoctrine()->getRepository(Company::class)
+                ->find($company_id);
+            $entity->setCompany($company);
         }
         if ($inspector_id != '') {
             $inspector = $this->getDoctrine()->getRepository(Inspector::class)
@@ -749,9 +871,30 @@ class ProjectService extends Base
             $entity->setInspector($inspector);
         }
 
+        $entity->setOwner($owner);
+        $entity->setSubcontract($subcontract);
+        $entity->setFederalFunding($federal_funding);
+        $entity->setCounty($county);
+        $entity->setResurfacing($resurfacing);
+        $entity->setInvoiceContact($invoice_contact);
+        $entity->setCertifiedPayrolls($certified_payrolls);
+
+        if ($start_date != '') {
+            $start_date = \DateTime::createFromFormat('m/d/Y', $start_date);
+            $entity->setStartDate($start_date);
+        }
+
+        if ($end_date != '') {
+            $end_date = \DateTime::createFromFormat('m/d/Y', $end_date);
+            $entity->setEndDate($end_date);
+        }
+
         $entity->setCreatedAt(new \DateTime());
 
         $em->persist($entity);
+
+        // items
+        $this->SalvarItems($entity, $items);
 
         $em->flush();
 
@@ -767,6 +910,50 @@ class ProjectService extends Base
     }
 
     /**
+     * SalvarItems
+     * @param array $items
+     * @param Project $entity
+     * @return void
+     */
+    public function SalvarItems($entity, $items)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        //Senderos
+        foreach ($items as $value) {
+
+            $project_item_entity = null;
+
+            if (is_numeric($value->project_item_id)) {
+                $project_item_entity = $this->getDoctrine()->getRepository(ProjectItem::class)
+                    ->find($value->project_item_id);
+            }
+
+            $is_new_item = false;
+            if ($project_item_entity == null) {
+                $project_item_entity = new ProjectItem();
+                $is_new_item = true;
+            }
+
+            $project_item_entity->setQuantity($value->quantity);
+            $project_item_entity->setPrice($value->price);
+
+            if ($value->item_id != '') {
+                $item_entity = $this->getDoctrine()->getRepository(Item::class)->find($value->item_id);
+                $project_item_entity->setItem($item_entity);
+            }
+
+
+            if ($is_new_item) {
+                $project_item_entity->setProject($entity);
+
+                $em->persist($project_item_entity);
+            }
+        }
+    }
+
+
+    /**
      * ListarProjects: Listar los projects
      *
      * @param int $start Inicio
@@ -775,13 +962,15 @@ class ProjectService extends Base
      *
      * @author Marcel
      */
-    public function ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $contractor_id, $inspector_id, $status)
+    public function ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
+                                   $company_id, $status, $fecha_inicial, $fecha_fin)
     {
         $arreglo_resultado = array();
         $cont = 0;
 
         $lista = $this->getDoctrine()->getRepository(Project::class)
-            ->ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $contractor_id, $inspector_id, $status);
+            ->ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
+                $company_id, '', $status, $fecha_inicial, $fecha_fin);
 
         foreach ($lista as $value) {
             $project_id = $value->getProjectId();
@@ -792,11 +981,11 @@ class ProjectService extends Base
                 "id" => $project_id,
                 "projectNumber" => $value->getProjectNumber(),
                 "name" => $value->getName(),
-                "location" => $value->getLocation(),
-                "contractor" => $value->getContractor()->getName(),
-                "inspector" => $value->getInspector() != null ? $value->getInspector()->getName() : '',
-                "manager" => $value->getManager(),
+                "company" => $value->getCompany()->getName(),
+                "county" => $value->getCounty(),
                 "status" => $value->getStatus() ? 1 : 0,
+                "startDate" => $value->getStartDate() != '' ? $value->getStartDate()->format('m/d/Y') : '',
+                "endDate" => $value->getEndDate() != '' ? $value->getEndDate()->format('m/d/Y') : '',
                 "acciones" => $acciones
             );
 
@@ -811,10 +1000,10 @@ class ProjectService extends Base
      * @param string $sSearch Para buscar
      * @author Marcel
      */
-    public function TotalProjects($sSearch, $contractor_id, $inspector_id, $status)
+    public function TotalProjects($sSearch, $company_id, $status, $fecha_inicial, $fecha_fin)
     {
         $total = $this->getDoctrine()->getRepository(Project::class)
-            ->TotalProjects($sSearch, $contractor_id, $inspector_id, $status);
+            ->TotalProjects($sSearch, $company_id, '', $status, $fecha_inicial, $fecha_fin);
 
         return $total;
     }

@@ -2,7 +2,7 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Contractor;
+use App\Entity\Company;
 use App\Entity\Inspector;
 use App\Entity\Item;
 use App\Utils\Admin\ProjectService;
@@ -26,8 +26,8 @@ class ProjectController extends AbstractController
         if (count($permiso) > 0) {
             if ($permiso[0]['ver']) {
 
-                // contractors
-                $contractors = $this->projectService->getDoctrine()->getRepository(Contractor::class)
+                // companies
+                $companies = $this->projectService->getDoctrine()->getRepository(Company::class)
                     ->ListarOrdenados();
 
                 // inspectors
@@ -40,7 +40,7 @@ class ProjectController extends AbstractController
 
                 return $this->render('admin/project/index.html.twig', array(
                     'permiso' => $permiso[0],
-                    'contractors' => $contractors,
+                    'companies' => $companies,
                     'inspectors' => $inspectors,
                     'items' => $items
                 ));
@@ -60,9 +60,11 @@ class ProjectController extends AbstractController
         // search filter by keywords
         $query = !empty($request->get('query')) ? $request->get('query') : array();
         $sSearch = isset($query['generalSearch']) && is_string($query['generalSearch']) ? $query['generalSearch'] : '';
-        $contractor_id = isset($query['contractor_id']) && is_string($query['contractor_id']) ? $query['contractor_id'] : '';
-        $inspector_id = isset($query['inspector_id']) && is_string($query['inspector_id']) ? $query['inspector_id'] : '';
+        $company_id = isset($query['company_id']) && is_string($query['company_id']) ? $query['company_id'] : '';
         $status = isset($query['status']) && is_string($query['status']) ? $query['status'] : '';
+        $fecha_inicial = isset($query['fechaInicial']) && is_string($query['fechaInicial']) ? $query['fechaInicial'] : '';
+        $fecha_fin = isset($query['fechaFin']) && is_string($query['fechaFin']) ? $query['fechaFin'] : '';
+
         //Sort
         $sort = !empty($request->get('sort')) ? $request->get('sort') : array();
         $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'desc';
@@ -75,7 +77,7 @@ class ProjectController extends AbstractController
 
         try {
             $pages = 1;
-            $total = $this->projectService->TotalProjects($sSearch, $contractor_id, $inspector_id, $status);
+            $total = $this->projectService->TotalProjects($sSearch, $company_id, $status, $fecha_inicial, $fecha_fin);
             if ($limit > 0) {
                 $pages = ceil($total / $limit); // calculate total pages
                 $page = max($page, 1); // get 1 page when $_REQUEST['page'] <= 0
@@ -96,7 +98,7 @@ class ProjectController extends AbstractController
             );
 
             $data = $this->projectService->ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
-                $contractor_id, $inspector_id, $status);
+                $company_id, $status, $fecha_inicial, $fecha_fin);
 
             $resultadoJson = array(
                 'meta' => $meta,
@@ -121,22 +123,40 @@ class ProjectController extends AbstractController
     {
         $project_id = $request->get('project_id');
 
-        $contractor_id = $request->get('contractor_id');
+        $company_id = $request->get('company_id');
         $inspector_id = $request->get('inspector_id');
         $number = $request->get('number');
         $name = $request->get('name');
         $location = $request->get('location');
         $po_number = $request->get('po_number');
         $po_cg = $request->get('po_cg');
+
         $manager = $request->get('manager');
         $status = $request->get('status');
+        $owner = $request->get('owner');
+        $subcontract = $request->get('subcontract');
+        $federal_funding = $request->get('federal_funding');
+        $county = $request->get('county');
+        $resurfacing = $request->get('resurfacing');
+        $invoice_contact = $request->get('invoice_contact');
+        $certified_payrolls = $request->get('certified_payrolls');
+        $start_date = $request->get('start_date');
+        $end_date = $request->get('end_date');
+
+        // items
+        $items = $request->get('items');
+        $items = json_decode($items);
 
         try {
 
             if ($project_id == "") {
-                $resultado = $this->projectService->SalvarProject($contractor_id, $inspector_id, $number, $name, $location, $po_number, $po_cg, $manager, $status);
+                $resultado = $this->projectService->SalvarProject($company_id, $inspector_id, $number, $name,
+                    $location, $po_number, $po_cg, $manager, $status, $owner, $subcontract, $federal_funding, $county,
+                $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $items);
             } else {
-                $resultado = $this->projectService->ActualizarProject($project_id, $contractor_id, $inspector_id, $number, $name, $location, $po_number, $po_cg, $manager, $status);
+                $resultado = $this->projectService->ActualizarProject($project_id, $company_id, $inspector_id, $number,
+                    $name, $location, $po_number, $po_cg, $manager, $status, $owner, $subcontract, $federal_funding, $county,
+                    $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $items);
             }
 
             if ($resultado['success']) {
@@ -254,12 +274,12 @@ class ProjectController extends AbstractController
      */
     public function listarOrdenados(Request $request)
     {
-        $contractor_id = $request->get('contractor_id');
+        $company_id = $request->get('company_id');
         $inspector_id = $request->get('inspector_id');
         $search = $request->get('search');
 
         try {
-            $projects = $this->projectService->ListarOrdenados($search, $contractor_id, $inspector_id);
+            $projects = $this->projectService->ListarOrdenados($search, $company_id, $inspector_id);
 
             $resultadoJson['success'] = true;
             $resultadoJson['projects'] = $projects;
@@ -275,10 +295,10 @@ class ProjectController extends AbstractController
     }
 
     /**
-     * listarItemDetails Acción que lista los items details projects
+     * listarDataTracking Acción que lista los items details projects
      *
      */
-    public function listarItemDetails(Request $request)
+    public function listarDataTracking(Request $request)
     {
 
         // search filter by keywords
@@ -301,7 +321,7 @@ class ProjectController extends AbstractController
 
         try {
             $pages = 1;
-            $total = $project_id != '' ? $this->projectService->TotalItemDetails($sSearch, $project_id, $item_id, $fecha_inicial, $fecha_fin) : 0;
+            $total = $project_id != '' ? $this->projectService->TotalDataTracking($sSearch, $project_id, $item_id, $fecha_inicial, $fecha_fin) : 0;
             if ($limit > 0) {
                 $pages = ceil($total / $limit); // calculate total pages
                 $page = max($page, 1); // get 1 page when $_REQUEST['page'] <= 0
@@ -321,7 +341,7 @@ class ProjectController extends AbstractController
                 'sort' => $sSortDir_0
             );
 
-            $data = $project_id != '' ? $this->projectService->ListarItemDetails($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $item_id, $fecha_inicial, $fecha_fin) : [];
+            $data = $project_id != '' ? $this->projectService->ListarDataTracking($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $item_id, $fecha_inicial, $fecha_fin) : [];
 
             $resultadoJson = array(
                 'meta' => $meta,
@@ -339,12 +359,12 @@ class ProjectController extends AbstractController
     }
 
     /**
-     * salvarItemDetails Acción que salvar un item details en la BD
+     * salvarDataTracking Acción que salvar un item details en la BD
      *
      */
-    public function salvarItemDetails(Request $request)
+    public function salvarDataTracking(Request $request)
     {
-        $item_details_id = $request->get('item_details_id');
+        $data_tracking_id = $request->get('data_tracking_id');
 
         $project_id = $request->get('project_id');
         $item_id = $request->get('item_id');
@@ -355,7 +375,7 @@ class ProjectController extends AbstractController
 
         try {
 
-            $resultado = $this->projectService->SalvarItemDetails($item_details_id, $project_id, $item_id, $quantity, $price, $date);
+            $resultado = $this->projectService->SalvarDataTracking($data_tracking_id, $project_id, $item_id, $quantity, $price, $date);
 
             if ($resultado['success']) {
 
@@ -378,15 +398,15 @@ class ProjectController extends AbstractController
     }
 
     /**
-     * cargarDatosItemDetails Acción que carga los datos del item detail project en la BD
+     * cargarDatosDataTracking Acción que carga los datos del item detail project en la BD
      *
      */
-    public function cargarDatosItemDetails(Request $request)
+    public function cargarDatosDataTracking(Request $request)
     {
-        $item_details_id = $request->get('item_details_id');
+        $data_tracking_id = $request->get('data_tracking_id');
 
         try {
-            $resultado = $this->projectService->CargarDatosItemDetails($item_details_id);
+            $resultado = $this->projectService->CargarDatosDataTracking($data_tracking_id);
             if ($resultado['success']) {
 
                 $resultadoJson['success'] = $resultado['success'];
@@ -409,15 +429,15 @@ class ProjectController extends AbstractController
     }
 
     /**
-     * eliminarItemDetails Acción que elimina un item details en la BD
+     * eliminarDataTracking Acción que elimina un item details en la BD
      *
      */
-    public function eliminarItemDetails(Request $request)
+    public function eliminarDataTracking(Request $request)
     {
-        $item_details_id = $request->get('item_details_id');
+        $data_tracking_id = $request->get('data_tracking_id');
 
         try {
-            $resultado = $this->projectService->EliminarItemDetails($item_details_id);
+            $resultado = $this->projectService->EliminarDataTracking($data_tracking_id);
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
@@ -437,17 +457,17 @@ class ProjectController extends AbstractController
     }
 
     /**
-     * listarItemDetailsParaInvoice Acción para listar los items para el invoice
+     * listarDataTrackingParaInvoice Acción para listar los items para el invoice
      *
      */
-    public function listarItemDetailsParaInvoice(Request $request)
+    public function listarDataTrackingParaInvoice(Request $request)
     {
         $project_id = $request->get('project_id');
         $fecha_inicial = $request->get('fechaInicial');
         $fecha_fin = $request->get('fechaFin');
 
         try {
-            $items = $this->projectService->ListarItemDetailsParaInvoice($project_id, $fecha_inicial, $fecha_fin);
+            $items = $this->projectService->ListarDataTrackingParaInvoice($project_id, $fecha_inicial, $fecha_fin);
 
             $resultadoJson['success'] = true;
             $resultadoJson['items'] = $items;
@@ -620,4 +640,32 @@ class ProjectController extends AbstractController
 
     }
 
+    /**
+     * eliminarItem Acción que elimina un item en la BD
+     *
+     */
+    public function eliminarItem(Request $request)
+    {
+        $project_item_id = $request->get('project_item_id');
+
+        try {
+            $resultado = $this->projectService->EliminarItem($project_item_id);
+            if ($resultado['success']) {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['message'] = "The operation was successful";
+
+            } else {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['error'] = $resultado['error'];
+            }
+
+            return $this->json($resultadoJson);
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+
+    }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Utils\Admin;
 
-use App\Entity\Contractor;
+use App\Entity\Company;
 use App\Entity\Invoice;
 use App\Entity\InvoiceItem;
 use App\Entity\Item;
@@ -139,7 +139,7 @@ class DefaultService extends Base
                     'project_id' => $project_id,
                     'number' => $project->getProjectNumber(),
                     'name' => $project->getName(),
-                    'contractor' => $project->getContractor()->getName(),
+                    'company' => $project->getCompany()->getName(),
                     'amount' => $amount,
                     'porciento' => $porciento
                 ];
@@ -166,22 +166,22 @@ class DefaultService extends Base
         // total de proyectos
         $total_proyectos = $this->getDoctrine()->getRepository(Project::class)->TotalProjects('');
 
-        // contractors
+        // companies
         $data = [];
-        $contractors = $this->getDoctrine()->getRepository(Contractor::class)
+        $companies = $this->getDoctrine()->getRepository(Company::class)
             ->ListarOrdenados();
-        foreach ($contractors as $contractor) {
-            $contractor_id = $contractor->getContractorId();
+        foreach ($companies as $company) {
+            $company_id = $company->getCompanyId();
             // cantidad de proyectos
-            $total = $this->getDoctrine()->getRepository(Project::class)->TotalProjects('', $contractor_id);
+            $total = $this->getDoctrine()->getRepository(Project::class)->TotalProjects('', $company_id);
 
             if ($total > 0) {
                 // porciento
                 $porciento = round($total / $total_proyectos * 100);
 
                 $data[] = [
-                    'contractor_id' => $contractor_id,
-                    'name' => $contractor->getName(),
+                    'company_id' => $company_id,
+                    'name' => $company->getName(),
                     'total' => $total,
                     'porciento' => $porciento
                 ];
@@ -220,7 +220,7 @@ class DefaultService extends Base
                     'project_id' => $project_id,
                     'number' => $project->getProjectNumber(),
                     'name' => $project->getName(),
-                    'contractor' => $project->getContractor()->getName(),
+                    'company' => $project->getCompany()->getName(),
                     'amount' => $amount
                 ];
             }

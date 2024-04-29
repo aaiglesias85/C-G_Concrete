@@ -28,7 +28,7 @@
             {% endif %}
 
             <!-- menu content -->
-            {% if menu.menuUnit or menu.menuItem or menu.menuInspector or menu.menuContractor or menu.menuProject %}
+            {% if menu.menuUnit or menu.menuItem or menu.menuInspector or menu.menuCompany or menu.menuProject %}
                 <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true"
                     m-menu-submenu-toggle="click">
                     <a href="javascript:;" class="m-menu__link m-menu__toggle menu-tooltip" data-title="CRUD">
@@ -70,11 +70,11 @@
                                 </li>
                             {% endif %}
 
-                            {% if menu.menuContractor %}
+                            {% if menu.menuCompany %}
                                 <li class="m-menu__item " aria-haspopup="true" m-menu-link-redirect="1">
-                                    <a href="{{ url('contractor') }}" class="m-menu__link ">
+                                    <a href="{{ url('company') }}" class="m-menu__link ">
                                         <i class="m-menu__link-bullet m-menu__link-bullet--line"><span></span></i>
-                                        <span class="m-menu__link-text">Contractors</span>
+                                        <span class="m-menu__link-text">Companies</span>
                                     </a>
                                 </li>
                             {% endif %}
@@ -94,7 +94,7 @@
             {% endif %}
 
             <!-- menu invoice -->
-            {% if menu.menuDailyTracking or menu.menuInvoice %}
+            {% if menu.menuDataTracking or menu.menuInvoice %}
                 <li class="m-menu__item  m-menu__item--submenu" aria-haspopup="true"
                     m-menu-submenu-toggle="click">
                     <a href="javascript:;" class="m-menu__link m-menu__toggle menu-tooltip" data-title="Invoices">
@@ -109,9 +109,9 @@
                                 <span class="m-menu__link"><span class="m-menu__link-text">Invoices</span></span>
                             </li>
 
-                            {% if menu.menuDailyTracking %}
+                            {% if menu.menuDataTracking %}
                                 <li class="m-menu__item " aria-haspopup="true" m-menu-link-redirect="1">
-                                    <a href="{{ url('daily_tracking') }}" class="m-menu__link ">
+                                    <a href="{{ url('data_tracking') }}" class="m-menu__link ">
                                         <i class="m-menu__link-bullet m-menu__link-bullet--line"><span></span></i>
                                         <span class="m-menu__link-text">Data Tracking</span>
                                     </a>

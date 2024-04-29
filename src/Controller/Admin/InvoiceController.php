@@ -2,7 +2,7 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Contractor;
+use App\Entity\Company;
 use App\Entity\Item;
 use App\Utils\Admin\InvoiceService;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,8 +25,8 @@ class InvoiceController extends AbstractController
         if (count($permiso) > 0) {
             if ($permiso[0]['ver']) {
 
-                // contractors
-                $contractors = $this->invoiceService->getDoctrine()->getRepository(Contractor::class)
+                // companies
+                $companies = $this->invoiceService->getDoctrine()->getRepository(Company::class)
                     ->ListarOrdenados();
 
                 // items
@@ -35,7 +35,7 @@ class InvoiceController extends AbstractController
 
                 return $this->render('admin/invoice/index.html.twig', array(
                     'permiso' => $permiso[0],
-                    'contractors' => $contractors,
+                    'companies' => $companies,
                     'items' => $items
                 ));
             }
@@ -54,7 +54,7 @@ class InvoiceController extends AbstractController
         // search filter by keywords
         $query = !empty($request->get('query')) ? $request->get('query') : array();
         $sSearch = isset($query['generalSearch']) && is_string($query['generalSearch']) ? $query['generalSearch'] : '';
-        $contractor_id = isset($query['contractor_id']) && is_string($query['contractor_id']) ? $query['contractor_id'] : '';
+        $company_id = isset($query['company_id']) && is_string($query['company_id']) ? $query['company_id'] : '';
         $project_id = isset($query['project_id']) && is_string($query['project_id']) ? $query['project_id'] : '';
         $fecha_inicial = isset($query['fechaInicial']) && is_string($query['fechaInicial']) ? $query['fechaInicial'] : '';
         $fecha_fin = isset($query['fechaFin']) && is_string($query['fechaFin']) ? $query['fechaFin'] : '';
@@ -71,7 +71,7 @@ class InvoiceController extends AbstractController
 
         try {
             $pages = 1;
-            $total = $this->invoiceService->TotalInvoices($sSearch, $contractor_id, $project_id, $fecha_inicial, $fecha_fin);
+            $total = $this->invoiceService->TotalInvoices($sSearch, $company_id, $project_id, $fecha_inicial, $fecha_fin);
             if ($limit > 0) {
                 $pages = ceil($total / $limit); // calculate total pages
                 $page = max($page, 1); // get 1 page when $_REQUEST['page'] <= 0
@@ -91,7 +91,7 @@ class InvoiceController extends AbstractController
                 'sort' => $sSortDir_0
             );
 
-            $data = $this->invoiceService->ListarInvoices($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $contractor_id, $project_id, $fecha_inicial, $fecha_fin);
+            $data = $this->invoiceService->ListarInvoices($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $company_id, $project_id, $fecha_inicial, $fecha_fin);
 
             $resultadoJson = array(
                 'meta' => $meta,

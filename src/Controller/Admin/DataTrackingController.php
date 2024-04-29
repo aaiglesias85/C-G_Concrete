@@ -2,29 +2,43 @@
 
 namespace App\Controller\Admin;
 
-use App\Utils\Admin\ContractorService;
+use App\Entity\Company;
+use App\Entity\Item;
+use App\Utils\Admin\DataTrackingService;
+use App\Utils\Admin\ProjectService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class ContractorController extends AbstractController
+class DataTrackingController extends AbstractController
 {
 
-    private $contractorService;
-
-    public function __construct(ContractorService $contractorService)
+    private $dataTrackingService;
+    private $projectService;
+    public function __construct(DataTrackingService $dataTrackingService, ProjectService $projectService)
     {
-        $this->contractorService = $contractorService;
+        $this->dataTrackingService = $dataTrackingService;
+        $this->projectService = $projectService;
     }
 
     public function index()
     {
         $usuario = $this->getUser();
-        $permiso = $this->contractorService->BuscarPermiso($usuario->getUsuarioId(), 8);
+        $permiso = $this->dataTrackingService->BuscarPermiso($usuario->getUsuarioId(), 10);
         if (count($permiso) > 0) {
             if ($permiso[0]['ver']) {
 
-                return $this->render('admin/contractor/index.html.twig', array(
-                    'permiso' => $permiso[0]
+                // companies
+                $companies = $this->dataTrackingService->getDoctrine()->getRepository(Company::class)
+                    ->ListarOrdenados();
+
+                // items
+                $items = $this->dataTrackingService->getDoctrine()->getRepository(Item::class)
+                    ->ListarOrdenados();
+
+                return $this->render('admin/data-tracking/index.html.twig', array(
+                    'permiso' => $permiso[0],
+                    'companies' => $companies,
+                    'items' => $items
                 ));
             }
         } else {
@@ -33,7 +47,7 @@ class ContractorController extends AbstractController
     }
 
     /**
-     * listar Acción que lista los contractors
+     * listar Acción que lista los dataTrackings
      *
      */
     public function listar(Request $request)
@@ -42,10 +56,16 @@ class ContractorController extends AbstractController
         // search filter by keywords
         $query = !empty($request->get('query')) ? $request->get('query') : array();
         $sSearch = isset($query['generalSearch']) && is_string($query['generalSearch']) ? $query['generalSearch'] : '';
+        $company_id = isset($query['company_id']) && is_string($query['company_id']) ? $query['company_id'] : '';
+        $project_id = isset($query['project_id']) && is_string($query['project_id']) ? $query['project_id'] : '';
+        $item_id = isset($query['item_id']) && is_string($query['item_id']) ? $query['item_id'] : '';
+        $fecha_inicial = isset($query['fechaInicial']) && is_string($query['fechaInicial']) ? $query['fechaInicial'] : '';
+        $fecha_fin = isset($query['fechaFin']) && is_string($query['fechaFin']) ? $query['fechaFin'] : '';
+
         //Sort
         $sort = !empty($request->get('sort')) ? $request->get('sort') : array();
         $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'desc';
-        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'createdAt';
+        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'date';
         //$start and $limit
         $pagination = !empty($request->get('pagination')) ? $request->get('pagination') : array();
         $page = !empty($pagination['page']) ? (int)$pagination['page'] : 1;
@@ -54,7 +74,7 @@ class ContractorController extends AbstractController
 
         try {
             $pages = 1;
-            $total = $this->contractorService->TotalContractors($sSearch);
+            $total = $this->dataTrackingService->TotalDataTrackings($sSearch, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin);
             if ($limit > 0) {
                 $pages = ceil($total / $limit); // calculate total pages
                 $page = max($page, 1); // get 1 page when $_REQUEST['page'] <= 0
@@ -74,7 +94,7 @@ class ContractorController extends AbstractController
                 'sort' => $sSortDir_0
             );
 
-            $data = $this->contractorService->ListarContractors($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0);
+            $data = $this->dataTrackingService->ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin);
 
             $resultadoJson = array(
                 'meta' => $meta,
@@ -97,24 +117,17 @@ class ContractorController extends AbstractController
      */
     public function salvar(Request $request)
     {
-        $contractor_id = $request->get('contractor_id');
+        $data_tracking_id = $request->get('data_tracking_id');
 
-        $name = $request->get('name');
-        $phone = $request->get('phone');
-        $contactName = $request->get('contactName');
-        $contactEmail = $request->get('contactEmail');
-
-        // contacts
-        $contacts = $request->get('contacts');
-        $contacts = json_decode($contacts);
+        $project_id = $request->get('project_id');
+        $item_id = $request->get('item_id');
+        $quantity = $request->get('quantity');
+        $price = $request->get('price');
+        $date = $request->get('date');
 
         try {
 
-            if ($contractor_id == "") {
-                $resultado = $this->contractorService->SalvarContractor($name, $phone, $contactName, $contactEmail, $contacts);
-            } else {
-                $resultado = $this->contractorService->ActualizarContractor($contractor_id, $name, $phone, $contactName, $contactEmail, $contacts);
-            }
+            $resultado = $this->projectService->SalvarDataTracking($data_tracking_id, $project_id, $item_id, $quantity, $price, $date);
 
             if ($resultado['success']) {
 
@@ -137,15 +150,15 @@ class ContractorController extends AbstractController
     }
 
     /**
-     * eliminar Acción que elimina un contractor en la BD
+     * eliminar Acción que elimina un dataTracking en la BD
      *
      */
     public function eliminar(Request $request)
     {
-        $contractor_id = $request->get('contractor_id');
+        $data_tracking_id = $request->get('data_tracking_id');
 
         try {
-            $resultado = $this->contractorService->EliminarContractor($contractor_id);
+            $resultado = $this->projectService->EliminarDataTracking($data_tracking_id);
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
@@ -161,20 +174,18 @@ class ContractorController extends AbstractController
 
             return $this->json($resultadoJson);
         }
-
-
     }
 
     /**
-     * eliminarContractors Acción que elimina los contractors seleccionados en la BD
+     * eliminarDataTrackings Acción que elimina los dataTrackings seleccionados en la BD
      *
      */
-    public function eliminarContractors(Request $request)
+    public function eliminarDataTrackings(Request $request)
     {
         $ids = $request->get('ids');
 
         try {
-            $resultado = $this->contractorService->EliminarContractors($ids);
+            $resultado = $this->dataTrackingService->EliminarDataTrackings($ids);
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
@@ -195,19 +206,19 @@ class ContractorController extends AbstractController
     }
 
     /**
-     * cargarDatos Acción que carga los datos del contractor en la BD
+     * cargarDatos Acción que carga los datos del dataTracking en la BD
      *
      */
     public function cargarDatos(Request $request)
     {
-        $contractor_id = $request->get('contractor_id');
+        $data_tracking_id = $request->get('data_tracking_id');
 
         try {
-            $resultado = $this->contractorService->CargarDatosContractor($contractor_id);
+            $resultado = $this->projectService->CargarDatosDataTracking($data_tracking_id);
             if ($resultado['success']) {
 
                 $resultadoJson['success'] = $resultado['success'];
-                $resultadoJson['contractor'] = $resultado['contractor'];
+                $resultadoJson['item'] = $resultado['item'];
 
                 return $this->json($resultadoJson);
             } else {
@@ -222,35 +233,5 @@ class ContractorController extends AbstractController
 
             return $this->json($resultadoJson);
         }
-
-    }
-
-    /**
-     * eliminarContact Acción que elimina un contact en la BD
-     *
-     */
-    public function eliminarContact(Request $request)
-    {
-        $contact_id = $request->get('contact_id');
-
-        try {
-            $resultado = $this->contractorService->EliminarContact($contact_id);
-            if ($resultado['success']) {
-                $resultadoJson['success'] = $resultado['success'];
-                $resultadoJson['message'] = "The operation was successful";
-                return $this->json($resultadoJson);
-            } else {
-                $resultadoJson['success'] = $resultado['success'];
-                $resultadoJson['error'] = $resultado['error'];
-                return $this->json($resultadoJson);
-            }
-        } catch (\Exception $e) {
-            $resultadoJson['success'] = false;
-            $resultadoJson['error'] = $e->getMessage();
-
-            return $this->json($resultadoJson);
-        }
-
-
     }
 }

@@ -60,11 +60,11 @@ class InvoiceItemRepository extends EntityRepository
      *
      * @author Marcel
      */
-    public function TotalInvoice($invoice_id = '', $contractor_id = '', $project_id = '', $fecha_inicial = '', $fecha_fin = '', $item_id = '')
+    public function TotalInvoice($invoice_id = '', $company_id = '', $project_id = '', $fecha_inicial = '', $fecha_fin = '', $item_id = '')
     {
         $em = $this->getEntityManager();
         $consulta = 'SELECT SUM(i_i.quantity * i_i.price) FROM App\Entity\InvoiceItem i_i ';
-        $join = ' LEFT JOIN i_i.item it LEFT JOIN i_i.invoice i LEFT JOIN i.project p LEFT JOIN p.contractor c ';
+        $join = ' LEFT JOIN i_i.item it LEFT JOIN i_i.invoice i LEFT JOIN i.project p LEFT JOIN p.company c ';
         $where = '';
 
         if ($item_id != '') {
@@ -91,12 +91,12 @@ class InvoiceItemRepository extends EntityRepository
                 $where .= 'AND (p.projectId = :project_id) ';
         }
 
-        if ($contractor_id != '') {
+        if ($company_id != '') {
             $esta_query = explode("WHERE", $where);
             if (count($esta_query) == 1)
-                $where .= 'WHERE (c.contractorId = :contractor_id) ';
+                $where .= 'WHERE (c.companyId = :company_id) ';
             else
-                $where .= 'AND (c.contractorId = :contractor_id) ';
+                $where .= 'AND (c.companyId = :company_id) ';
         }
 
         if ($fecha_inicial != "") {
@@ -145,9 +145,9 @@ class InvoiceItemRepository extends EntityRepository
             $query->setParameter('project_id', $project_id);
         }
 
-        $esta_query_contractor_id = substr_count($consulta, ':contractor_id');
-        if ($esta_query_contractor_id == 1) {
-            $query->setParameter('contractor_id', $contractor_id);
+        $esta_query_company_id = substr_count($consulta, ':company_id');
+        if ($esta_query_company_id == 1) {
+            $query->setParameter('company_id', $company_id);
         }
 
         $esta_query_inicio = substr_count($consulta, ':inicio');
