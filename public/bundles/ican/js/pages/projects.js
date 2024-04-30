@@ -347,13 +347,13 @@ var Projects = function () {
                             btnClickFiltrar();
 
                         } else {
-                            toastr.error(response.error, "Error !!!");
+                            toastr.error(response.error, "");
                         }
                     },
                     failure: function (response) {
                         mApp.unblock('#form-project');
 
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 });
             } else {
@@ -484,13 +484,13 @@ var Projects = function () {
                         event_change = false;
 
                     } else {
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
                     mApp.unblock('#form-project');
 
-                    toastr.error(response.error, "Error !!!");
+                    toastr.error(response.error, "");
                 }
             });
 
@@ -539,7 +539,7 @@ var Projects = function () {
                     'show': true
                 });
             } else {
-                toastr.error('Select projects to delete', "Error !!!");
+                toastr.error('Select projects to delete', "");
             }
         };
 
@@ -564,13 +564,13 @@ var Projects = function () {
                         toastr.success(response.message, "Success !!!");
 
                     } else {
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
                     mApp.unblock('#project-table-editable');
 
-                    toastr.error(response.error, "Error !!!");
+                    toastr.error(response.error, "");
                 }
             });
         };
@@ -603,13 +603,13 @@ var Projects = function () {
                         toastr.success(response.message, "Success !!!");
 
                     } else {
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
                     mApp.unblock('#project-table-editable');
 
-                    toastr.error(response.error, "Error !!!");
+                    toastr.error(response.error, "");
                 }
             });
         };
@@ -1141,13 +1141,13 @@ var Projects = function () {
                                 deleteItem(posicion);
 
                             } else {
-                                toastr.error(response.error, "Error !!!");
+                                toastr.error(response.error, "");
                             }
                         },
                         failure: function (response) {
                             mApp.unblock('#items-table-editable');
 
-                            toastr.error(response.error, "Error !!!");
+                            toastr.error(response.error, "");
                         }
                     });
                 } else {
@@ -1445,13 +1445,13 @@ var Projects = function () {
                             btnClickFiltrarDataTracking();
 
                         } else {
-                            toastr.error(response.error, "Error !!!");
+                            toastr.error(response.error, "");
                         }
                     },
                     failure: function (response) {
                         mApp.unblock('#modal-data-tracking .modal-content');
 
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 });
 
@@ -1521,13 +1521,13 @@ var Projects = function () {
                         toastr.success(response.message, "Success !!!");
 
                     } else {
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
                     mApp.unblock('#data-tracking-table-editable');
 
-                    toastr.error(response.error, "Error !!!");
+                    toastr.error(response.error, "");
                 }
             });
 
@@ -1568,13 +1568,13 @@ var Projects = function () {
                         $('#data-tracking-price').on('change', calcularTotalItemDataTracking);
 
                     } else {
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
                     mApp.unblock('#modal-data-tracking .modal-content');
 
-                    toastr.error(response.error, "Error !!!");
+                    toastr.error(response.error, "");
                 }
             });
 
@@ -1819,13 +1819,13 @@ var Projects = function () {
                             btnClickFiltrarNotes();
 
                         } else {
-                            toastr.error(response.error, "Error !!!");
+                            toastr.error(response.error, "");
                         }
                     },
                     failure: function (response) {
                         mApp.unblock('#modal-notes .modal-content');
 
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 });
 
@@ -1881,13 +1881,13 @@ var Projects = function () {
                         toastr.success(response.message, "Success !!!");
 
                     } else {
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
                     mApp.unblock('#notes-table-editable');
 
-                    toastr.error(response.error, "Error !!!");
+                    toastr.error(response.error, "");
                 }
             });
 
@@ -1913,13 +1913,13 @@ var Projects = function () {
                         $('#notes').val(response.notes.notes);
 
                     } else {
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
                     mApp.unblock('#modal-notes .modal-content');
 
-                    toastr.error(response.error, "Error !!!");
+                    toastr.error(response.error, "");
                 }
             });
 
