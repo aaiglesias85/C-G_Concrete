@@ -1053,7 +1053,7 @@ var Projects = function () {
 
                 // reset
                 resetFormItem();
-                $('#modal-item').modal('hide');
+                //$('#modal-item').modal('hide');
 
             } else {
                 if (item_id == "") {
