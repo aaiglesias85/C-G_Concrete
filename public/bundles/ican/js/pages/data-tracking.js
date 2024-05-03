@@ -255,7 +255,7 @@ var DataTracking = function () {
             var project_id = $('#project').val();
             if (project_id == '') {
 
-                toastr.error('Select the project in the side panel', "Error !!!");
+                toastr.error('Select the project in the side panel', "");
 
                 var $element = $('#select-project .select2');
                 $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
@@ -315,23 +315,23 @@ var DataTracking = function () {
                         mApp.unblock('#modal-item .modal-content');
                         if (response.success) {
 
-                            toastr.success(response.message, "Success !!!");
+                            toastr.success(response.message, "Success");
 
                             // reset
                             resetForms();
-                            $('#modal-item').modal('hide');
+                            //$('#modal-item').modal('hide');
 
                             //actualizar lista
                             btnClickFiltrar();
 
                         } else {
-                            toastr.error(response.error, "Error !!!");
+                            toastr.error(response.error, "");
                         }
                     },
                     failure: function (response) {
                         mApp.unblock('#modal-item .modal-content');
 
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 });
             } else {
@@ -403,13 +403,13 @@ var DataTracking = function () {
                         $('#item-price').on('change', calcularTotalItem);
 
                     } else {
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
                     mApp.unblock('#modal-item .modal-content');
 
-                    toastr.error(response.error, "Error !!!");
+                    toastr.error(response.error, "");
                 }
             });
 
@@ -458,7 +458,7 @@ var DataTracking = function () {
                     'show': true
                 });
             } else {
-                toastr.error('Select items to delete', "Error !!!");
+                toastr.error('Select items to delete', "");
             }
         };
 
@@ -481,16 +481,16 @@ var DataTracking = function () {
 
                         btnClickFiltrar();
 
-                        toastr.success(response.message, "Success !!!");
+                        toastr.success(response.message, "Success");
 
                     } else {
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
                     mApp.unblock('#data-tracking-table-editable');
 
-                    toastr.error(response.error, "Error !!!");
+                    toastr.error(response.error, "");
                 }
             });
         };
@@ -524,13 +524,13 @@ var DataTracking = function () {
                         toastr.success(response.message, "Success !!!");
 
                     } else {
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
                     mApp.unblock('#data-tracking-table-editable');
 
-                    toastr.error(response.error, "Error !!!");
+                    toastr.error(response.error, "");
                 }
             });
         };
@@ -584,13 +584,13 @@ var DataTracking = function () {
                         $('#project').select2();
 
                     } else {
-                        toastr.error(response.error, "Error !!!");
+                        toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
                     mApp.unblock('#form-group-project');
 
-                    toastr.error(response.error, "Error !!!");
+                    toastr.error(response.error, "");
                 }
             });
         }

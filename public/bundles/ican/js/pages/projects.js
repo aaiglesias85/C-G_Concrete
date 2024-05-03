@@ -341,7 +341,7 @@ var Projects = function () {
                         mApp.unblock('#form-project');
                         if (response.success) {
 
-                            toastr.success(response.message, "Success !!!");
+                            toastr.success(response.message, "Success");
                             cerrarForms();
 
                             btnClickFiltrar();
@@ -561,7 +561,7 @@ var Projects = function () {
                     if (response.success) {
                         oTable.load();
 
-                        toastr.success(response.message, "Success !!!");
+                        toastr.success(response.message, "Success");
 
                     } else {
                         toastr.error(response.error, "");
@@ -600,7 +600,7 @@ var Projects = function () {
                     if (response.success) {
 
                         oTable.load();
-                        toastr.success(response.message, "Success !!!");
+                        toastr.success(response.message, "Success");
 
                     } else {
                         toastr.error(response.error, "");
@@ -1136,7 +1136,7 @@ var Projects = function () {
                             mApp.unblock('#items-table-editable');
                             if (response.success) {
 
-                                toastr.success(response.message, "Success !!!");
+                                toastr.success(response.message, "Success");
 
                                 deleteItem(posicion);
 
@@ -1435,11 +1435,11 @@ var Projects = function () {
                         mApp.unblock('#modal-data-tracking .modal-content');
                         if (response.success) {
 
-                            toastr.success(response.message, "Success !!!");
+                            toastr.success(response.message, "Success");
 
                             // reset
                             resetFormDataTracking();
-                            $('#modal-data-tracking').modal('hide');
+                            //$('#modal-data-tracking').modal('hide');
 
                             //actualizar lista
                             btnClickFiltrarDataTracking();
@@ -1518,7 +1518,7 @@ var Projects = function () {
 
                         btnClickFiltrarDataTracking();
 
-                        toastr.success(response.message, "Success !!!");
+                        toastr.success(response.message, "Success");
 
                     } else {
                         toastr.error(response.error, "");
@@ -1809,7 +1809,7 @@ var Projects = function () {
                         mApp.unblock('#modal-notes .modal-content');
                         if (response.success) {
 
-                            toastr.success(response.message, "Success !!!");
+                            toastr.success(response.message, "Success");
 
                             // reset
                             resetFormNote();
@@ -1878,7 +1878,7 @@ var Projects = function () {
 
                         btnClickFiltrarNotes();
 
-                        toastr.success(response.message, "Success !!!");
+                        toastr.success(response.message, "Success");
 
                     } else {
                         toastr.error(response.error, "");
