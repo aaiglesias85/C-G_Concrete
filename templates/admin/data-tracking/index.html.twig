@@ -83,30 +83,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group m-form__group" id="form-group-project">
-                                <label>Project</label>
-                                <div class="row">
-                                    <div class="col-md-12" id="select-project">
-                                        <select class="form-control m-select2 event-change" id="project">
-                                            <option value="">Select</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group m-form__group">
-                                <label>Item</label>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <select class="form-control m-select2" id="filtro-item">
-                                            <option value="">Select</option>
-                                            {% for item in items %}
-                                                <option value="{{ item.itemId }}">{{ item.description }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="form-group m-form__group">
                                 <label>From</label>
                                 <div class='input-group date'>
@@ -130,6 +106,30 @@
                                         <span class="input-group-text">
                                             <i class="la la-calendar glyphicon-th"></i>
                                         </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group m-form__group" id="form-group-project">
+                                <label>Project</label>
+                                <div class="row">
+                                    <div class="col-md-12" id="select-project">
+                                        <select class="form-control m-select2 event-change" id="project">
+                                            <option value="">Select</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group m-form__group">
+                                <label>Item</label>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <select class="form-control m-select2" id="filtro-item">
+                                            <option value="">Select</option>
+                                            {% for item in items %}
+                                                <option value="{{ item.itemId }}">{{ item.description }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                 </div>
                             </div>

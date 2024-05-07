@@ -63,6 +63,22 @@ var Projects = function () {
                 }
             },
             {
+                field: "nota",
+                title: "Notes",
+                responsive: {visible: 'lg'},
+                width: 200,
+                sortable: false,
+                // callback function support for column rendering
+                template: function (row) {
+
+                    var html = '';
+                    if(row.nota != null){
+                        html = `${row.nota.nota} <span class="m-badge m-badge--info">${row.nota.date}</span> <i class="flaticon-edit editar-notas" data-id="${row.id}" style="cursor:pointer;" title="Edit notes"></i>`;
+                    }
+                    return html;
+                }
+            },
+            {
                 field: "acciones",
                 width: 80,
                 title: "Actions",
@@ -422,10 +438,24 @@ var Projects = function () {
             $('#form-project').removeClass('m--hide');
             $('#lista-project').addClass('m--hide');
 
-            editRow(project_id);
+            editRow(project_id, false);
         });
 
-        function editRow(project_id) {
+        $(document).off('click', "#project-table-editable i.editar-notas");
+        $(document).on('click', "#project-table-editable i.editar-notas", function (e) {
+            e.preventDefault();
+            resetForms();
+
+            var project_id = $(this).data('id');
+            $('#project_id').val(project_id);
+
+            $('#form-project').removeClass('m--hide');
+            $('#lista-project').addClass('m--hide');
+
+            editRow(project_id, true);
+        });
+
+        function editRow(project_id, editar_notas) {
 
             MyApp.block('#form-project');
 
@@ -484,6 +514,12 @@ var Projects = function () {
                         $('.nav-item-hide').removeClass('m--hide');
 
                         event_change = false;
+
+                        // ir al tab de notas
+                        if(editar_notas){
+                            activeTab = 3;
+                            mostrarTab();
+                        }
 
                     } else {
                         toastr.error(response.error, "");

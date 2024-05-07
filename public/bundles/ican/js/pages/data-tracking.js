@@ -545,6 +545,8 @@ var DataTracking = function () {
 
         // change
         $('#company').change(changeCompany);
+        $('#filtro-fecha-inicial-item').change(changeCompany);
+        $('#filtro-fecha-fin-item').change(changeCompany);
         $('#item').change(changeItem);
         $('#item-quantity').change(calcularTotalItem);
         $('#item-price').change(calcularTotalItem);
@@ -552,6 +554,8 @@ var DataTracking = function () {
 
     var changeCompany = function () {
         var company_id = $('#company').val();
+        var from = $('#filtro-fecha-inicial-item').val();
+        var to = $('#filtro-fecha-fin-item').val();
 
         // reset
         $('#project option').each(function (e) {
@@ -569,7 +573,9 @@ var DataTracking = function () {
                 url: "project/listarOrdenados",
                 dataType: "json",
                 data: {
-                    'company_id': company_id
+                    'company_id': company_id,
+                    'from': from,
+                    'to': to
                 },
                 success: function (response) {
                     mApp.unblock('#form-group-project');

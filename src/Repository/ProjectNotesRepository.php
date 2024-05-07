@@ -14,7 +14,7 @@ class ProjectNotesRepository extends EntityRepository
      *
      * @return ProjectNotes[]
      */
-    public function ListarNotesDeProject($project_id, $fecha_inicial = '', $fecha_fin = '')
+    public function ListarNotesDeProject($project_id, $fecha_inicial = '', $fecha_fin = '', $sort = 'DESC')
     {
         $consulta = $this->createQueryBuilder('p_n')
             ->leftJoin('p_n.project', 'p');
@@ -42,7 +42,7 @@ class ProjectNotesRepository extends EntityRepository
         }
 
 
-        $consulta->orderBy('p_n.date', "ASC");
+        $consulta->orderBy('p_n.date', $sort);
 
 
         return $consulta->getQuery()->getResult();

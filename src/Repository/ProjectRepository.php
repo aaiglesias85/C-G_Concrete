@@ -14,7 +14,7 @@ class ProjectRepository extends EntityRepository
      *
      * @return Project[]
      */
-    public function ListarOrdenados($sSearch = '', $company_id = '', $inspector_id = '')
+    public function ListarOrdenados($sSearch = '', $company_id = '', $inspector_id = '', $from = '', $to = '')
     {
         $consulta = $this->createQueryBuilder('p')
             ->leftJoin('p.company', 'c')
@@ -45,6 +45,23 @@ class ProjectRepository extends EntityRepository
                 ->setParameter('inspector_id', $inspector_id);
         }
 
+
+        if ($from != "") {
+
+            $from = \DateTime::createFromFormat("m/d/Y", $from);
+            $from = $from->format("Y-m-d");
+
+            $consulta->andWhere('p.startDate >= :fecha_inicial')
+                ->setParameter('fecha_inicial', $from);
+        }
+        if ($to != "") {
+
+            $to = \DateTime::createFromFormat("m/d/Y", $to);
+            $to = $to->format("Y-m-d");
+
+            $consulta->andWhere('p.endDate <= :fecha_final')
+                ->setParameter('fecha_final', $to);
+        }
 
         $consulta->orderBy('p.name', "ASC");
 

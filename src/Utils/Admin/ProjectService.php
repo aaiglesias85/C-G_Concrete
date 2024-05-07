@@ -256,12 +256,12 @@ class ProjectService extends Base
      * @param $inspector_id
      * @return array
      */
-    public function ListarOrdenados($search, $company_id, $inspector_id)
+    public function ListarOrdenados($search, $company_id, $inspector_id, $from, $to)
     {
         $projects = [];
 
         $lista = $this->getDoctrine()->getRepository(Project::class)
-            ->ListarOrdenados($search, $company_id, $inspector_id);
+            ->ListarOrdenados($search, $company_id, $inspector_id, $from, $to);
         foreach ($lista as $value) {
             $projects[] = [
                 'project_id' => $value->getProjectId(),
@@ -977,6 +977,9 @@ class ProjectService extends Base
 
             $acciones = $this->ListarAcciones($project_id);
 
+            // listar ultima nota del proyecto
+            $nota = $this->ListarUltimaNotaDeProject($project_id);
+
             $arreglo_resultado[$cont] = array(
                 "id" => $project_id,
                 "projectNumber" => $value->getProjectNumber(),
@@ -986,6 +989,7 @@ class ProjectService extends Base
                 "status" => $value->getStatus() ? 1 : 0,
                 "startDate" => $value->getStartDate() != '' ? $value->getStartDate()->format('m/d/Y') : '',
                 "endDate" => $value->getEndDate() != '' ? $value->getEndDate()->format('m/d/Y') : '',
+                'nota' => $nota,
                 "acciones" => $acciones
             );
 
@@ -993,6 +997,27 @@ class ProjectService extends Base
         }
 
         return $arreglo_resultado;
+    }
+
+    /**
+     * ListarUltimaNotaDeProject
+     * @param $project_id
+     * @return array
+     */
+    private function ListarUltimaNotaDeProject($project_id)
+    {
+        $nota = null;
+
+        $lista = $this->getDoctrine()->getRepository(ProjectNotes::class)
+            ->ListarNotesDeProject($project_id);
+        if (!empty($lista)) {
+            $nota = [
+                'nota' => $this->truncate($lista[0]->getNotes(), 50),
+                'date' => $lista[0]->getDate()->format('m/d/Y')
+            ];
+        }
+
+        return $nota;
     }
 
     /**
