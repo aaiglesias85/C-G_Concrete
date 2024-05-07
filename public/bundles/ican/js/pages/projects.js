@@ -1786,6 +1786,13 @@ var Projects = function () {
         $(document).on('click', "#btn-agregar-note", function (e) {
             // reset
             resetFormNote();
+            var proyect_number_note = localStorage.getItem("proyect-number-item");
+            var proyect_company_note = localStorage.getItem("proyect-company-item");  
+
+            if(proyect_number_note)
+                $("#proyect-number-note").html(proyect_number_note);                     
+            if(proyect_company_note)
+                $("#proyect-company-note").html(proyect_company_note);
 
             $('#modal-notes').modal({
                 'show': true
