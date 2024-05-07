@@ -451,6 +451,7 @@ var Projects = function () {
                         $('#inspector').trigger('change');
 
                         $('#name').val(response.project.name);
+                        localStorage['proyect-company-item'] = response.project.name;
                         $('#number').val(response.project.number);
                         localStorage['proyect-number-item'] = response.project.number;
                         $('#location').val(response.project.location);
@@ -1004,9 +1005,14 @@ var Projects = function () {
         $(document).on('click', "#btn-agregar-item", function (e) {
             // reset
             resetFormItem();
-            var proyect_number_item = localStorage.getItem("proyect-number-item");           
+            var proyect_number_item = localStorage.getItem("proyect-number-item");
+            var proyect_company_item = localStorage.getItem("proyect-company-item");  
+
             if(proyect_number_item)
-                $("#proyect-number-item").html(proyect_number_item);
+                $("#proyect-number-item").html(proyect_number_item);                     
+            if(proyect_company_item)
+                $("#proyect-company-item").html(proyect_company_item);
+
 
             $('#modal-item').modal({
                 'show': true
