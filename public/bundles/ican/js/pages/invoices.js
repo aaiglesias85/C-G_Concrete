@@ -24,7 +24,7 @@ var Invoices = function () {
         aoColumns.push({
                 field: "number",
                 title: "Number",
-                width: 120,
+                width: 80,
             },
             {
                 field: "company",
@@ -52,7 +52,8 @@ var Invoices = function () {
             },
             {
                 field: "notes",
-                title: "Notes"
+                title: "Notes",
+                width: 150
             },
             {
                 field: "createdAt",

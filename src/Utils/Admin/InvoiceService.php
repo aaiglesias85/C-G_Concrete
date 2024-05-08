@@ -566,7 +566,7 @@ class InvoiceService extends Base
                 "project" => $value->getProject()->getName(),
                 "startDate" => $value->getStartDate()->format('m/d/Y'),
                 "endDate" => $value->getEndDate()->format('m/d/Y'),
-                "notes" => $value->getNotes(),
+                "notes" => $this->truncate($value->getNotes(), 50),
                 "total" => number_format($total, 2, '.', ','),
                 "createdAt" => $value->getCreatedAt()->format('m/d/Y'),
                 "acciones" => $acciones

@@ -73,7 +73,10 @@ var Projects = function () {
 
                     var html = '';
                     if(row.nota != null){
-                        html = `${row.nota.nota} <span class="m-badge m-badge--info">${row.nota.date}</span> <i class="flaticon-edit editar-notas" data-id="${row.id}" style="cursor:pointer;" title="Edit notes"></i>`;
+                        html = `${row.nota.nota} <span class="m-badge m-badge--info">${row.nota.date}</span> 
+                            <i class="flaticon-edit editar-notas" data-id="${row.id}" 
+                            data-projectnumber="${row.projectNumber}" data-projectname="${row.name}"
+                             data-notaid="${row.nota.id}" style="cursor:pointer;" title="Edit notes"></i>`;
                     }
                     return html;
                 }
@@ -453,6 +456,13 @@ var Projects = function () {
             $('#lista-project').addClass('m--hide');
 
             editRow(project_id, true);
+
+            // editar nota directo
+            var notes_id = $(this).data('notaid');
+            $('#name').val($(this).data('projectnumber'));
+            $('#number').val($(this).data('projectname'));
+
+            editRowNote(notes_id);
         });
 
         function editRow(project_id, editar_notas) {
@@ -481,9 +491,8 @@ var Projects = function () {
                         $('#inspector').trigger('change');
 
                         $('#name').val(response.project.name);
-                        localStorage['proyect-company-item'] = response.project.name;
                         $('#number').val(response.project.number);
-                        localStorage['proyect-number-item'] = response.project.number;
+
                         $('#location').val(response.project.location);
                         $('#po_number').val(response.project.po_number);
                         $('#po_cg').val(response.project.po_cg);
@@ -1041,14 +1050,6 @@ var Projects = function () {
         $(document).on('click', "#btn-agregar-item", function (e) {
             // reset
             resetFormItem();
-            var proyect_number_item = localStorage.getItem("proyect-number-item");
-            var proyect_company_item = localStorage.getItem("proyect-company-item");  
-
-            if(proyect_number_item)
-                $("#proyect-number-item").html(proyect_number_item);                     
-            if(proyect_company_item)
-                $("#proyect-company-item").html(proyect_company_item);
-
 
             $('#modal-item').modal({
                 'show': true
@@ -1230,6 +1231,10 @@ var Projects = function () {
         $element.removeClass('has-error').tooltip("dispose");
 
         nEditingRowItem = null;
+
+        // add datos de proyecto
+        $("#proyect-number-item").html($('#number').val());
+        $("#proyect-name-item").html($('#name').val());
     };
 
     // tracking
@@ -1822,13 +1827,6 @@ var Projects = function () {
         $(document).on('click', "#btn-agregar-note", function (e) {
             // reset
             resetFormNote();
-            var proyect_number_note = localStorage.getItem("proyect-number-item");
-            var proyect_company_note = localStorage.getItem("proyect-company-item");  
-
-            if(proyect_number_note)
-                $("#proyect-number-note").html(proyect_number_note);                     
-            if(proyect_company_note)
-                $("#proyect-company-note").html(proyect_company_note);
 
             $('#modal-notes').modal({
                 'show': true
@@ -1889,16 +1887,10 @@ var Projects = function () {
         $(document).off('click', "#notes-table-editable a.edit");
         $(document).on('click', "#notes-table-editable a.edit", function (e) {
             e.preventDefault();
-            resetFormNote();
-
-            $('#modal-notes').modal({
-                'show': true
-            });
 
             var notes_id = $(this).data('id');
-            $('#notes_id').val(notes_id);
-
-            editRow(notes_id);
+            // editar nota
+            editRowNote(notes_id);
         });
 
         $(document).off('click', "#notes-table-editable a.delete");
@@ -1946,38 +1938,47 @@ var Projects = function () {
 
         });
 
-        function editRow(notes_id) {
 
-            MyApp.block('#modal-notes .modal-content');
+    };
+    var editRowNote = function (notes_id) {
 
-            $.ajax({
-                type: "POST",
-                url: "project/cargarDatosNotes",
-                dataType: "json",
-                data: {
-                    'notes_id': notes_id
-                },
-                success: function (response) {
-                    mApp.unblock('#modal-notes .modal-content');
-                    if (response.success) {
-                        //Datos project
+        resetFormNote();
 
-                        $('#notes-date').val(response.notes.date);
-                        $('#notes').val(response.notes.notes);
+        $('#modal-notes').modal({
+            'show': true
+        });
 
-                    } else {
-                        toastr.error(response.error, "");
-                    }
-                },
-                failure: function (response) {
-                    mApp.unblock('#modal-notes .modal-content');
+        $('#notes_id').val(notes_id);
 
+        MyApp.block('#modal-notes .modal-content');
+
+        $.ajax({
+            type: "POST",
+            url: "project/cargarDatosNotes",
+            dataType: "json",
+            data: {
+                'notes_id': notes_id
+            },
+            success: function (response) {
+                mApp.unblock('#modal-notes .modal-content');
+                if (response.success) {
+                    //Datos project
+
+                    $('#notes-date').val(response.notes.date);
+                    $('#notes').val(response.notes.notes);
+
+                } else {
                     toastr.error(response.error, "");
                 }
-            });
+            },
+            failure: function (response) {
+                mApp.unblock('#modal-notes .modal-content');
 
-        }
-    };
+                toastr.error(response.error, "");
+            }
+        });
+
+    }
     var resetFormNote = function () {
         $('#notes-form input').each(function (e) {
             $element = $(this);
@@ -1996,6 +1997,10 @@ var Projects = function () {
 
         var fecha_actual = new Date();
         $('#notes-date').val(fecha_actual.format('m/d/Y'));
+
+        // add datos de proyecto
+        $("#proyect-number-note").html($('#number').val());
+        $("#proyect-name-note").html($('#name').val());
     };
 
 

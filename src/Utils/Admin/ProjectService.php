@@ -1012,6 +1012,7 @@ class ProjectService extends Base
             ->ListarNotesDeProject($project_id);
         if (!empty($lista)) {
             $nota = [
+                'id' => $lista[0]->getId(),
                 'nota' => $this->truncate($lista[0]->getNotes(), 50),
                 'date' => $lista[0]->getDate()->format('m/d/Y')
             ];
