@@ -561,6 +561,7 @@ class ProjectService extends Base
             $arreglo_resultado['certified_payrolls'] = $entity->getCertifiedPayrolls();
             $arreglo_resultado['start_date'] = $entity->getStartDate() != '' ? $entity->getStartDate()->format('m/d/Y') : '';
             $arreglo_resultado['end_date'] = $entity->getEndDate() != '' ? $entity->getEndDate()->format('m/d/Y') : '';
+            $arreglo_resultado['due_date'] = $entity->getDueDate() != '' ? $entity->getDueDate()->format('m/d/Y') : '';
 
             // items
             $items = $this->ListarItemsDeProject($project_id);
@@ -756,7 +757,7 @@ class ProjectService extends Base
     public function ActualizarProject($project_id, $company_id, $inspector_id, $number, $name, $location,
                                       $po_number, $po_cg, $manager, $status, $owner, $subcontract,
                                       $federal_funding, $county, $resurfacing, $invoice_contact,
-                                      $certified_payrolls, $start_date, $end_date, $items)
+                                      $certified_payrolls, $start_date, $end_date, $due_date, $items)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -810,6 +811,11 @@ class ProjectService extends Base
                 $entity->setEndDate($end_date);
             }
 
+            if ($due_date != '') {
+                $due_date = \DateTime::createFromFormat('m/d/Y', $due_date);
+                $entity->setDueDate($due_date);
+            }
+
             $entity->setUpdatedAt(new \DateTime());
 
             // items
@@ -837,7 +843,7 @@ class ProjectService extends Base
     public function SalvarProject($company_id, $inspector_id, $number, $name, $location,
                                   $po_number, $po_cg, $manager, $status, $owner, $subcontract,
                                   $federal_funding, $county, $resurfacing, $invoice_contact,
-                                  $certified_payrolls, $start_date, $end_date, $items)
+                                  $certified_payrolls, $start_date, $end_date, $due_date, $items)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -887,6 +893,11 @@ class ProjectService extends Base
         if ($end_date != '') {
             $end_date = \DateTime::createFromFormat('m/d/Y', $end_date);
             $entity->setEndDate($end_date);
+        }
+
+        if ($due_date != '') {
+            $due_date = \DateTime::createFromFormat('m/d/Y', $due_date);
+            $entity->setDueDate($due_date);
         }
 
         $entity->setCreatedAt(new \DateTime());
@@ -989,6 +1000,7 @@ class ProjectService extends Base
                 "status" => $value->getStatus() ? 1 : 0,
                 "startDate" => $value->getStartDate() != '' ? $value->getStartDate()->format('m/d/Y') : '',
                 "endDate" => $value->getEndDate() != '' ? $value->getEndDate()->format('m/d/Y') : '',
+                "dueDate" => $value->getDueDate() != '' ? $value->getDueDate()->format('m/d/Y') : '',
                 'nota' => $nota,
                 "acciones" => $acciones
             );

@@ -106,6 +106,13 @@ class Project
     private $endDate;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="due_date", type="date", nullable=false)
+     */
+    private $dueDate;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="manager", type="string", length=255, nullable=false)
@@ -394,6 +401,19 @@ class Project
     public function setEndDate($endDate)
     {
         $this->endDate = $endDate;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getDueDate()
+    {
+        return $this->dueDate;
+    }
+
+    public function setDueDate($dueDate)
+    {
+        $this->dueDate = $dueDate;
     }
 
 }

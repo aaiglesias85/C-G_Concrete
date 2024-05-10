@@ -23,30 +23,25 @@ var Projects = function () {
         }
         aoColumns.push({
                 field: "projectNumber",
-                title: "Number",
+                title: "C & G Project #",
                 width: 120,
-            },
-            {
-                field: "name",
-                title: "Name"
-            },
-            {
-                field: "company",
-                title: "Company"
             },
             {
                 field: "county",
                 title: "County"
             },
             {
-                field: "startDate",
-                title: "From",
+                field: "name",
+                title: "Name"
+            },
+            {
+                field: "dueDate",
+                title: "Due Date",
                 width: 100,
             },
             {
-                field: "endDate",
-                title: "To",
-                width: 100,
+                field: "company",
+                title: "Company"
             },
             {
                 field: "status",
@@ -327,6 +322,7 @@ var Projects = function () {
                 var invoice_contact = $('#invoice_contact').val();
                 var start_date = $('#start_date').val();
                 var end_date = $('#end_date').val();
+                var due_date = $('#due_date').val();
 
                 MyApp.block('#form-project');
 
@@ -354,6 +350,7 @@ var Projects = function () {
                         'invoice_contact': invoice_contact,
                         'start_date': start_date,
                         'end_date': end_date,
+                        'due_date': due_date,
                         'items': JSON.stringify(items)
                     },
                     success: function (response) {
@@ -513,6 +510,7 @@ var Projects = function () {
 
                         $('#start_date').val(response.project.start_date);
                         $('#end_date').val(response.project.end_date);
+                        $('#due_date').val(response.project.due_date);
 
                         // items
                         items = response.project.items;

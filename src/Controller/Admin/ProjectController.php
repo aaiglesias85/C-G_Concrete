@@ -142,6 +142,7 @@ class ProjectController extends AbstractController
         $certified_payrolls = $request->get('certified_payrolls');
         $start_date = $request->get('start_date');
         $end_date = $request->get('end_date');
+        $due_date = $request->get('due_date');
 
         // items
         $items = $request->get('items');
@@ -152,11 +153,11 @@ class ProjectController extends AbstractController
             if ($project_id == "") {
                 $resultado = $this->projectService->SalvarProject($company_id, $inspector_id, $number, $name,
                     $location, $po_number, $po_cg, $manager, $status, $owner, $subcontract, $federal_funding, $county,
-                $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $items);
+                $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $due_date, $items);
             } else {
                 $resultado = $this->projectService->ActualizarProject($project_id, $company_id, $inspector_id, $number,
                     $name, $location, $po_number, $po_cg, $manager, $status, $owner, $subcontract, $federal_funding, $county,
-                    $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $items);
+                    $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $due_date, $items);
             }
 
             if ($resultado['success']) {

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 29-04-2024 a las 23:47:31
+-- Tiempo de generación: 10-05-2024 a las 20:30:43
 -- Versión del servidor: 11.2.2-MariaDB
 -- Versión de PHP: 8.1.12
 
@@ -188,7 +188,7 @@ INSERT INTO `invoice` (`invoice_id`, `number`, `start_date`, `end_date`, `notes`
 (5, '3', '2024-02-01', '2024-02-29', 'dfdf sdfsdf sdf sdf sdf sdf', '2024-04-23 19:40:22', NULL, 1),
 (6, '4', '2024-01-01', '2024-01-31', 'fd dfg df gdfg dfg fdgdfg df gdfg dfg', '2024-04-23 19:40:44', NULL, 1),
 (7, '5', '2024-04-01', '2024-04-30', 'fgg dg fdgdf g', '2024-04-24 04:21:24', '2024-04-24 16:59:59', 2),
-(8, '6', '2024-04-01', '2024-04-30', 'g fdgdfg fdg', '2024-04-24 04:24:52', '2024-04-24 16:59:17', 3);
+(8, '6', '2024-04-01', '2024-04-30', 'Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.', '2024-04-24 04:24:52', '2024-05-08 23:49:36', 3);
 
 -- --------------------------------------------------------
 
@@ -394,7 +394,10 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (97, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-04-29 23:38:38', 1),
 (98, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-04-29 23:39:10', 1),
 (99, 'Delete', 'Project Item', 'The item: CONCRETE V GUTTER of the project is deleted', '::1', '2024-04-29 23:39:45', 1),
-(100, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-04-29 23:41:10', 1);
+(100, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-04-29 23:41:10', 1),
+(101, 'Add', 'Project Notes', 'The notes: Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups. is add to the project: Houston Texas', '::1', '2024-05-07 18:02:54', 1),
+(102, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-05-07 19:17:23', 1),
+(103, 'Update', 'Invoice', 'The invoice #6 is modified', '::1', '2024-05-08 23:49:36', 1);
 
 -- --------------------------------------------------------
 
@@ -437,6 +440,7 @@ CREATE TABLE `project` (
   `certified_payrolls` tinyint(1) DEFAULT NULL,
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
+  `due_date` date DEFAULT NULL,
   `manager` varchar(255) DEFAULT NULL,
   `status` tinyint(1) DEFAULT NULL,
   `po_number` varchar(255) DEFAULT NULL,
@@ -451,10 +455,10 @@ CREATE TABLE `project` (
 -- Volcado de datos para la tabla `project`
 --
 
-INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `owner`, `subcontract`, `federal_funding`, `county`, `resurfacing`, `invoice_contact`, `certified_payrolls`, `start_date`, `end_date`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `company_id`, `inspector_id`) VALUES
-(1, '0009001', 'FL COUNTY', 'FL COUNTY', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-04-27 18:37:31', 1, 1),
-(2, '0009002', 'FL MIAMI', 'FL MIAMI', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-04-27 18:37:22', 1, 1),
-(3, '0009003', 'Houston Texas', 'Houston Texas', 'Marcel', '896532', 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', 'Carlos', 1, '86532', '89653', '2024-04-24 04:24:02', '2024-04-29 23:41:10', 3, 1);
+INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `owner`, `subcontract`, `federal_funding`, `county`, `resurfacing`, `invoice_contact`, `certified_payrolls`, `start_date`, `end_date`, `due_date`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `company_id`, `inspector_id`) VALUES
+(1, '0009001', 'FL COUNTY', 'FL COUNTY', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-04-27 18:37:31', 1, 1),
+(2, '0009002', 'FL MIAMI', 'FL MIAMI', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-04-27 18:37:22', 1, 1),
+(3, '0009003', 'Houston Texas', 'Houston Texas', 'Marcel', '896532', 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', NULL, 'Carlos', 1, '86532', '89653', '2024-04-24 04:24:02', '2024-05-07 19:17:23', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -491,6 +495,13 @@ CREATE TABLE `project_notes` (
   `date` date DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `project_notes`
+--
+
+INSERT INTO `project_notes` (`id`, `notes`, `date`, `project_id`) VALUES
+(2, 'Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.', '2024-05-07', 3);
 
 -- --------------------------------------------------------
 
@@ -819,7 +830,7 @@ ALTER TABLE `item`
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
 
 --
 -- AUTO_INCREMENT de la tabla `notification`
@@ -843,7 +854,7 @@ ALTER TABLE `project_item`
 -- AUTO_INCREMENT de la tabla `project_notes`
 --
 ALTER TABLE `project_notes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `rol`
