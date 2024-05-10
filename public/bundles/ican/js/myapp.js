@@ -381,6 +381,26 @@ var MyApp = function () {
         }
     }
 
+    // evaluar expression
+    var evaluateExpression = function (expression, variableValue) {
+        try {
+            // Sustituye 'x' por el valor de la variable, asumiendo que 'x' es la variable
+            expression = expression.replace(/x/g, variableValue);
+
+            // Verifica que la expresión solo contenga números, operadores permitidos y paréntesis
+            if (/^[0-9+\-*\/\s\(\)]+$/.test(expression)) {
+                let func = new Function('return ' + expression);
+                return func();
+            } else {
+                console.error("La expresión contiene caracteres inválidos.");
+                return null;
+            }
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+    }
+
     return {
         //main function to initiate the module
         init: function () {
@@ -407,6 +427,7 @@ var MyApp = function () {
         formatearFechaCalendario: formatearFechaCalendario,
         convertirStringAFecha: convertirStringAFecha,
         formatearFecha: formatearFecha,
+        evaluateExpression: evaluateExpression,
         scrollTo: function (el, offset) {
             var pos = (el && el.length > 0) ? el.offset().top : 0;
             pos = pos + (offset ? offset : 0);
