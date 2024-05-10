@@ -764,4 +764,25 @@ class Base
 
         return $lista;
     }
+
+    // funciones para evaluar una ecuacion
+    public function evaluateExpression($expression, $xValue)
+    {
+        // Reemplazar 'x' con el valor proporcionado en la expresión
+        $expression = str_replace('x', (string)$xValue, $expression);
+
+        // Limpiar la expresión para asegurar que solo contiene números, operadores permitidos y paréntesis
+        $expression = preg_replace('/[^0-9+\-*\/(). ]/', '', $expression);
+
+        // Preparar la cadena de evaluación
+        $resultado = '';
+        $evaluar = '$resultado = ' . $expression . ';';
+
+        // Evaluar la expresión
+        eval($evaluar);
+
+        return $resultado; // Salida: El resultado es: 19
+    }
+
+
 }
