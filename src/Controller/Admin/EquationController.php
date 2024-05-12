@@ -2,42 +2,29 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Equation;
-use App\Entity\Unit;
-use App\Utils\Admin\ItemService;
+use App\Utils\Admin\EquationService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class ItemController extends AbstractController
+class EquationController extends AbstractController
 {
 
-    private $itemService;
+    private $equationService;
 
-    public function __construct(ItemService $itemService)
+    public function __construct(EquationService $equationService)
     {
-        $this->itemService = $itemService;
+        $this->equationService = $equationService;
     }
 
     public function index()
     {
         $usuario = $this->getUser();
-        $permiso = $this->itemService->BuscarPermiso($usuario->getUsuarioId(), 6);
+        $permiso = $this->equationService->BuscarPermiso($usuario->getUsuarioId(), 13);
         if (count($permiso) > 0) {
             if ($permiso[0]['ver']) {
 
-                $units = $this->itemService->getDoctrine()->getRepository(Unit::class)
-                    ->ListarOrdenados();
-
-                $equations = $this->itemService->getDoctrine()->getRepository(Equation::class)
-                    ->ListarOrdenados();
-
-                $yields_calculation = $this->itemService->ListarYieldsCalculation();
-
-                return $this->render('admin/item/index.html.twig', array(
-                    'permiso' => $permiso[0],
-                    'units' => $units,
-                    'equations' => $equations,
-                    'yields_calculation' => $yields_calculation
+                return $this->render('admin/equation/index.html.twig', array(
+                    'permiso' => $permiso[0]
                 ));
             }
         } else {
@@ -46,7 +33,7 @@ class ItemController extends AbstractController
     }
 
     /**
-     * listar Acción que lista los items
+     * listar Acción que lista los equationes
      *
      */
     public function listar(Request $request)
@@ -57,8 +44,8 @@ class ItemController extends AbstractController
         $sSearch = isset($query['generalSearch']) && is_string($query['generalSearch']) ? $query['generalSearch'] : '';
         //Sort
         $sort = !empty($request->get('sort')) ? $request->get('sort') : array();
-        $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'desc';
-        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'createdAt';
+        $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'asc';
+        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'description';
         //$start and $limit
         $pagination = !empty($request->get('pagination')) ? $request->get('pagination') : array();
         $page = !empty($pagination['page']) ? (int)$pagination['page'] : 1;
@@ -67,7 +54,7 @@ class ItemController extends AbstractController
 
         try {
             $pages = 1;
-            $total = $this->itemService->TotalItems($sSearch);
+            $total = $this->equationService->TotalEquations($sSearch);
             if ($limit > 0) {
                 $pages = ceil($total / $limit); // calculate total pages
                 $page = max($page, 1); // get 1 page when $_REQUEST['page'] <= 0
@@ -87,7 +74,7 @@ class ItemController extends AbstractController
                 'sort' => $sSortDir_0
             );
 
-            $data = $this->itemService->ListarItems($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0);
+            $data = $this->equationService->ListarEquations($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0);
 
             $resultadoJson = array(
                 'meta' => $meta,
@@ -110,21 +97,17 @@ class ItemController extends AbstractController
      */
     public function salvar(Request $request)
     {
-        $item_id = $request->get('item_id');
-
-        $unit_id = $request->get('unit_id');
-        $description = $request->get('description');
-        $price = $request->get('price');
-        $status = $request->get('status');
-        $yield_calculation = $request->get('yield_calculation');
         $equation_id = $request->get('equation_id');
+        $description = $request->get('description');
+        $equation = $request->get('equation');
+        $status = $request->get('status');
 
         try {
 
-            if ($item_id == "") {
-                $resultado = $this->itemService->SalvarItem($unit_id, $description, $price, $status, $yield_calculation, $equation_id);
+            if ($equation_id == "") {
+                $resultado = $this->equationService->SalvarEquation($description, $equation, $status);
             } else {
-                $resultado = $this->itemService->ActualizarItem($item_id, $unit_id, $description, $price, $status, $yield_calculation, $equation_id);
+                $resultado = $this->equationService->ActualizarEquation($equation_id, $description, $equation, $status);
             }
 
             if ($resultado['success']) {
@@ -148,15 +131,15 @@ class ItemController extends AbstractController
     }
 
     /**
-     * eliminar Acción que elimina un item en la BD
+     * eliminar Acción que elimina un equation en la BD
      *
      */
     public function eliminar(Request $request)
     {
-        $item_id = $request->get('item_id');
+        $equation_id = $request->get('equation_id');
 
         try {
-            $resultado = $this->itemService->EliminarItem($item_id);
+            $resultado = $this->equationService->EliminarEquation($equation_id);
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
@@ -177,15 +160,15 @@ class ItemController extends AbstractController
     }
 
     /**
-     * eliminarItems Acción que elimina los items seleccionados en la BD
+     * eliminarEquations Acción que elimina los equationes seleccionados en la BD
      *
      */
-    public function eliminarItems(Request $request)
+    public function eliminarEquations(Request $request)
     {
         $ids = $request->get('ids');
 
         try {
-            $resultado = $this->itemService->EliminarItems($ids);
+            $resultado = $this->equationService->EliminarEquations($ids);
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
@@ -206,19 +189,19 @@ class ItemController extends AbstractController
     }
 
     /**
-     * cargarDatos Acción que carga los datos del item en la BD
+     * cargarDatos Acción que carga los datos del equation en la BD
      *
      */
     public function cargarDatos(Request $request)
     {
-        $item_id = $request->get('item_id');
+        $equation_id = $request->get('equation_id');
 
         try {
-            $resultado = $this->itemService->CargarDatosItem($item_id);
+            $resultado = $this->equationService->CargarDatosEquation($equation_id);
             if ($resultado['success']) {
 
                 $resultadoJson['success'] = $resultado['success'];
-                $resultadoJson['item'] = $resultado['item'];
+                $resultadoJson['equation'] = $resultado['equation'];
 
                 return $this->json($resultadoJson);
             } else {

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 10-05-2024 a las 20:30:43
+-- Tiempo de generación: 12-05-2024 a las 19:18:59
 -- Versión del servidor: 11.2.2-MariaDB
 -- Versión de PHP: 8.1.12
 
@@ -111,6 +111,27 @@ INSERT INTO `data_tracking` (`id`, `quantity`, `price`, `date`, `project_id`, `i
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `equation`
+--
+
+CREATE TABLE `equation` (
+  `equation_id` int(11) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `equation` varchar(255) DEFAULT NULL,
+  `status` tinyint(1) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `equation`
+--
+
+INSERT INTO `equation` (`equation_id`, `description`, `equation`, `status`) VALUES
+(1, 'SW, 4 IN, SY', '(x*4)/36', 1),
+(2, 'SW, 4 IN, SF', '(x*4)/324', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `function`
 --
 
@@ -136,7 +157,8 @@ INSERT INTO `function` (`function_id`, `url`, `description`) VALUES
 (9, 'projects', 'Projects'),
 (10, 'data_tracking', 'Data Tracking'),
 (11, 'invoice', 'Invoices'),
-(12, 'notification', 'Notifications');
+(12, 'notification', 'Notifications'),
+(13, 'equation', 'Equations');
 
 -- --------------------------------------------------------
 
@@ -243,37 +265,39 @@ CREATE TABLE `item` (
   `item_id` int(11) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   `price` float(8,2) DEFAULT NULL,
+  `yield_calculation` varchar(50) DEFAULT NULL,
   `status` tinyint(1) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `unit_id` int(11) DEFAULT NULL
+  `unit_id` int(11) DEFAULT NULL,
+  `equation_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `item`
 --
 
-INSERT INTO `item` (`item_id`, `description`, `price`, `status`, `created_at`, `updated_at`, `unit_id`) VALUES
-(1, 'CONC MEDIAN 4IN', 29.00, 1, '2024-04-12 20:18:17', NULL, 1),
-(2, 'CONC MEDIAN 6IN', 70.00, 1, '2024-04-12 20:18:40', NULL, 1),
-(3, 'CONCRETE V GUTTER', 25.00, 1, '2024-04-12 20:19:00', NULL, 2),
-(4, 'CONC VALLEY GUTTER 6IN', 58.00, 1, '2024-04-12 20:19:26', NULL, 1),
-(5, 'CONC VALLEY GUTTER 8IN', 77.00, 1, '2024-04-12 20:19:51', NULL, 1),
-(6, 'CONC CURB & GUTTEER 8INX30IN TP2', 16.50, 1, '2024-04-12 20:20:29', NULL, 2),
-(7, 'CONC CURB & GUTTEER 8INX30IN TP7', 16.50, 1, '2024-04-12 20:22:07', NULL, 2),
-(8, 'CLASS B CONCRETE', 700.00, 1, '2024-04-12 20:22:31', NULL, 3),
-(9, 'CLASS B CONCRETE, INCL REINF STEEL', 0.00, 1, '2024-04-12 20:23:08', NULL, 3),
-(10, 'CLASS B CONC, BASE OR PVMT WIDENING', 253.00, 1, '2024-04-12 20:23:35', NULL, 3),
-(11, 'BAR REINF. STEEL ', 0.00, 1, '2024-04-12 20:23:52', NULL, 4),
-(12, 'CONC DRIVEWAY 8IN', 70.00, 1, '2024-04-12 20:24:09', NULL, 1),
-(13, 'CONC SLOPE DRAIN ', 100.00, 1, '2024-04-12 20:24:29', NULL, 1),
-(14, 'CONC SIDEWALK 4IN', 30.00, 1, '2024-04-12 20:25:08', NULL, 1),
-(15, 'CONC SIDEWALK 8IN', 63.00, 1, '2024-04-12 20:25:30', NULL, 1),
-(16, 'CONC SPILLWAY TP3', 2100.00, 1, '2024-04-12 20:25:50', NULL, 5),
-(17, 'PLAIN CONC DITCH PAVING', 47.18, 1, '2024-04-12 20:26:54', NULL, 1),
-(18, 'EXTRA CONCRETE', 208.00, 1, '2024-04-12 20:27:17', NULL, 3),
-(19, 'EXTRA LABOR', 1500.00, 1, '2024-04-12 20:27:37', NULL, 6),
-(20, 'Cubic Yards of Concrete', 150.00, 1, '2024-04-12 20:28:15', '2024-04-14 17:54:52', 3);
+INSERT INTO `item` (`item_id`, `description`, `price`, `yield_calculation`, `status`, `created_at`, `updated_at`, `unit_id`, `equation_id`) VALUES
+(1, 'CONC MEDIAN 4IN', 29.00, NULL, 1, '2024-04-12 20:18:17', NULL, 1, NULL),
+(2, 'CONC MEDIAN 6IN', 70.00, NULL, 1, '2024-04-12 20:18:40', NULL, 1, NULL),
+(3, 'CONCRETE V GUTTER', 25.00, NULL, 1, '2024-04-12 20:19:00', NULL, 2, NULL),
+(4, 'CONC VALLEY GUTTER 6IN', 58.00, NULL, 1, '2024-04-12 20:19:26', NULL, 1, NULL),
+(5, 'CONC VALLEY GUTTER 8IN', 77.00, NULL, 1, '2024-04-12 20:19:51', NULL, 1, NULL),
+(6, 'CONC CURB & GUTTEER 8INX30IN TP2', 16.50, NULL, 1, '2024-04-12 20:20:29', NULL, 2, NULL),
+(7, 'CONC CURB & GUTTEER 8INX30IN TP7', 16.50, NULL, 1, '2024-04-12 20:22:07', NULL, 2, NULL),
+(8, 'CLASS B CONCRETE', 700.00, NULL, 1, '2024-04-12 20:22:31', NULL, 3, NULL),
+(9, 'CLASS B CONCRETE, INCL REINF STEEL', 0.00, NULL, 1, '2024-04-12 20:23:08', NULL, 3, NULL),
+(10, 'CLASS B CONC, BASE OR PVMT WIDENING', 253.00, NULL, 1, '2024-04-12 20:23:35', NULL, 3, NULL),
+(11, 'BAR REINF. STEEL ', 0.00, NULL, 1, '2024-04-12 20:23:52', NULL, 4, NULL),
+(12, 'CONC DRIVEWAY 8IN', 70.00, NULL, 1, '2024-04-12 20:24:09', NULL, 1, NULL),
+(13, 'CONC SLOPE DRAIN ', 100.00, NULL, 1, '2024-04-12 20:24:29', NULL, 1, NULL),
+(14, 'CONC SIDEWALK 4IN', 30.00, NULL, 1, '2024-04-12 20:25:08', NULL, 1, NULL),
+(15, 'CONC SIDEWALK 8IN', 63.00, NULL, 1, '2024-04-12 20:25:30', NULL, 1, NULL),
+(16, 'CONC SPILLWAY TP3', 2100.00, 'none', 1, '2024-04-12 20:25:50', '2024-05-12 19:18:34', 5, NULL),
+(17, 'PLAIN CONC DITCH PAVING', 47.18, 'equation', 1, '2024-04-12 20:26:54', '2024-05-12 19:18:15', 1, 2),
+(18, 'EXTRA CONCRETE', 208.00, 'equation', 1, '2024-04-12 20:27:17', '2024-05-12 19:18:05', 3, 1),
+(19, 'EXTRA LABOR', 1500.00, 'same', 1, '2024-04-12 20:27:37', '2024-05-12 19:17:54', 6, NULL),
+(20, 'Cubic Yards of Concrete', 150.00, 'none', 1, '2024-04-12 20:28:15', '2024-05-12 19:17:47', 3, NULL);
 
 -- --------------------------------------------------------
 
@@ -397,7 +421,14 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (100, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-04-29 23:41:10', 1),
 (101, 'Add', 'Project Notes', 'The notes: Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups. is add to the project: Houston Texas', '::1', '2024-05-07 18:02:54', 1),
 (102, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-05-07 19:17:23', 1),
-(103, 'Update', 'Invoice', 'The invoice #6 is modified', '::1', '2024-05-08 23:49:36', 1);
+(103, 'Update', 'Invoice', 'The invoice #6 is modified', '::1', '2024-05-08 23:49:36', 1),
+(104, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-05-10 20:55:23', 1),
+(105, 'Update', 'Equation', 'The equation is modified: SW, 4 IN, SY', '::1', '2024-05-10 23:06:04', 1),
+(106, 'Update', 'Item', 'The item is modified: Cubic Yards of Concrete', '::1', '2024-05-12 19:17:47', 1),
+(107, 'Update', 'Item', 'The item is modified: EXTRA LABOR', '::1', '2024-05-12 19:17:54', 1),
+(108, 'Update', 'Item', 'The item is modified: EXTRA CONCRETE', '::1', '2024-05-12 19:18:05', 1),
+(109, 'Update', 'Item', 'The item is modified: PLAIN CONC DITCH PAVING', '::1', '2024-05-12 19:18:15', 1),
+(110, 'Update', 'Item', 'The item is modified: CONC SPILLWAY TP3', '::1', '2024-05-12 19:18:34', 1);
 
 -- --------------------------------------------------------
 
@@ -458,7 +489,7 @@ CREATE TABLE `project` (
 INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `owner`, `subcontract`, `federal_funding`, `county`, `resurfacing`, `invoice_contact`, `certified_payrolls`, `start_date`, `end_date`, `due_date`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `company_id`, `inspector_id`) VALUES
 (1, '0009001', 'FL COUNTY', 'FL COUNTY', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-04-27 18:37:31', 1, 1),
 (2, '0009002', 'FL MIAMI', 'FL MIAMI', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-04-27 18:37:22', 1, 1),
-(3, '0009003', 'Houston Texas', 'Houston Texas', 'Marcel', '896532', 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', NULL, 'Carlos', 1, '86532', '89653', '2024-04-24 04:24:02', '2024-05-07 19:17:23', 3, 1);
+(3, '0009003', 'Houston Texas', 'Houston Texas', 'Marcel', '896532', 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 1, '86532', '89653', '2024-04-24 04:24:02', '2024-05-10 20:55:23', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -557,7 +588,8 @@ INSERT INTO `rol_permission` (`id`, `view_permission`, `add_permission`, `edit_p
 (21, 1, 1, 1, 1, 1, 10),
 (22, 1, 1, 1, 1, 1, 11),
 (23, 1, 1, 1, 1, 1, 12),
-(24, 1, 1, 1, 1, 2, 12);
+(24, 1, 1, 1, 1, 2, 12),
+(25, 1, 1, 1, 1, 1, 13);
 
 -- --------------------------------------------------------
 
@@ -641,7 +673,8 @@ INSERT INTO `user_permission` (`id`, `view_permission`, `add_permission`, `edit_
 (13, 1, 1, 1, 1, 1, 9),
 (14, 1, 1, 1, 1, 1, 10),
 (15, 1, 1, 1, 1, 1, 11),
-(16, 1, 1, 1, 1, 1, 12);
+(16, 1, 1, 1, 1, 1, 12),
+(17, 1, 1, 1, 1, 1, 13);
 
 --
 -- Índices para tablas volcadas
@@ -667,6 +700,12 @@ ALTER TABLE `data_tracking`
   ADD PRIMARY KEY (`id`),
   ADD KEY `Ref6675` (`project_id`),
   ADD KEY `Ref6776` (`item_id`);
+
+--
+-- Indices de la tabla `equation`
+--
+ALTER TABLE `equation`
+  ADD PRIMARY KEY (`equation_id`);
 
 --
 -- Indices de la tabla `function`
@@ -700,7 +739,8 @@ ALTER TABLE `invoice_item`
 --
 ALTER TABLE `item`
   ADD PRIMARY KEY (`item_id`),
-  ADD KEY `Ref6864` (`unit_id`);
+  ADD KEY `Ref6864` (`unit_id`),
+  ADD KEY `equation_id` (`equation_id`);
 
 --
 -- Indices de la tabla `log`
@@ -797,10 +837,16 @@ ALTER TABLE `data_tracking`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
+-- AUTO_INCREMENT de la tabla `equation`
+--
+ALTER TABLE `equation`
+  MODIFY `equation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT de la tabla `function`
 --
 ALTER TABLE `function`
-  MODIFY `function_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `function_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `inspector`
@@ -830,7 +876,7 @@ ALTER TABLE `item`
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=111;
 
 --
 -- AUTO_INCREMENT de la tabla `notification`
@@ -866,7 +912,7 @@ ALTER TABLE `rol`
 -- AUTO_INCREMENT de la tabla `rol_permission`
 --
 ALTER TABLE `rol_permission`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT de la tabla `unit`
@@ -884,7 +930,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT de la tabla `user_permission`
 --
 ALTER TABLE `user_permission`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- Restricciones para tablas volcadas
@@ -920,6 +966,7 @@ ALTER TABLE `invoice_item`
 -- Filtros para la tabla `item`
 --
 ALTER TABLE `item`
+  ADD CONSTRAINT `Refequation10` FOREIGN KEY (`equation_id`) REFERENCES `equation` (`equation_id`),
   ADD CONSTRAINT `Refunit64` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`unit_id`);
 
 --

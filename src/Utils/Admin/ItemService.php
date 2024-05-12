@@ -2,6 +2,7 @@
 
 namespace App\Utils\Admin;
 
+use App\Entity\Equation;
 use App\Entity\InvoiceItem;
 use App\Entity\Item;
 use App\Entity\DataTracking;
@@ -33,6 +34,8 @@ class ItemService extends Base
             $arreglo_resultado['price'] = $entity->getPrice();
             $arreglo_resultado['status'] = $entity->getStatus();
             $arreglo_resultado['unit_id'] = $entity->getUnit()->getUnitId();
+            $arreglo_resultado['yield_calculation'] = $entity->getYieldCalculation();
+            $arreglo_resultado['equation_id'] = $entity->getEquation() != null ? $entity->getEquation()->getEquationId() : '';
 
             $resultado['success'] = true;
             $resultado['item'] = $arreglo_resultado;
@@ -179,7 +182,7 @@ class ItemService extends Base
      * @param int $item_id Id
      * @author Marcel
      */
-    public function ActualizarItem($item_id, $unit_id, $description, $price, $status)
+    public function ActualizarItem($item_id, $unit_id, $description, $price, $status, $yield_calculation, $equation_id)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -199,10 +202,17 @@ class ItemService extends Base
             $entity->setDescription($description);
             $entity->setPrice($price);
             $entity->setStatus($status);
+            $entity->setYieldCalculation($yield_calculation);
 
             if ($unit_id != '') {
                 $unit = $this->getDoctrine()->getRepository(Unit::class)->find($unit_id);
                 $entity->setUnit($unit);
+            }
+
+            $entity->setEquation(NULL);
+            if ($equation_id != '') {
+                $equation = $this->getDoctrine()->getRepository(Equation::class)->find($equation_id);
+                $entity->setEquation($equation);
             }
 
             $entity->setUpdatedAt(new \DateTime());
@@ -226,7 +236,7 @@ class ItemService extends Base
      * @param string $description Nombre
      * @author Marcel
      */
-    public function SalvarItem($unit_id, $description, $price, $status)
+    public function SalvarItem($unit_id, $description, $price, $status, $yield_calculation, $equation_id)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -244,10 +254,16 @@ class ItemService extends Base
         $entity->setDescription($description);
         $entity->setPrice($price);
         $entity->setStatus($status);
+        $entity->setYieldCalculation($yield_calculation);
 
         if ($unit_id != '') {
             $unit = $this->getDoctrine()->getRepository(Unit::class)->find($unit_id);
             $entity->setUnit($unit);
+        }
+
+        if ($equation_id != '') {
+            $equation = $this->getDoctrine()->getRepository(Equation::class)->find($equation_id);
+            $entity->setEquation($equation);
         }
 
         $entity->setCreatedAt(new \DateTime());
@@ -289,12 +305,15 @@ class ItemService extends Base
 
             $acciones = $this->ListarAcciones($item_id);
 
+            $yield_calculation = $this->DevolverYieldCalculationDeItem($value);
+
             $arreglo_resultado[$cont] = array(
                 "id" => $item_id,
                 "description" => $value->getDescription(),
                 "price" => number_format($value->getPrice(), 2, '.', ','),
                 "status" => $value->getStatus() ? 1 : 0,
                 "unit" => $value->getUnit()->getDescription(),
+                "yieldCalculation" => $yield_calculation,
                 "acciones" => $acciones
             );
 
@@ -302,6 +321,25 @@ class ItemService extends Base
         }
 
         return $arreglo_resultado;
+    }
+
+    /**
+     * DevolverYieldCalculationDeItem
+     * @param Item $item_entity
+     * @return string
+     */
+    private function DevolverYieldCalculationDeItem($item_entity)
+    {
+        $yield_calculation = $item_entity->getYieldCalculation();
+
+        $yield_calculation_name = $this->BuscarYieldCalculation($yield_calculation);
+
+        // para la ecuacion devuelvo la ecuacion asociada
+        if ($yield_calculation == 'equation' && $item_entity->getEquation() != null) {
+            $yield_calculation_name = $item_entity->getEquation()->getEquation();
+        }
+
+        return $yield_calculation_name;
     }
 
     /**

@@ -41,6 +41,22 @@ class ItemRepository extends EntityRepository
     }
 
     /**
+     * ListarItemsDeEquation: Lista los items de una equation
+     *
+     * @return Item[]
+     */
+    public function ListarItemsDeEquation($equation_id)
+    {
+        $consulta = $this->createQueryBuilder('i')
+            ->leftJoin('i.equation', 'e')
+            ->andWhere('e.equationId = :equation_id')
+            ->setParameter('equation_id', $equation_id)
+            ->orderBy('i.description', "ASC");
+
+        return $consulta->getQuery()->getResult();
+    }
+
+    /**
      * ListarItems: Lista los items
      * @param int $start Inicio
      * @param int $limit Limite

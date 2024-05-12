@@ -512,6 +512,7 @@ class Base
             $menuDataTracking = false;
             $menuInvoice = false;
             $menuNotification = false;
+            $menuEquation = false;
 
             foreach ($permisos as $permiso) {
                 if ($permiso['funcion_id'] == 1 && $permiso['ver']) {
@@ -550,6 +551,9 @@ class Base
                 if ($permiso['funcion_id'] == 12 && $permiso['ver']) {
                     $menuNotification = true;
                 }
+                if ($permiso['funcion_id'] == 13 && $permiso['ver']) {
+                    $menuEquation = true;
+                }
             }
             $menu = array(
                 'menuInicio' => $menuInicio,
@@ -563,7 +567,8 @@ class Base
                 'menuProject' => $menuProject,
                 'menuDataTracking' => $menuDataTracking,
                 'menuInvoice' => $menuInvoice,
-                'menuNotification' => $menuNotification
+                'menuNotification' => $menuNotification,
+                'menuEquation' => $menuEquation
             );
         }
 
@@ -782,6 +787,48 @@ class Base
         eval($evaluar);
 
         return $resultado; // Salida: El resultado es: 19
+    }
+
+    /**
+     * ListarYieldsCalculation
+     * @return array
+     */
+    public function ListarYieldsCalculation()
+    {
+        return [
+            [
+                'id' => 'none',
+                'name' => 'NONE'
+            ],
+            [
+                'id' => 'same',
+                'name' => 'SAME AS QUANTITY'
+            ],
+            [
+                'id' => 'equation',
+                'name' => 'EQUATION'
+            ]
+        ];
+    }
+
+    /**
+     * BuscarYieldCalculation
+     * @param $id
+     * @return string
+     */
+    public function BuscarYieldCalculation($id)
+    {
+        $name = '';
+
+        $lista = $this->ListarYieldsCalculation();
+        foreach ($lista as $value) {
+            if ($value['id'] == $id) {
+                $name = $value['name'];
+                break;
+            }
+        }
+
+        return $name;
     }
 
 

@@ -1,13 +1,13 @@
-var Items = function () {
+var Equations = function () {
 
     var oTable;
     var rowDelete = null;
 
     //Inicializar table
     var initTable = function () {
-        MyApp.block('#item-table-editable');
+        MyApp.block('#equation-table-editable');
 
-        var table = $('#item-table-editable');
+        var table = $('#equation-table-editable');
 
         var aoColumns = [];
 
@@ -28,19 +28,8 @@ var Items = function () {
                 title: "Name"
             },
             {
-                field: "unit",
-                title: "Unit",
-                width: 120,
-            },
-            {
-                field: "price",
-                title: "Price",
-                width: 150,
-                textAlign: 'center',
-            },
-            {
-                field: "yieldCalculation",
-                title: "Yield Calculation",
+                field: "equation",
+                title: "Equation"
             },
             {
                 field: "status",
@@ -71,7 +60,7 @@ var Items = function () {
                 type: 'remote',
                 source: {
                     read: {
-                        url: 'item/listarItem',
+                        url: 'equation/listarEquation',
                     }
                 },
                 pageSize: 10,
@@ -112,19 +101,19 @@ var Items = function () {
         //Events
         oTable
             .on('m-datatable--on-ajax-done', function () {
-                mApp.unblock('#item-table-editable');
+                mApp.unblock('#equation-table-editable');
             })
             .on('m-datatable--on-ajax-fail', function (e, jqXHR) {
-                mApp.unblock('#item-table-editable');
+                mApp.unblock('#equation-table-editable');
             })
             .on('m-datatable--on-goto-page', function (e, args) {
-                MyApp.block('#item-table-editable');
+                MyApp.block('#equation-table-editable');
             })
             .on('m-datatable--on-reloaded', function (e) {
-                MyApp.block('#item-table-editable');
+                MyApp.block('#equation-table-editable');
             })
             .on('m-datatable--on-sort', function (e, args) {
-                MyApp.block('#item-table-editable');
+                MyApp.block('#equation-table-editable');
             })
             .on('m-datatable--on-check', function (e, args) {
                 //eventsWriter('Checkbox active: ' + args.toString());
@@ -135,7 +124,7 @@ var Items = function () {
 
         //Busqueda
         var query = oTable.getDataSourceQuery();
-        $('#lista-item .m_form_search').on('keyup', function (e) {
+        $('#lista-equation .m_form_search').on('keyup', function (e) {
             // shortcode to datatable.getDataSourceParam('query');
             var query = oTable.getDataSourceQuery();
             query.generalSearch = $(this).val().toLowerCase();
@@ -147,7 +136,7 @@ var Items = function () {
 
     //Reset forms
     var resetForms = function () {
-        $('#item-form input').each(function (e) {
+        $('#equation-form input').each(function (e) {
             $element = $(this);
             $element.val('');
 
@@ -155,31 +144,20 @@ var Items = function () {
             $element.closest('.form-group').removeClass('has-error').addClass('success');
         });
 
-        $('#unit').val('');
-        $('#unit').trigger('change');
-
-        $('#yield-calculation').val('');
-        $('#yield-calculation').trigger('change');
-
-        $('#equation').val('');
-        $('#equation').trigger('change');
-        $('#select-equation').removeClass('m--hide').addClass('m--hide');
-
         $('#estadoactivo').prop('checked', true);
 
-        var $element = $('.select2');
-        $element.removeClass('has-error').tooltip("dispose");
-
         event_change = false;
-
     };
 
     //Validacion
     var initForm = function () {
         //Validacion
-        $("#item-form").validate({
+        $("#equation-form").validate({
             rules: {
                 descripcion: {
+                    required: true
+                },
+                equation: {
                     required: true
                 }
             },
@@ -219,23 +197,23 @@ var Items = function () {
 
     //Nuevo
     var initAccionNuevo = function () {
-        $(document).off('click', "#btn-nuevo-item");
-        $(document).on('click', "#btn-nuevo-item", function (e) {
+        $(document).off('click', "#btn-nuevo-equation");
+        $(document).on('click', "#btn-nuevo-equation", function (e) {
             btnClickNuevo();
         });
 
         function btnClickNuevo() {
             resetForms();
-            var formTitle = "Do you want to create a new item? Follow the next steps:";
-            $('#form-item-title').html(formTitle);
-            $('#form-item').removeClass('m--hide');
-            $('#lista-item').addClass('m--hide');
+            var formTitle = "Do you want to create a new equation? Follow the next steps:";
+            $('#form-equation-title').html(formTitle);
+            $('#form-equation').removeClass('m--hide');
+            $('#lista-equation').addClass('m--hide');
         };
     };
     //Salvar
     var initAccionSalvar = function () {
-        $(document).off('click', "#btn-salvar-item");
-        $(document).on('click', "#btn-salvar-item", function (e) {
+        $(document).off('click', "#btn-salvar-equation");
+        $(document).on('click', "#btn-salvar-equation", function (e) {
             btnClickSalvarForm();
         });
 
@@ -244,35 +222,29 @@ var Items = function () {
 
             event_change = false;
 
-            var unit_id = $('#unit').val();
+            var equation = $('#equation').val();
 
-            if ($('#item-form').valid() && unit_id != "") {
+            if ($('#equation-form').valid() && /^[0-9+\-*\/\s\(\)x]+$/.test(equation)) {
 
-                var item_id = $('#item_id').val();
+                var equation_id = $('#equation_id').val();
 
                 var descripcion = $('#descripcion').val();
-                var price = $('#price').val();
                 var status = ($('#estadoactivo').prop('checked')) ? 1 : 0;
-                var yield_calculation = $('#yield-calculation').val();
-                var equation_id = $('#equation').val();
 
-                MyApp.block('#form-item');
+                MyApp.block('#form-equation');
 
                 $.ajax({
                     type: "POST",
-                    url: "item/salvarItem",
+                    url: "equation/salvarEquation",
                     dataType: "json",
                     data: {
-                        'item_id': item_id,
+                        'equation_id': equation_id,
                         'description': descripcion,
-                        'price': price,
-                        'unit_id': unit_id,
-                        'status': status,
-                        'yield_calculation': yield_calculation,
-                        'equation_id': equation_id
+                        'equation': equation,
+                        'status': status
                     },
                     success: function (response) {
-                        mApp.unblock('#form-item');
+                        mApp.unblock('#form-equation');
                         if (response.success) {
 
                             toastr.success(response.message, "Success !!!");
@@ -283,31 +255,22 @@ var Items = function () {
                         }
                     },
                     failure: function (response) {
-                        mApp.unblock('#form-item');
+                        mApp.unblock('#form-equation');
 
                         toastr.error(response.error, "Error !!!");
                     }
                 });
             } else {
-                if (unit_id == "") {
-                    var $element = $('#select-unit .select2');
-                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
-                        .data("title", "This field is required")
-                        .addClass("has-error")
-                        .tooltip({
-                            placement: 'bottom'
-                        }); // Create a new tooltip based on the error messsage we just set in the title
-
-                    $element.closest('.form-group')
-                        .removeClass('has-success').addClass('has-error');
+                if (!/^[0-9+\-*\/\s\(\)x]+$/.test(equation)) {
+                    toastr.error('The equation expression is not valid', "Error !!!");
                 }
             }
         };
     }
     //Cerrar form
     var initAccionCerrar = function () {
-        $(document).off('click', ".cerrar-form-item");
-        $(document).on('click', ".cerrar-form-item", function (e) {
+        $(document).off('click', ".cerrar-form-equation");
+        $(document).on('click', ".cerrar-form-equation", function (e) {
             cerrarForms();
         });
     }
@@ -322,80 +285,48 @@ var Items = function () {
         }
     };
 
-    //Eventos change
-    var event_change = false;
-    var initAccionChange = function () {
-        $(document).off('change', ".event-change");
-        $(document).on('change', ".event-change", function (e) {
-            event_change = true;
-        });
-
-        $(document).off('click', "#btn-save-changes");
-        $(document).on('click', "#btn-save-changes", function (e) {
-            cerrarFormsConfirmated();
-        });
-    };
-    var cerrarFormsConfirmated = function () {
-        resetForms();
-        $('#form-item').addClass('m--hide');
-        $('#lista-item').removeClass('m--hide');
-    };
     //Editar
     var initAccionEditar = function () {
-        $(document).off('click', "#item-table-editable a.edit");
-        $(document).on('click', "#item-table-editable a.edit", function (e) {
+        $(document).off('click', "#equation-table-editable a.edit");
+        $(document).on('click', "#equation-table-editable a.edit", function (e) {
             e.preventDefault();
             resetForms();
 
-            var item_id = $(this).data('id');
-            $('#item_id').val(item_id);
+            var equation_id = $(this).data('id');
+            $('#equation_id').val(equation_id);
 
-            $('#form-item').removeClass('m--hide');
-            $('#lista-item').addClass('m--hide');
+            $('#form-equation').removeClass('m--hide');
+            $('#lista-equation').addClass('m--hide');
 
-            editRow(item_id);
+            editRow(equation_id);
         });
 
-        function editRow(item_id) {
+        function editRow(equation_id) {
 
-            MyApp.block('#form-item');
+            MyApp.block('#form-equation');
 
             $.ajax({
                 type: "POST",
-                url: "item/cargarDatos",
+                url: "equation/cargarDatos",
                 dataType: "json",
                 data: {
-                    'item_id': item_id
+                    'equation_id': equation_id
                 },
                 success: function (response) {
-                    mApp.unblock('#form-item');
+                    mApp.unblock('#form-equation');
                     if (response.success) {
-                        //Datos item
+                        //Datos equation
 
-                        var formTitle = "You want to update the item? Follow the next steps:";
-                        $('#form-item-title').html(formTitle);
+                        var formTitle = "You want to update the equation? Follow the next steps:";
+                        $('#form-equation-title').html(formTitle);
 
-                        $('#descripcion').val(response.item.descripcion);
-                        $('#price').val(response.item.price);
+                        $('#descripcion').val(response.equation.descripcion);
+                        $('#equation').val(response.equation.equation);
 
-                        $('#unit').val(response.item.unit_id);
-                        $('#unit').trigger('change');
-
-                        if (!response.item.status) {
+                        if (!response.equation.status) {
                             $('#estadoactivo').prop('checked', false);
                             $('#estadoinactivo').prop('checked', true);
                         }
-
-                        // yield
-                        $('#yield-calculation').off('change', changeYield);
-
-                        $('#yield-calculation').val(response.item.yield_calculation);
-                        $('#yield-calculation').trigger('change');
-
-                        $('#equation').val(response.item.equation_id);
-                        $('#equation').trigger('change');
-
-                        $('#yield-calculation').on('change', changeYield);
 
                         event_change = false;
 
@@ -404,7 +335,7 @@ var Items = function () {
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#form-item');
+                    mApp.unblock('#form-equation');
 
                     toastr.error(response.error, "Error !!!");
                 }
@@ -414,8 +345,8 @@ var Items = function () {
     };
     //Eliminar
     var initAccionEliminar = function () {
-        $(document).off('click', "#item-table-editable a.delete");
-        $(document).on('click', "#item-table-editable a.delete", function (e) {
+        $(document).off('click', "#equation-table-editable a.delete");
+        $(document).on('click', "#equation-table-editable a.delete", function (e) {
             e.preventDefault();
 
             rowDelete = $(this).data('id');
@@ -424,8 +355,8 @@ var Items = function () {
             });
         });
 
-        $(document).off('click', "#btn-eliminar-item");
-        $(document).on('click', "#btn-eliminar-item", function (e) {
+        $(document).off('click', "#btn-eliminar-equation");
+        $(document).on('click', "#btn-eliminar-equation", function (e) {
             btnClickEliminar();
         });
 
@@ -460,19 +391,19 @@ var Items = function () {
         };
 
         function btnClickModalEliminar() {
-            var item_id = rowDelete;
+            var equation_id = rowDelete;
 
-            MyApp.block('#item-table-editable');
+            MyApp.block('#equation-table-editable');
 
             $.ajax({
                 type: "POST",
-                url: "item/eliminarItem",
+                url: "equation/eliminarEquation",
                 dataType: "json",
                 data: {
-                    'item_id': item_id
+                    'equation_id': equation_id
                 },
                 success: function (response) {
-                    mApp.unblock('#item-table-editable');
+                    mApp.unblock('#equation-table-editable');
 
                     if (response.success) {
                         oTable.load();
@@ -484,7 +415,7 @@ var Items = function () {
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#item-table-editable');
+                    mApp.unblock('#equation-table-editable');
 
                     toastr.error(response.error, "Error !!!");
                 }
@@ -502,17 +433,17 @@ var Items = function () {
                 }
             });
 
-            MyApp.block('#item-table-editable');
+            MyApp.block('#equation-table-editable');
 
             $.ajax({
                 type: "POST",
-                url: "item/eliminarItems",
+                url: "equation/eliminarEquations",
                 dataType: "json",
                 data: {
                     'ids': ids
                 },
                 success: function (response) {
-                    mApp.unblock('#item-table-editable');
+                    mApp.unblock('#equation-table-editable');
                     if (response.success) {
 
                         oTable.load();
@@ -523,7 +454,7 @@ var Items = function () {
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#item-table-editable');
+                    mApp.unblock('#equation-table-editable');
 
                     toastr.error(response.error, "Error !!!");
                 }
@@ -531,32 +462,9 @@ var Items = function () {
         };
     };
 
-
-    var initWidgets = function () {
-
-        initPortlets();
-
-        $('.m-select2').select2();
-
-        // change
-        $('#yield-calculation').change(changeYield);
-    }
-
-    var changeYield = function () {
-        var yield_calculation = $('#yield-calculation').val();
-
-        // reset
-        $('#equation').val('');
-        $('#equation').trigger('change');
-        $('#select-equation').removeClass('m--hide').addClass('m--hide');
-
-        if (yield_calculation == 'equation') {
-            $('#select-equation').removeClass('m--hide');
-        }
-    }
-
+    //initPortlets
     var initPortlets = function () {
-        var portlet = new mPortlet('lista-item');
+        var portlet = new mPortlet('lista-equation');
         portlet.on('afterFullscreenOn', function (portlet) {
             $('.m-portlet').addClass('m-portlet--fullscreen');
         });
@@ -566,11 +474,30 @@ var Items = function () {
         });
     }
 
+    //Eventos change
+    var event_change = false;
+    var initAccionChange = function () {
+        $(document).off('change', ".event-change");
+        $(document).on('change', ".event-change", function (e) {
+            event_change = true;
+        });
+
+        $(document).off('click', "#btn-save-changes");
+        $(document).on('click', "#btn-save-changes", function (e) {
+            cerrarFormsConfirmated();
+        });
+    };
+    var cerrarFormsConfirmated = function () {
+        resetForms();
+        $('#form-equation').addClass('m--hide');
+        $('#lista-equation').removeClass('m--hide');
+    }
+
     return {
         //main function to initiate the module
         init: function () {
 
-            initWidgets();
+            initPortlets();
             initTable();
             initForm();
 
@@ -581,6 +508,7 @@ var Items = function () {
             initAccionEliminar();
 
             initAccionChange();
+
         }
 
     };

@@ -42,6 +42,13 @@ class Item
      */
     private $status;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="yield_calculation", type="string", length=50, nullable=false)
+     */
+    private $yieldCalculation;
+
 
     /**
      * @var \DateTime
@@ -66,6 +73,16 @@ class Item
      * })
      */
     private $unit;
+
+    /**
+     * @var Equation
+     *
+     * @ORM\ManyToOne(targetEntity="App\Entity\Equation")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="equation_id", referencedColumnName="equation_id")
+     * })
+     */
+    private $equation;
 
 
     /**
@@ -149,5 +166,28 @@ class Item
     public function setUnit($unit): void
     {
         $this->unit = $unit;
+    }
+
+    public function getYieldCalculation()
+    {
+        return $this->yieldCalculation;
+    }
+
+    public function setYieldCalculation($yieldCalculation)
+    {
+        $this->yieldCalculation = $yieldCalculation;
+    }
+
+    /**
+     * @return Equation
+     */
+    public function getEquation()
+    {
+        return $this->equation;
+    }
+
+    public function setEquation($equation)
+    {
+        $this->equation = $equation;
     }
 }
