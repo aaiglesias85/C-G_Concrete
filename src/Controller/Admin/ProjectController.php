@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Company;
+use App\Entity\Equation;
 use App\Entity\Inspector;
 use App\Entity\Item;
 use App\Utils\Admin\ProjectService;
@@ -38,11 +39,18 @@ class ProjectController extends AbstractController
                 $items = $this->projectService->getDoctrine()->getRepository(Item::class)
                     ->ListarOrdenados();
 
+                $equations = $this->projectService->getDoctrine()->getRepository(Equation::class)
+                    ->ListarOrdenados();
+
+                $yields_calculation = $this->projectService->ListarYieldsCalculation();
+
                 return $this->render('admin/project/index.html.twig', array(
                     'permiso' => $permiso[0],
                     'companies' => $companies,
                     'inspectors' => $inspectors,
-                    'items' => $items
+                    'items' => $items,
+                    'equations' => $equations,
+                    'yields_calculation' => $yields_calculation
                 ));
             }
         } else {

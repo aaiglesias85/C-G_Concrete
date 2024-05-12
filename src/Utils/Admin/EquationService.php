@@ -4,6 +4,7 @@ namespace App\Utils\Admin;
 
 use App\Entity\Item;
 use App\Entity\Equation;
+use App\Entity\ProjectItem;
 use App\Utils\Base;
 
 class EquationService extends Base
@@ -54,7 +55,9 @@ class EquationService extends Base
             // items
             $items = $this->getDoctrine()->getRepository(Item::class)
                 ->ListarItemsDeEquation($equation_id);
-            if (count($items) > 0) {
+            $project_items = $this->getDoctrine()->getRepository(ProjectItem::class)
+                ->ListarProjectItemsDeEquation($equation_id);
+            if (count($items) > 0 || count($project_items) > 0) {
                 $resultado['success'] = false;
                 $resultado['error'] = "The equation could not be deleted, because it is related to a item";
                 return $resultado;
@@ -104,7 +107,9 @@ class EquationService extends Base
 
                         $items = $this->getDoctrine()->getRepository(Item::class)
                             ->ListarItemsDeEquation($equation_id);
-                        if (count($items) == 0) {
+                        $project_items = $this->getDoctrine()->getRepository(ProjectItem::class)
+                            ->ListarProjectItemsDeEquation($equation_id);
+                        if (count($items) == 0 && count($project_items) == 0) {
 
                             $equation_descripcion = $entity->getDescription();
 

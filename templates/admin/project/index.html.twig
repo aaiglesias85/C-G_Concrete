@@ -194,7 +194,7 @@
             <div class="m-portlet__body">
 
                 <ul class="nav nav-tabs" role="tablist">
-                    <li class="nav-item" >
+                    <li class="nav-item">
                         <a class="nav-link active wizard-tab" data-item="1"
                            data-toggle="tab" href="#tab-content-general" id="tab-general">
                             General
@@ -268,7 +268,8 @@
                                                 Owner
                                                 <span class="ic-small italic">(optional)</span>
                                             </label>
-                                            <input type="text" class="form-control event-change" id="owner" name="owner">
+                                            <input type="text" class="form-control event-change" id="owner"
+                                                   name="owner">
                                         </div>
                                         <div class="col-md-4">
                                             <label>
@@ -281,7 +282,8 @@
                                             <label>&nbsp;</label>
                                             <div>
                                                 <label class="m-checkbox">
-                                                    <input type="checkbox" class="form-control event-change" id="federal_funding" name="federal_funding"> Federal Funding
+                                                    <input type="checkbox" class="form-control event-change"
+                                                           id="federal_funding" name="federal_funding"> Federal Funding
                                                     <span></span>
                                                 </label>
                                             </div>
@@ -296,7 +298,8 @@
                                                 County
                                                 <span class="ic-small italic">(optional)</span>
                                             </label>
-                                            <input type="text" class="form-control event-change" id="county" name="county">
+                                            <input type="text" class="form-control event-change" id="county"
+                                                   name="county">
                                         </div>
                                         <div class="col-md-7">
                                             <label>
@@ -309,7 +312,8 @@
                                             <label>&nbsp;</label>
                                             <div>
                                                 <label class="m-checkbox">
-                                                    <input type="checkbox" class="form-control event-change" id="resurfacing" name="resurfacing"> Resurfacing
+                                                    <input type="checkbox" class="form-control event-change"
+                                                           id="resurfacing" name="resurfacing"> Resurfacing
                                                     <span></span>
                                                 </label>
                                             </div>
@@ -338,13 +342,16 @@
                                             <label>
                                                 Invoice Contact
                                             </label>
-                                            <input type="text" class="form-control event-change" id="invoice_contact" name="invoice_contact">
+                                            <input type="text" class="form-control event-change" id="invoice_contact"
+                                                   name="invoice_contact">
                                         </div>
                                         <div class="col-md-2">
                                             <label>&nbsp;</label>
                                             <div>
                                                 <label class="m-checkbox">
-                                                    <input type="checkbox" class="form-control event-change" id="certified_payrolls" name="certified_payrolls"> Certified payrolls
+                                                    <input type="checkbox" class="form-control event-change"
+                                                           id="certified_payrolls" name="certified_payrolls"> Certified
+                                                    payrolls
                                                     <span></span>
                                                 </label>
                                             </div>
@@ -585,7 +592,8 @@
                                                 {% if permiso.agregar or permiso.editar %}
                                                     <div class="col-md-2">
                                                         <div class="btn-group">
-                                                            <button id="btn-agregar-data-tracking" class="btn btn-success"
+                                                            <button id="btn-agregar-data-tracking"
+                                                                    class="btn btn-success"
                                                                     style="margin-bottom: 20px; margin-top: 10px;">
                                                                 New <i class="la la-plus"></i>
                                                             </button>
@@ -656,7 +664,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
 
                 <div class="m-form">
@@ -688,7 +696,7 @@
 
     <!-- items -->
     <div class="modal fade" id="modal-item" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
@@ -703,7 +711,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
-                   
+
                 </div>
                 <div class="modal-body">
                     <form class="m-form" id="item-form" action="#"
@@ -711,9 +719,8 @@
 
                         <input type="hidden" id="project_item_id" name="project_item_id"/>
 
-                        <div class="form-group m-form__group ic-form-group">
+                        <div class="form-group m-form__group">
                             <label>
-                                <span class="ic-step-number">1</span>
                                 Item
                                 <span class="ic-small italic">(required)</span>
                             </label>
@@ -722,7 +729,8 @@
                                     <select class="form-control m-select2" id="item">
                                         <option value="">Select</option>
                                         {% for item in items %}
-                                            <option value="{{ item.itemId }}" data-price="{{ item.price }}" data-unit="{{ item.unit.description }}">
+                                            <option value="{{ item.itemId }}" data-price="{{ item.price }}"
+                                                    data-unit="{{ item.unit.description }}">
                                                 {{ item.description }} ${{ item.price | number_format(2, ',', '.') }}
                                             </option>
                                         {% endfor %}
@@ -731,38 +739,56 @@
                             </div>
                         </div>
 
-                        <div class="form-group m-form__group ic-form-group">
+                        <div class="form-group m-form__group">
+                            <label>
+                                Yield Calculation
+                                <span class="ic-small italic">(optional)</span>
+                            </label>
                             <div class="row">
-                                <div class="col-md-4">
-                                    <label>
-                                        <span class="ic-step-number">2</span>
-                                        Quatity
-                                        <span class="ic-small italic">(required)</span>
-                                    </label>
-                                    <input type="text" class="form-control form-control-number" id="item-quantity" name="quantity">
+                                <div class="col-md-12" id="select-yield-calculation">
+                                    <select class="form-control m-select2 event-change" id="yield-calculation"
+                                            name="yield">
+                                        <option value="">Select</option>
+                                        {% for item in yields_calculation %}
+                                            <option value="{{ item.id }}">{{ item.name }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
-                                <div class="col-md-4">
-                                    <label>
-                                        Price
-                                    </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group m--hide" id="select-equation">
+                            <label>
+                                Equation
+                                <span class="ic-small italic">(required)</span>
+                            </label>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <select class="form-control m-select2 event-change" id="equation"
+                                            name="equation">
+                                        <option value="">Select</option>
+                                        {% for item in equations %}
+                                            <option value="{{ item.equationId }}" data-equation="{{ item.equation }}"> {{ item.description }} {{ item.equation }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group">
+                            <label>
+                                Price
+                                <span class="ic-small italic">(required)</span>
+                            </label>
+                            <div class="row">
+                                <div class="col-md-6">
                                     <div class="input-group m-input-group">
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">$</span>
                                         </div>
                                         <input type="text" class="form-control form-control-number" id="item-price"
                                                name="price">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <label>
-                                        Total
-                                    </label>
-                                    <div class="input-group m-input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">$</span>
-                                        </div>
-                                        <input type="text" class="form-control form-control-number" id="item-total"
-                                               name="total" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -773,7 +799,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="btn-salvar-item">Save</button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                
+
                 </div>
             </div>
         </div>
@@ -865,7 +891,8 @@
                                         Quatity
                                         <span class="ic-small italic">(required)</span>
                                     </label>
-                                    <input type="text" class="form-control form-control-number" id="data-tracking-quantity" name="quantity">
+                                    <input type="text" class="form-control form-control-number"
+                                           id="data-tracking-quantity" name="quantity">
                                 </div>
                                 <div class="col-md-4">
                                     <label>
@@ -873,9 +900,10 @@
                                     </label>
                                     <div class="input-group m-input-group">
                                         <div class="input-group-prepend">
-                                        <span class="input-group-text">$</span>
+                                            <span class="input-group-text">$</span>
                                         </div>
-                                        <input type="text" class="form-control form-control-number" id="data-tracking-price"
+                                        <input type="text" class="form-control form-control-number"
+                                               id="data-tracking-price"
                                                name="price">
                                     </div>
                                 </div>
@@ -887,7 +915,8 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">$</span>
                                         </div>
-                                        <input type="text" class="form-control form-control-number" id="data-tracking-total"
+                                        <input type="text" class="form-control form-control-number"
+                                               id="data-tracking-total"
                                                name="total" disabled>
                                     </div>
                                 </div>
@@ -903,7 +932,8 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="modal-eliminar-data-tracking" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="modal-eliminar-data-tracking" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -928,7 +958,7 @@
     <div class="modal fade" id="modal-notes" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-               <div class="modal-header">
+                <div class="modal-header">
                     <h5 class="modal-title">
                         New Note
 
@@ -938,10 +968,10 @@
                         </span>
                     </h5>
 
-                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                       <span aria-hidden="true">×</span>
-                   </button>
-                   
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+
                 </div>
                 <div class="modal-body">
                     <form class="m-form" id="notes-form" action="#"

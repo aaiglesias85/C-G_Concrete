@@ -67,7 +67,7 @@ var Projects = function () {
                 template: function (row) {
 
                     var html = '';
-                    if(row.nota != null){
+                    if (row.nota != null) {
                         html = `${row.nota.nota} <span class="m-badge m-badge--info">${row.nota.date}</span> 
                             <i class="flaticon-edit editar-notas" data-id="${row.id}" 
                             data-projectnumber="${row.projectNumber}" data-projectname="${row.name}"
@@ -523,7 +523,7 @@ var Projects = function () {
                         event_change = false;
 
                         // ir al tab de notas
-                        if(editar_notas){
+                        if (editar_notas) {
                             activeTab = 3;
                             mostrarTab();
                         }
@@ -669,36 +669,40 @@ var Projects = function () {
 
         // change
         $('#item').change(changeItem);
-        $('#item-quantity').change(calcularTotalItem);
-        $('#item-price').change(calcularTotalItem);
+        $('#yield-calculation').change(changeYield);
 
         $('#item-data-tracking').change(changeItemDataTracking);
         $('#data-tracking-quantity').change(calcularTotalItemDataTracking);
         $('#data-tracking-price').change(calcularTotalItemDataTracking);
+
+
     }
+
+    var changeYield = function () {
+        var yield_calculation = $('#yield-calculation').val();
+
+        // reset
+        $('#equation').val('');
+        $('#equation').trigger('change');
+        $('#select-equation').removeClass('m--hide').addClass('m--hide');
+
+        if (yield_calculation == 'equation') {
+            $('#select-equation').removeClass('m--hide');
+        }
+    }
+
     var changeItem = function () {
         var item_id = $('#item').val();
 
         // reset
-        $('#item-quantity').val('');
         $('#item-price').val('');
-        $('#item-total').val('');
 
         if (item_id != '') {
             var price = $('#item option[value="' + item_id + '"]').data("price");
             $('#item-price').val(price);
+        }
+    }
 
-            calcularTotalItem();
-        }
-    }
-    var calcularTotalItem = function () {
-        var cantidad = $('#item-quantity').val();
-        var price = $('#item-price').val();
-        if (cantidad != '' && price != '') {
-            var total = parseFloat(cantidad) * parseFloat(price);
-            $('#item-total').val(total);
-        }
-    }
     var changeItemDataTracking = function () {
         var item_id = $('#item-data-tracking').val();
 
@@ -891,10 +895,8 @@ var Projects = function () {
                 width: 100,
             },
             {
-                field: "quantity",
-                title: "Quatity",
-                width: 100,
-                textAlign: 'center',
+                field: "yield_calculation_name",
+                title: "Yield Calculation",
             },
             {
                 field: "price",
@@ -903,15 +905,6 @@ var Projects = function () {
                 textAlign: 'center',
                 template: function (row) {
                     return `<span>${MyApp.formatearNumero(row.price, 2, '.', ',')}</span>`;
-                }
-            },
-            {
-                field: "total",
-                title: "Total",
-                width: 100,
-                textAlign: 'center',
-                template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.total, 2, '.', ',')}</span>`;
                 }
             },
             {
@@ -1003,9 +996,6 @@ var Projects = function () {
     var initFormItem = function () {
         $("#item-form").validate({
             rules: {
-                quantity: {
-                    required: true,
-                },
                 price: {
                     required: true
                 },
@@ -1059,14 +1049,16 @@ var Projects = function () {
             e.preventDefault();
 
             var item_id = $('#item').val();
-            if ($('#item-form').valid() && item_id != '') {
+            if ($('#item-form').valid() && item_id != '' && isValidYield()) {
 
                 var item = $("#item option:selected").text();
                 var unit = $('#item option[value="' + item_id + '"]').data("unit");
 
-                var quantity = $('#item-quantity').val();
                 var price = $('#item-price').val();
-                var total = $('#item-total').val();
+
+                var yield_calculation = $('#yield-calculation').val();
+                var equation_id = $('#equation').val();
+                var yield_calculation_name = DevolverYieldCalculationDeItem();
 
                 if (nEditingRowItem == null) {
 
@@ -1075,9 +1067,10 @@ var Projects = function () {
                         item_id: item_id,
                         item: item,
                         unit: unit,
-                        quantity: quantity,
+                        equation_id: equation_id,
+                        yield_calculation: yield_calculation,
+                        yield_calculation_name: yield_calculation_name,
                         price: price,
-                        total: total,
                         posicion: items.length
                     });
 
@@ -1087,9 +1080,10 @@ var Projects = function () {
                         items[posicion].item_id = item_id;
                         items[posicion].item = item;
                         items[posicion].unit = unit;
-                        items[posicion].quantity = quantity;
+                        items[posicion].yield_calculation = yield_calculation;
+                        items[posicion].yield_calculation_name = yield_calculation_name;
+                        items[posicion].equation_id = equation_id;
                         items[posicion].price = price;
-                        items[posicion].total = total;
                     }
                 }
 
@@ -1098,11 +1092,26 @@ var Projects = function () {
 
                 // reset
                 resetFormItem();
-                //$('#modal-item').modal('hide');
+
+                if (nEditingRowItem != null) {
+                    $('#modal-item').modal('hide');
+                }
 
             } else {
                 if (item_id == "") {
                     var $element = $('#select-item .select2');
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", "This field is required")
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+                }
+                if (!isValidYield()) {
+                    var $element = $('#select-equation .select2');
                     $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
                         .data("title", "This field is required")
                         .addClass("has-error")
@@ -1128,20 +1137,24 @@ var Projects = function () {
                 nEditingRowItem = posicion;
 
                 $('#item').off('change', changeItem);
-                $('#item-quantity').off('change', calcularTotalItem);
-                $('#item-price').off('change', calcularTotalItem);
 
                 $('#item').val(items[posicion].item_id);
                 $('#item').trigger('change');
 
-                $('#item-quantity').val(items[posicion].quantity);
                 $('#item-price').val(items[posicion].price);
 
-                calcularTotalItem();
-
                 $('#item').on('change', changeItem);
-                $('#item-quantity').on('change', calcularTotalItem);
-                $('#item-price').on('change', calcularTotalItem);
+
+                // yield
+                $('#yield-calculation').off('change', changeYield);
+
+                $('#yield-calculation').val(items[posicion].yield_calculation);
+                $('#yield-calculation').trigger('change');
+
+                $('#equation').val(items[posicion].equation_id);
+                $('#equation').trigger('change');
+
+                $('#yield-calculation').on('change', changeYield);
 
                 // open modal
                 $('#modal-item').modal('show');
@@ -1202,6 +1215,34 @@ var Projects = function () {
 
         });
 
+        function isValidYield() {
+            var valid = true;
+
+            var yield_calculation = $('#yield-calculation').val();
+            var equation_id = $('#equation').val();
+            if (yield_calculation == 'equation' && equation_id == '') {
+                valid = false;
+            }
+
+
+            return valid;
+        }
+
+        function DevolverYieldCalculationDeItem() {
+
+            var yield_calculation = $('#yield-calculation').val();
+
+            var yield_calculation_name = yield_calculation != "" ? $('#yield-calculation option:selected').text() : "";
+
+            // para la ecuacion devuelvo la ecuacion asociada
+            if (yield_calculation == 'equation') {
+                var equation_id = $('#equation').val();
+                yield_calculation_name = $('#equation option[value="' + equation_id + '"]').data("equation");
+            }
+
+            return yield_calculation_name;
+        }
+
         function deleteItem(posicion) {
             //Eliminar
             items.splice(posicion, 1);
@@ -1224,6 +1265,13 @@ var Projects = function () {
 
         $('#item').val('');
         $('#item').trigger('change');
+
+        $('#yield-calculation').val('');
+        $('#yield-calculation').trigger('change');
+
+        $('#equation').val('');
+        $('#equation').trigger('change');
+        $('#select-equation').removeClass('m--hide').addClass('m--hide');
 
         var $element = $('.select2');
         $element.removeClass('has-error').tooltip("dispose");

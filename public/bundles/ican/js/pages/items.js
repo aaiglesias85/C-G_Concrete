@@ -246,7 +246,7 @@ var Items = function () {
 
             var unit_id = $('#unit').val();
 
-            if ($('#item-form').valid() && unit_id != "") {
+            if ($('#item-form').valid() && unit_id != "" && isValidYield()) {
 
                 var item_id = $('#item_id').val();
 
@@ -301,9 +301,35 @@ var Items = function () {
                     $element.closest('.form-group')
                         .removeClass('has-success').addClass('has-error');
                 }
+                if (!isValidYield()) {
+                    var $element = $('#select-equation .select2');
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", "This field is required")
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+                }
             }
         };
     }
+
+    var isValidYield = function () {
+        var valid = true;
+
+        var yield_calculation = $('#yield-calculation').val();
+        var equation_id = $('#equation').val();
+        if (yield_calculation == 'equation' && equation_id == '') {
+            valid = false;
+        }
+
+
+        return valid;
+    }
+
     //Cerrar form
     var initAccionCerrar = function () {
         $(document).off('click', ".cerrar-form-item");

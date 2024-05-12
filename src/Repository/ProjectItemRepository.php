@@ -47,8 +47,25 @@ class ProjectItemRepository extends EntityRepository
         }
 
 
-        $consulta->orderBy('p_i.date', "ASC");
+        $consulta->orderBy('p_i.id', "ASC");
 
+
+        return $consulta->getQuery()->getResult();
+    }
+
+    /**
+     * ListarProjectItemsDeEquation: Lista los items de una equation
+     *
+     * @return ProjectItem[]
+     */
+    public function ListarProjectItemsDeEquation($equation_id)
+    {
+        $consulta = $this->createQueryBuilder('p_i')
+            ->leftJoin('p_i.equation', 'e')
+            ->andWhere('e.equationId = :equation_id')
+            ->setParameter('equation_id', $equation_id);
+
+        $consulta->orderBy('p_i.id', "ASC");
 
         return $consulta->getQuery()->getResult();
     }

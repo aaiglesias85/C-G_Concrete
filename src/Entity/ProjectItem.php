@@ -21,12 +21,6 @@ class ProjectItem
      */
     private $id;
 
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="quantity", type="float", nullable=false)
-     */
-    private $quantity;
 
     /**
      * @var float
@@ -34,6 +28,13 @@ class ProjectItem
      * @ORM\Column(name="price", type="float", nullable=false)
      */
     private $price;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="yield_calculation", type="string", length=50, nullable=false)
+     */
+    private $yieldCalculation;
 
     /**
      * @var Project
@@ -57,6 +58,16 @@ class ProjectItem
     private $item;
 
     /**
+     * @var Equation
+     *
+     * @ORM\ManyToOne(targetEntity="App\Entity\Equation")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="equation_id", referencedColumnName="equation_id")
+     * })
+     */
+    private $equation;
+
+    /**
      * Get id
      *
      * @return integer
@@ -64,16 +75,6 @@ class ProjectItem
     public function getId()
     {
         return $this->id;
-    }
-
-    public function getQuantity()
-    {
-        return $this->quantity;
-    }
-
-    public function setQuantity($quantity)
-    {
-        $this->quantity = $quantity;
     }
 
     public function getPrice()
@@ -110,6 +111,29 @@ class ProjectItem
     public function setItem($item)
     {
         $this->item = $item;
+    }
+
+    public function getYieldCalculation()
+    {
+        return $this->yieldCalculation;
+    }
+
+    public function setYieldCalculation($yieldCalculation)
+    {
+        $this->yieldCalculation = $yieldCalculation;
+    }
+
+    /**
+     * @return Equation
+     */
+    public function getEquation()
+    {
+        return $this->equation;
+    }
+
+    public function setEquation($equation)
+    {
+        $this->equation = $equation;
     }
 
 }

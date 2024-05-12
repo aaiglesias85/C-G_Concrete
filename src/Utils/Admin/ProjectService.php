@@ -3,6 +3,7 @@
 namespace App\Utils\Admin;
 
 use App\Entity\Company;
+use App\Entity\Equation;
 use App\Entity\Inspector;
 use App\Entity\Invoice;
 use App\Entity\Item;
@@ -587,23 +588,43 @@ class ProjectService extends Base
             ->ListarItemsDeProject($project_id);
         foreach ($lista as $key => $value) {
 
-            $quantity = $value->getQuantity();
             $price = $value->getPrice();
-            $total = $quantity * $price;
+
+            $yield_calculation_name = $this->DevolverYieldCalculationDeItem($value);
 
             $items[] = [
                 'project_item_id' => $value->getId(),
                 "item_id" => $value->getItem()->getItemId(),
                 "item" => $value->getItem()->getDescription(),
                 "unit" => $value->getItem()->getUnit()->getDescription(),
-                "quantity" => $quantity,
                 "price" => $price,
-                "total" => $total,
+                "yield_calculation" => $value->getYieldCalculation(),
+                "yield_calculation_name" => $yield_calculation_name,
+                "equation_id" => $value->getEquation() != null ? $value->getEquation()->getEquationId() : '',
                 "posicion" => $key
             ];
         }
 
         return $items;
+    }
+
+    /**
+     * DevolverYieldCalculationDeItem
+     * @param ProjectItem $item_entity
+     * @return string
+     */
+    private function DevolverYieldCalculationDeItem($item_entity)
+    {
+        $yield_calculation = $item_entity->getYieldCalculation();
+
+        $yield_calculation_name = $this->BuscarYieldCalculation($yield_calculation);
+
+        // para la ecuacion devuelvo la ecuacion asociada
+        if ($yield_calculation == 'equation' && $item_entity->getEquation() != null) {
+            $yield_calculation_name = $item_entity->getEquation()->getEquation();
+        }
+
+        return $yield_calculation_name;
     }
 
     /**
@@ -946,9 +967,16 @@ class ProjectService extends Base
                 $is_new_item = true;
             }
 
-            $project_item_entity->setQuantity($value->quantity);
+            $project_item_entity->setYieldCalculation($value->yield_calculation);
             $project_item_entity->setPrice($value->price);
 
+            $equation_entity = null;
+            if ($value->equation_id != '') {
+                $equation_entity = $this->getDoctrine()->getRepository(Equation::class)->find($value->equation_id);
+                $project_item_entity->setEquation($equation_entity);
+            }
+
+            $item_entity = null;
             if ($value->item_id != '') {
                 $item_entity = $this->getDoctrine()->getRepository(Item::class)->find($value->item_id);
                 $project_item_entity->setItem($item_entity);
