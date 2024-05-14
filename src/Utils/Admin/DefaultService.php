@@ -13,6 +13,28 @@ class DefaultService extends Base
 {
 
     /**
+     * ListarProjectsParaDashboard: lista los projects ordenados por el due date
+     * @return array
+     */
+    public function ListarProjectsParaDashboard()
+    {
+        $arreglo_resultado = [];
+
+        $lista = $this->getDoctrine()->getRepository(Project::class)
+            ->ListarProjectsParaDashboard('', '');
+        foreach ($lista as $value) {
+            $arreglo_resultado[] = [
+                'project_id' => $value->getProjectId(),
+                'number' => $value->getProjectNumber(),
+                'name' => $value->getName(),
+                'dueDate' => $value->getDueDate() != '' ? $value->getDueDate()->format('m/d/Y') : ''
+            ];
+        }
+
+        return $arreglo_resultado;
+    }
+
+    /**
      * ListarStats: listar stats
      * @return array
      */

@@ -39,6 +39,8 @@ class DefaultController extends AbstractController
                 $chart3 = $this->defaultService->DevolverDataChart3();
                 // items
                 $items = $this->defaultService->ListarItemsConMontos();
+                // projects
+                $projects = $this->defaultService->ListarProjectsParaDashboard();
 
                 return $this->render('admin/default/index.html.twig', array(
                     'usuario' => $usuario,
@@ -47,6 +49,7 @@ class DefaultController extends AbstractController
                     'chart2' => $chart2,
                     'chart3' => $chart3,
                     'items' => $items,
+                    'projects' => $projects
                 ));
             }
         } else {

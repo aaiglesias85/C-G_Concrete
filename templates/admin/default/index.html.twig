@@ -63,11 +63,27 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="m-widget1__item">
-                                <div class="row m-row--no-padding align-items-center">
 
+                            {% for item in projects %}
+                                <div class="m-widget1__item">
+                                    <div class="row m-row--no-padding align-items-center">
+                                        <div class="col">
+                                            <h3 class="m-widget1__title">{{ item.number }}</h3>
+                                            <span class="m-widget1__desc">{{ item.name }}</span>
+                                        </div>
+                                        <div class="col m--align-right">
+                                            <span>Due Date</span> </br>
+                                            <span class="m--font-info">{{ item.dueDate }}</span>
+                                        </div>
+                                    </div>
                                 </div>
+                            {% endfor %}
+
+                            {% if projects | length > 0 %}
+                            <div style="margin-top: 1.5rem;">
+                                <a href="{{ url('project') }}" class="btn m-btn--pill btn-secondary m-btn m-btn--hover-brand m-btn--custom">View all</a>
                             </div>
+                            {% endif %}
                         </div>
 
                         <!--end:: Widgets/Stats2-1 -->

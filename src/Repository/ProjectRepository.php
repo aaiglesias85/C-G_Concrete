@@ -326,4 +326,41 @@ class ProjectRepository extends EntityRepository
         $total = $query->getSingleScalarResult();
         return $total;
     }
+
+
+    /**
+     * ListarProjectsParaDashboard: Lista los projects
+     *
+     * @return Project[]
+     */
+    public function ListarProjectsParaDashboard($from = '', $to = '', $sort = 'DESC', $limit = 3)
+    {
+        $consulta = $this->createQueryBuilder('p')
+            ->leftJoin('p.company', 'c')
+            ->leftJoin('p.inspector', 'i')
+            ->where('p.status = 1 and p.dueDate is not null');
+
+        if ($from != "") {
+
+            $from = \DateTime::createFromFormat("m/d/Y", $from);
+            $from = $from->format("Y-m-d");
+
+            $consulta->andWhere('p.startDate >= :fecha_inicial')
+                ->setParameter('fecha_inicial', $from);
+        }
+        if ($to != "") {
+
+            $to = \DateTime::createFromFormat("m/d/Y", $to);
+            $to = $to->format("Y-m-d");
+
+            $consulta->andWhere('p.endDate <= :fecha_final')
+                ->setParameter('fecha_final', $to);
+        }
+
+        $consulta->orderBy('p.dueDate', $sort);
+
+        $consulta->setMaxResults($limit);
+
+        return $consulta->getQuery()->getResult();
+    }
 }
