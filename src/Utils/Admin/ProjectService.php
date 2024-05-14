@@ -11,6 +11,7 @@ use App\Entity\Project;
 use App\Entity\DataTracking;
 use App\Entity\ProjectItem;
 use App\Entity\ProjectNotes;
+use App\Entity\Unit;
 use App\Utils\Base;
 
 class ProjectService extends Base
@@ -840,7 +841,7 @@ class ProjectService extends Base
             $entity->setUpdatedAt(new \DateTime());
 
             // items
-            $this->SalvarItems($entity, $items);
+            $items_new = $this->SalvarItems($entity, $items);
 
             $em->flush();
 
@@ -851,6 +852,7 @@ class ProjectService extends Base
             $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
             $resultado['success'] = true;
+            $resultado['items'] = $items_new;
 
             return $resultado;
         }
@@ -926,7 +928,7 @@ class ProjectService extends Base
         $em->persist($entity);
 
         // items
-        $this->SalvarItems($entity, $items);
+        $items_new = $this->SalvarItems($entity, $items);
 
         $em->flush();
 
@@ -937,6 +939,7 @@ class ProjectService extends Base
         $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
         $resultado['success'] = true;
+        $resultado['items'] = $items_new;
 
         return $resultado;
     }
@@ -945,11 +948,14 @@ class ProjectService extends Base
      * SalvarItems
      * @param array $items
      * @param Project $entity
-     * @return void
+     * @return array
      */
     public function SalvarItems($entity, $items)
     {
         $em = $this->getDoctrine()->getManager();
+
+        // para devolver los items nuevos que se creen
+        $items_news = [];
 
         //Senderos
         foreach ($items as $value) {
@@ -961,10 +967,10 @@ class ProjectService extends Base
                     ->find($value->project_item_id);
             }
 
-            $is_new_item = false;
+            $is_new_project_item = false;
             if ($project_item_entity == null) {
                 $project_item_entity = new ProjectItem();
-                $is_new_item = true;
+                $is_new_project_item = true;
             }
 
             $project_item_entity->setYieldCalculation($value->yield_calculation);
@@ -979,16 +985,59 @@ class ProjectService extends Base
             $item_entity = null;
             if ($value->item_id != '') {
                 $item_entity = $this->getDoctrine()->getRepository(Item::class)->find($value->item_id);
-                $project_item_entity->setItem($item_entity);
+            } else {
+                // add new item
+                $item_entity = $this->AgregarNewItem($value, $equation_entity);
+                $items_news[] = [
+                    'item_id' => $item_entity->getItemId(),
+                    'description' => $value->item,
+                    'price' => $value->price,
+                    'unit' => $value->unit
+                ];
             }
 
+            $project_item_entity->setItem($item_entity);
 
-            if ($is_new_item) {
+            if ($is_new_project_item) {
                 $project_item_entity->setProject($entity);
 
                 $em->persist($project_item_entity);
             }
         }
+
+        return $items_news;
+    }
+
+    /**
+     * AgregarNewItem
+     * @param $value
+     * @return Item
+     */
+    private function AgregarNewItem($value, $equation_entity)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $item_entity = new Item();
+
+        $item_entity->setDescription($value->item);
+        $item_entity->setPrice($value->price);
+        $item_entity->setStatus(1);
+        $item_entity->setYieldCalculation($value->yield_calculation);
+
+        if ($value->unit_id != '') {
+            $unit = $this->getDoctrine()->getRepository(Unit::class)->find($value->unit_id);
+            $item_entity->setUnit($unit);
+        }
+
+        $item_entity->setEquation($equation_entity);
+
+        $item_entity->setCreatedAt(new \DateTime());
+
+        $em->persist($item_entity);
+
+        $em->flush();
+
+        return $item_entity;
     }
 
 

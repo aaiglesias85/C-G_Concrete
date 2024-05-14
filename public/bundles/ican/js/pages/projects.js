@@ -362,6 +362,16 @@ var Projects = function () {
 
                             btnClickFiltrar();
 
+                            // add new items
+                            if(response.items.length > 0){
+                                for (let item of response.items) {
+                                    $('#item').append(new Option(item.description, item.item_id, false, false));
+                                    $('#item option[value="' + item.item_id + '"]').attr("data-price", item.price);
+                                    $('#item option[value="' + item.item_id + '"]').attr("data-unit", item.unit);
+                                }
+                                $('#item').select2();
+                            }
+
                         } else {
                             toastr.error(response.error, "");
                         }
@@ -667,6 +677,8 @@ var Projects = function () {
 
         $('.m-select2').select2();
 
+        $("[data-switch=true]").bootstrapSwitch();
+
         // change
         $('#item').change(changeItem);
         $('#yield-calculation').change(changeYield);
@@ -675,7 +687,30 @@ var Projects = function () {
         $('#data-tracking-quantity').change(calcularTotalItemDataTracking);
         $('#data-tracking-price').change(calcularTotalItemDataTracking);
 
+        $(document).off('switchChange.bootstrapSwitch', '#item-type');
+        $(document).on('switchChange.bootstrapSwitch', '#item-type', changeItemType);
 
+    }
+
+    var changeItemType = function (event, state) {
+
+        // reset
+        $('#item').val('');
+        $('#item').trigger('change');
+        $('#div-item').removeClass('m--hide');
+
+        $('#item-name').val('');
+        $('#item-name').removeClass('m--hide').addClass('m--hide');
+
+        $('#unit').val('');
+        $('#unit').trigger('change');
+        $('#select-unit').removeClass('m--hide').addClass('m--hide');
+
+        if (!state) {
+            $('#div-item').removeClass('m--hide').addClass('m--hide');
+            $('#item-name').removeClass('m--hide');
+            $('#select-unit').removeClass('m--hide');
+        }
     }
 
     var changeYield = function () {
@@ -996,6 +1031,9 @@ var Projects = function () {
     var initFormItem = function () {
         $("#item-form").validate({
             rules: {
+                item: {
+                    required: true
+                },
                 price: {
                     required: true
                 },
@@ -1048,11 +1086,19 @@ var Projects = function () {
         $(document).on('click', "#btn-salvar-item", function (e) {
             e.preventDefault();
 
-            var item_id = $('#item').val();
-            if ($('#item-form').valid() && item_id != '' && isValidYield()) {
+            var item_type = $('#item-type').prop('checked');
 
-                var item = $("#item option:selected").text();
-                var unit = $('#item option[value="' + item_id + '"]').data("unit");
+            var item_id = $('#item').val();
+            var item = item_type ? $("#item option:selected").text() : $('#item-name').val();
+            if (item_type) {
+                $('#item-name').val(item);
+            }
+
+
+            if ($('#item-form').valid() && isValidItem() && isValidYield() && isValidUnit()) {
+
+                var unit_id = $('#unit').val();
+                var unit = item_type ? $('#item option[value="' + item_id + '"]').data("unit") : $("#unit option:selected").text();
 
                 var price = $('#item-price').val();
 
@@ -1066,6 +1112,7 @@ var Projects = function () {
                         project_item_id: '',
                         item_id: item_id,
                         item: item,
+                        unit_id: unit_id,
                         unit: unit,
                         equation_id: equation_id,
                         yield_calculation: yield_calculation,
@@ -1079,6 +1126,7 @@ var Projects = function () {
                     if (items[posicion]) {
                         items[posicion].item_id = item_id;
                         items[posicion].item = item;
+                        items[posicion].unit_id = unit_id;
                         items[posicion].unit = unit;
                         items[posicion].yield_calculation = yield_calculation;
                         items[posicion].yield_calculation_name = yield_calculation_name;
@@ -1098,7 +1146,7 @@ var Projects = function () {
                 }
 
             } else {
-                if (item_id == "") {
+                if (!isValidItem()) {
                     var $element = $('#select-item .select2');
                     $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
                         .data("title", "This field is required")
@@ -1112,6 +1160,18 @@ var Projects = function () {
                 }
                 if (!isValidYield()) {
                     var $element = $('#select-equation .select2');
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", "This field is required")
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+                }
+                if (!isValidUnit()) {
+                    var $element = $('#select-unit .select2');
                     $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
                         .data("title", "This field is required")
                         .addClass("has-error")
@@ -1155,6 +1215,21 @@ var Projects = function () {
                 $('#equation').trigger('change');
 
                 $('#yield-calculation').on('change', changeYield);
+
+                $(document).off('switchChange.bootstrapSwitch', '#item-type', changeItemType);
+
+                if (items[posicion].item_id == '') {
+
+                    $('#item-type').prop('checked', false);
+                    $("#item-type").bootstrapSwitch("state", false, true);
+
+                    $('#item-name').val(items[posicion].item);
+
+                    $('#unit').val(items[posicion].unit_id);
+                    $('#unit').trigger('change');
+                }
+
+                $(document).on('switchChange.bootstrapSwitch', '#item-type', changeItemType);
 
                 // open modal
                 $('#modal-item').modal('show');
@@ -1215,6 +1290,34 @@ var Projects = function () {
 
         });
 
+        function isValidItem() {
+            var valid = true;
+
+            var item_type = $('#item-type').prop('checked');
+            var item_id = $('#item').val();
+
+            if (item_type && item_id == '') {
+                valid = false;
+            }
+
+
+            return valid;
+        }
+
+        function isValidUnit() {
+            var valid = true;
+
+            var item_type = $('#item-type').prop('checked');
+            var unit_id = $('#unit').val();
+
+            if (!item_type && unit_id == '') {
+                valid = false;
+            }
+
+
+            return valid;
+        }
+
         function isValidYield() {
             var valid = true;
 
@@ -1263,6 +1366,9 @@ var Projects = function () {
             $element.closest('.form-group').removeClass('has-error').addClass('success');
         });
 
+        $('#item-type').prop('checked', true);
+        $("#item-type").bootstrapSwitch("state", true, true);
+
         $('#item').val('');
         $('#item').trigger('change');
 
@@ -1272,6 +1378,13 @@ var Projects = function () {
         $('#equation').val('');
         $('#equation').trigger('change');
         $('#select-equation').removeClass('m--hide').addClass('m--hide');
+
+        $('#div-item').removeClass('m--hide');
+        $('#item-name').removeClass('m--hide').addClass('m--hide');
+
+        $('#unit').val('');
+        $('#unit').trigger('change');
+        $('#select-unit').removeClass('m--hide').addClass('m--hide');
 
         var $element = $('.select2');
         $element.removeClass('has-error').tooltip("dispose");

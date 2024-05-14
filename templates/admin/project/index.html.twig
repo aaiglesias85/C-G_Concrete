@@ -720,11 +720,24 @@
                         <input type="hidden" id="project_item_id" name="project_item_id"/>
 
                         <div class="form-group m-form__group">
+                            <div>
+                                <input type="checkbox" data-switch="true" id="item-type"
+                                       checked="checked" data-on-text="Existing item"
+                                       data-off-text="New item" data-on-color="success"
+                                       data-off-color="danger">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group">
                             <label>
                                 Item
                                 <span class="ic-small italic">(required)</span>
                             </label>
-                            <div class="row">
+
+                            <input type="text" class="form-control form-control-text m--hide"
+                                   id="item-name" name="item" placeholder="Enter the custom name"/>
+
+                            <div class="row" id="div-item">
                                 <div class="col-md-12" id="select-item">
                                     <select class="form-control m-select2" id="item">
                                         <option value="">Select</option>
@@ -775,6 +788,21 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="form-group m-form__group m--hide" id="select-unit">
+                            <label>
+                                Unit
+                                <span class="ic-small italic">(required)</span>
+                            </label>
+                            <select class="form-control m-select2 event-change" id="unit" name="unit">
+                                <option value="">Select</option>
+                                {% for item in units %}
+                                    <option value="{{ item.unitId }}">{{ item.description }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
 
                         <div class="form-group m-form__group">
                             <label>

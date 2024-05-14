@@ -6,6 +6,7 @@ use App\Entity\Company;
 use App\Entity\Equation;
 use App\Entity\Inspector;
 use App\Entity\Item;
+use App\Entity\Unit;
 use App\Utils\Admin\ProjectService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,6 +43,9 @@ class ProjectController extends AbstractController
                 $equations = $this->projectService->getDoctrine()->getRepository(Equation::class)
                     ->ListarOrdenados();
 
+                $units = $this->projectService->getDoctrine()->getRepository(Unit::class)
+                    ->ListarOrdenados();
+
                 $yields_calculation = $this->projectService->ListarYieldsCalculation();
 
                 return $this->render('admin/project/index.html.twig', array(
@@ -50,7 +54,8 @@ class ProjectController extends AbstractController
                     'inspectors' => $inspectors,
                     'items' => $items,
                     'equations' => $equations,
-                    'yields_calculation' => $yields_calculation
+                    'yields_calculation' => $yields_calculation,
+                    'units' => $units
                 ));
             }
         } else {
@@ -172,6 +177,9 @@ class ProjectController extends AbstractController
 
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
+
+                // new items
+                $resultadoJson['items'] = $resultado['items'];
 
                 return $this->json($resultadoJson);
             } else {
