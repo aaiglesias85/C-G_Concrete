@@ -368,6 +368,8 @@ var Projects = function () {
                                     $('#item').append(new Option(item.description, item.item_id, false, false));
                                     $('#item option[value="' + item.item_id + '"]').attr("data-price", item.price);
                                     $('#item option[value="' + item.item_id + '"]').attr("data-unit", item.unit);
+                                    $('#item option[value="' + item.item_id + '"]').attr("data-equation", item.equation);
+                                    $('#item option[value="' + item.item_id + '"]').attr("data-yield", item.yield);
                                 }
                                 $('#item').select2();
                             }
@@ -732,9 +734,23 @@ var Projects = function () {
         // reset
         $('#item-price').val('');
 
+        $('#yield-calculation').val('');
+        $('#yield-calculation').trigger('change');
+
+        $('#equation').val('');
+        $('#equation').trigger('change');
+
         if (item_id != '') {
             var price = $('#item option[value="' + item_id + '"]').data("price");
             $('#item-price').val(price);
+
+            var yield = $('#item option[value="' + item_id + '"]').data("yield");
+            $('#yield-calculation').val(yield);
+            $('#yield-calculation').trigger('change');
+
+            var equation = $('#item option[value="' + item_id + '"]').data("equation");
+            $('#equation').val(equation);
+            $('#equation').trigger('change');
         }
     }
 

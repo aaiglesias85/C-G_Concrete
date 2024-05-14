@@ -743,7 +743,9 @@
                                         <option value="">Select</option>
                                         {% for item in items %}
                                             <option value="{{ item.itemId }}" data-price="{{ item.price }}"
-                                                    data-unit="{{ item.unit.description }}">
+                                                    data-unit="{{ item.unit.description }}"
+                                                    data-yield="{{ item.yieldCalculation }}"
+                                                    data-equation="{% if item.equation != null %}{{ item.equation.equationId }}{% endif %}">
                                                 {{ item.description }} ${{ item.price | number_format(2, ',', '.') }}
                                             </option>
                                         {% endfor %}

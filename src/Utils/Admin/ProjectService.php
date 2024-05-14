@@ -992,7 +992,9 @@ class ProjectService extends Base
                     'item_id' => $item_entity->getItemId(),
                     'description' => $value->item,
                     'price' => $value->price,
-                    'unit' => $value->unit
+                    'unit' => $value->unit,
+                    'equation' => $value->equation_id,
+                    'yield' => $value->yield_calculation
                 ];
             }
 
