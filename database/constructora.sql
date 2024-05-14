@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 12-05-2024 a las 19:18:59
+-- Tiempo de generación: 14-05-2024 a las 15:53:54
 -- Versión del servidor: 11.2.2-MariaDB
 -- Versión de PHP: 8.1.12
 
@@ -428,7 +428,16 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (107, 'Update', 'Item', 'The item is modified: EXTRA LABOR', '::1', '2024-05-12 19:17:54', 1),
 (108, 'Update', 'Item', 'The item is modified: EXTRA CONCRETE', '::1', '2024-05-12 19:18:05', 1),
 (109, 'Update', 'Item', 'The item is modified: PLAIN CONC DITCH PAVING', '::1', '2024-05-12 19:18:15', 1),
-(110, 'Update', 'Item', 'The item is modified: CONC SPILLWAY TP3', '::1', '2024-05-12 19:18:34', 1);
+(110, 'Update', 'Item', 'The item is modified: CONC SPILLWAY TP3', '::1', '2024-05-12 19:18:34', 1),
+(111, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-05-12 20:53:23', 1),
+(112, 'Update', 'Project', 'The project is modified: FL COUNTY', '::1', '2024-05-14 15:21:02', 1),
+(113, 'Delete', 'Project Item', 'The item: Test item of the project is deleted', '::1', '2024-05-14 15:22:13', 1),
+(114, 'Delete', 'Item', 'The item is deleted: Test item', '::1', '2024-05-14 15:22:27', 1),
+(115, 'Update', 'Project', 'The project is modified: FL COUNTY', '::1', '2024-05-14 15:23:15', 1),
+(116, 'Delete', 'Project Item', 'The item: Test item of the project is deleted', '::1', '2024-05-14 15:23:26', 1),
+(117, 'Delete', 'Item', 'The item is deleted: Test item', '::1', '2024-05-14 15:23:37', 1),
+(118, 'Update', 'Project', 'The project is modified: FL MIAMI', '::1', '2024-05-14 15:52:43', 1),
+(119, 'Update', 'Project', 'The project is modified: FL COUNTY', '::1', '2024-05-14 15:52:54', 1);
 
 -- --------------------------------------------------------
 
@@ -487,9 +496,9 @@ CREATE TABLE `project` (
 --
 
 INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `owner`, `subcontract`, `federal_funding`, `county`, `resurfacing`, `invoice_contact`, `certified_payrolls`, `start_date`, `end_date`, `due_date`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `company_id`, `inspector_id`) VALUES
-(1, '0009001', 'FL COUNTY', 'FL COUNTY', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-04-27 18:37:31', 1, 1),
-(2, '0009002', 'FL MIAMI', 'FL MIAMI', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-04-27 18:37:22', 1, 1),
-(3, '0009003', 'Houston Texas', 'Houston Texas', 'Marcel', '896532', 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 1, '86532', '89653', '2024-04-24 04:24:02', '2024-05-10 20:55:23', 3, 1);
+(1, '0009001', 'FL COUNTY', 'FL COUNTY', '', '', 0, '', 0, '', 0, NULL, NULL, '2024-05-31', 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-05-14 15:52:54', 1, 1),
+(2, '0009002', 'FL MIAMI', 'FL MIAMI', '', '', 0, '', 0, '', 0, NULL, NULL, '2024-05-28', 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-05-14 15:52:43', 1, 1),
+(3, '0009003', 'Houston Texas', 'Houston Texas', 'Marcel', '896532', 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 1, '86532', '89653', '2024-04-24 04:24:02', '2024-05-12 20:53:23', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -499,20 +508,22 @@ INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `owne
 
 CREATE TABLE `project_item` (
   `id` int(11) NOT NULL,
-  `quantity` float(8,2) DEFAULT NULL,
   `price` float(8,2) DEFAULT NULL,
+  `yield_calculation` varchar(50) DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL,
-  `item_id` int(11) DEFAULT NULL
+  `item_id` int(11) DEFAULT NULL,
+  `equation_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `project_item`
 --
 
-INSERT INTO `project_item` (`id`, `quantity`, `price`, `project_id`, `item_id`) VALUES
-(1, 50.00, 16.50, 3, 6),
-(2, 10.00, 63.00, 3, 15),
-(4, 50.00, 150.00, 3, 20);
+INSERT INTO `project_item` (`id`, `price`, `yield_calculation`, `project_id`, `item_id`, `equation_id`) VALUES
+(1, 16.50, 'none', 3, 6, NULL),
+(2, 63.00, 'same', 3, 15, NULL),
+(4, 150.00, 'equation', 3, 20, 2),
+(5, 253.00, 'none', 1, 10, NULL);
 
 -- --------------------------------------------------------
 
@@ -770,7 +781,8 @@ ALTER TABLE `project`
 ALTER TABLE `project_item`
   ADD PRIMARY KEY (`id`),
   ADD KEY `Ref6679` (`project_id`),
-  ADD KEY `Ref6780` (`item_id`);
+  ADD KEY `Ref6780` (`item_id`),
+  ADD KEY `equation_id` (`equation_id`);
 
 --
 -- Indices de la tabla `project_notes`
@@ -870,13 +882,13 @@ ALTER TABLE `invoice_item`
 -- AUTO_INCREMENT de la tabla `item`
 --
 ALTER TABLE `item`
-  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=111;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=120;
 
 --
 -- AUTO_INCREMENT de la tabla `notification`
@@ -894,7 +906,7 @@ ALTER TABLE `project`
 -- AUTO_INCREMENT de la tabla `project_item`
 --
 ALTER TABLE `project_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `project_notes`
@@ -992,6 +1004,7 @@ ALTER TABLE `project`
 -- Filtros para la tabla `project_item`
 --
 ALTER TABLE `project_item`
+  ADD CONSTRAINT `Refequation11` FOREIGN KEY (`equation_id`) REFERENCES `equation` (`equation_id`),
   ADD CONSTRAINT `Refitem80` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`),
   ADD CONSTRAINT `Refproject79` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`);
 
