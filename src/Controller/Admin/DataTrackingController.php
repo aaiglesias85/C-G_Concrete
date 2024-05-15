@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Company;
+use App\Entity\Inspector;
 use App\Entity\Item;
 use App\Utils\Admin\DataTrackingService;
 use App\Utils\Admin\ProjectService;
@@ -36,10 +37,15 @@ class DataTrackingController extends AbstractController
                 $items = $this->dataTrackingService->getDoctrine()->getRepository(Item::class)
                     ->ListarOrdenados();
 
+                // inspectors
+                $inspectors = $this->projectService->getDoctrine()->getRepository(Inspector::class)
+                    ->ListarOrdenados();
+
                 return $this->render('admin/data-tracking/index.html.twig', array(
                     'permiso' => $permiso[0],
                     'companies' => $companies,
-                    'items' => $items
+                    'items' => $items,
+                    'inspectors' => $inspectors
                 ));
             }
         } else {
@@ -126,9 +132,11 @@ class DataTrackingController extends AbstractController
         $price = $request->get('price');
         $date = $request->get('date');
 
+        $inspector_id = $request->get('inspector_id');
+
         try {
 
-            $resultado = $this->projectService->SalvarDataTracking($data_tracking_id, $project_id, $item_id, $quantity, $price, $date);
+            $resultado = $this->projectService->SalvarDataTracking($data_tracking_id, $project_id, $item_id, $quantity, $price, $date, $inspector_id);
 
             if ($resultado['success']) {
 
@@ -219,7 +227,7 @@ class DataTrackingController extends AbstractController
             if ($resultado['success']) {
 
                 $resultadoJson['success'] = $resultado['success'];
-                $resultadoJson['item'] = $resultado['item'];
+                $resultadoJson['data_tracking'] = $resultado['data_tracking'];
 
                 return $this->json($resultadoJson);
             } else {

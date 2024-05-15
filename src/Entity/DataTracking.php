@@ -64,6 +64,16 @@ class DataTracking
     private $item;
 
     /**
+     * @var Inspector
+     *
+     * @ORM\ManyToOne(targetEntity="App\Entity\Inspector")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="inspector_id", referencedColumnName="inspector_id")
+     * })
+     */
+    private $inspector;
+
+    /**
      * Get id
      *
      * @return integer
@@ -127,6 +137,19 @@ class DataTracking
     public function setItem($item)
     {
         $this->item = $item;
+    }
+
+    /**
+     * @return Inspector
+     */
+    public function getInspector()
+    {
+        return $this->inspector;
+    }
+
+    public function setInspector($inspector)
+    {
+        $this->inspector = $inspector;
     }
 
 }

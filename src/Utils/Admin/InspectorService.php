@@ -2,6 +2,7 @@
 
 namespace App\Utils\Admin;
 
+use App\Entity\DataTracking;
 use App\Entity\Inspector;
 use App\Entity\Project;
 use App\Utils\Base;
@@ -61,6 +62,15 @@ class InspectorService extends Base
                 return $resultado;
             }
 
+            // data tracking
+            $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
+                ->ListarDataTrackingsDeInspector($inspector_id);
+            if (count($data_tracking) > 0) {
+                $resultado['success'] = false;
+                $resultado['error'] = "The inspector could not be deleted, because it is related to a data tracking";
+                return $resultado;
+            }
+
             $inspector_descripcion = $entity->getName();
 
 
@@ -106,7 +116,11 @@ class InspectorService extends Base
                         // projects
                         $projects = $this->getDoctrine()->getRepository(Project::class)
                             ->ListarProjectsDeInspector($inspector_id);
-                        if (count($projects) == 0) {
+                        // data tracking
+                        $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
+                            ->ListarDataTrackingsDeInspector($inspector_id);
+
+                        if (count($projects) == 0 && count($data_tracking) == 0) {
                             $inspector_descripcion = $entity->getName();
 
                             $em->remove($entity);
@@ -127,11 +141,11 @@ class InspectorService extends Base
 
         if ($cant_eliminada == 0) {
             $resultado['success'] = false;
-            $resultado['error'] = "The inspectors could not be deleted, because they are associated with a project";
+            $resultado['error'] = "The inspectors could not be deleted, because they are associated with a project or data tracking";
         } else {
             $resultado['success'] = true;
 
-            $mensaje = ($cant_eliminada == $cant_total) ? "The operation was successful" : "The operation was successful. But attention, it was not possible to delete all the selected inspectors because they are associated with a project";
+            $mensaje = ($cant_eliminada == $cant_total) ? "The operation was successful" : "The operation was successful. But attention, it was not possible to delete all the selected inspectors because they are associated with a project or data tracking";
             $resultado['message'] = $mensaje;
         }
 
@@ -176,6 +190,7 @@ class InspectorService extends Base
             $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
             $resultado['success'] = true;
+            $resultado['inspector_id'] = $inspector_id;
 
             return $resultado;
         }
@@ -219,6 +234,7 @@ class InspectorService extends Base
         $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
         $resultado['success'] = true;
+        $resultado['inspector_id'] = $entity->getInspectorId();
 
         return $resultado;
     }

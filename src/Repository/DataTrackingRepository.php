@@ -72,6 +72,28 @@ class DataTrackingRepository extends EntityRepository
     }
 
     /**
+     * ListarDataTrackingsDeInspector: Lista el data tracking de un inspector
+     *
+     * @return DataTracking[]
+     */
+    public function ListarDataTrackingsDeInspector($inspector_id)
+    {
+        $consulta = $this->createQueryBuilder('d_t')
+            ->leftJoin('d_t.inspector', 'i');
+
+        if ($inspector_id != '') {
+            $consulta->andWhere('i.inspectorId = :inspector_id')
+                ->setParameter('inspector_id', $inspector_id);
+        }
+
+
+        $consulta->orderBy('d_t.date', "ASC");
+
+
+        return $consulta->getQuery()->getResult();
+    }
+
+    /**
      * ListarDataTrackings: Lista los items
      * @param int $start Inicio
      * @param int $limit Limite

@@ -188,6 +188,9 @@ var DataTracking = function () {
         var fecha_actual = new Date();
         $('#item-date').val(fecha_actual.format('m/d/Y'));
 
+        $('#inspector').val('');
+        $('#inspector').trigger('change');
+
         var $element = $('.select2');
         $element.removeClass('has-error').tooltip("dispose");
 
@@ -296,12 +299,13 @@ var DataTracking = function () {
                 var quantity = $('#item-quantity').val();
                 var price = $('#item-price').val();
                 var date = $('#item-date').val();
+                var inspector_id = $('#inspector').val();
 
                 MyApp.block('#modal-item .modal-content');
 
                 $.ajax({
                     type: "POST",
-                    url: "project/salvarDataTracking",
+                    url: "data-tracking/salvarDataTracking",
                     dataType: "json",
                     data: {
                         'data_tracking_id': data_tracking_id,
@@ -309,7 +313,8 @@ var DataTracking = function () {
                         'item_id': item_id,
                         'quantity': quantity,
                         'price': price,
-                        'date': date
+                        'date': date,
+                        'inspector_id': inspector_id
                     },
                     success: function (response) {
                         mApp.unblock('#modal-item .modal-content');
@@ -319,7 +324,12 @@ var DataTracking = function () {
 
                             // reset
                             resetForms();
-                            //$('#modal-item').modal('hide');
+
+                            // cerrar modal solo si estoy editando
+                            if(data_tracking_id != ''){
+                                $('#modal-item').modal('hide');
+                            }
+
 
                             //actualizar lista
                             btnClickFiltrar();
@@ -374,7 +384,7 @@ var DataTracking = function () {
 
             $.ajax({
                 type: "POST",
-                url: "project/cargarDatosDataTracking",
+                url: "data-tracking/cargarDatos",
                 dataType: "json",
                 data: {
                     'data_tracking_id': data_tracking_id
@@ -384,23 +394,26 @@ var DataTracking = function () {
                     if (response.success) {
                         //Datos project
 
-                        $('#item-date').val(response.item.date);
+                        $('#item-date').val(response.data_tracking.date);
 
                         $('#item').off('change', changeItem);
                         $('#item-quantity').off('change', calcularTotalItem);
                         $('#item-price').off('change', calcularTotalItem);
 
-                        $('#item').val(response.item.item_id);
+                        $('#item').val(response.data_tracking.item_id);
                         $('#item').trigger('change');
 
-                        $('#item-quantity').val(response.item.quantity);
-                        $('#item-price').val(response.item.price);
+                        $('#item-quantity').val(response.data_tracking.quantity);
+                        $('#item-price').val(response.data_tracking.price);
 
                         calcularTotalItem();
 
                         $('#item').on('change', changeItem);
                         $('#item-quantity').on('change', calcularTotalItem);
                         $('#item-price').on('change', calcularTotalItem);
+
+                        $('#inspector').val(response.data_tracking.inspector_id);
+                        $('#inspector').trigger('change');
 
                     } else {
                         toastr.error(response.error, "");
@@ -469,7 +482,7 @@ var DataTracking = function () {
 
             $.ajax({
                 type: "POST",
-                url: "project/eliminarDataTracking",
+                url: "data-tracking/eliminarDataTracking",
                 dataType: "json",
                 data: {
                     'data_tracking_id': data_tracking_id
@@ -542,6 +555,10 @@ var DataTracking = function () {
         initPortlets();
 
         $('.m-select2').select2();
+
+        $('#inspector-phone').inputmask("mask", {
+            "mask": "(999)999-9999"
+        });
 
         // change
         $('#company').change(changeCompany);
@@ -637,6 +654,127 @@ var DataTracking = function () {
         });
     }
 
+    // inspector
+    var initFormInspector = function () {
+        //Validacion
+        $("#inspector-form").validate({
+            rules: {
+                name: {
+                    required: true
+                },
+                email: {
+                    email: true
+                }
+            },
+            showErrors: function (errorMap, errorList) {
+                // Clean up any tooltips for valid elements
+                $.each(this.validElements(), function (index, element) {
+                    var $element = $(element);
+
+                    $element.data("title", "") // Clear the title - there is no error associated anymore
+                        .removeClass("has-error")
+                        .tooltip("dispose");
+
+                    $element
+                        .closest('.form-group')
+                        .removeClass('has-error').addClass('success');
+                });
+
+                // Create new tooltips for invalid elements
+                $.each(errorList, function (index, error) {
+                    var $element = $(error.element);
+
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", error.message)
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+
+                });
+            }
+        });
+
+    };
+    var initAccionesInspector = function () {
+        $(document).off('click', "#btn-add-inspector");
+        $(document).on('click', "#btn-add-inspector", function (e) {
+
+            resetFormInspector();
+
+            $('#modal-inspector').modal('show');
+        });
+
+        $(document).off('click', "#btn-salvar-inspector");
+        $(document).on('click', "#btn-salvar-inspector", function (e) {
+            btnClickSalvarFormInspector();
+        });
+
+        function btnClickSalvarFormInspector() {
+
+            if ($('#inspector-form').valid()) {
+
+                var name = $('#inspector-name').val();
+                var email = $('#inspector-email').val();
+                var phone = $('#inspector-phone').val();
+
+                MyApp.block('#modal-inspector .modal-content');
+
+                $.ajax({
+                    type: "POST",
+                    url: "inspector/salvarInspector",
+                    dataType: "json",
+                    data: {
+                        'inspector_id': '',
+                        'name': name,
+                        'email': email,
+                        'phone': phone,
+                        'status': 1
+                    },
+                    success: function (response) {
+                        mApp.unblock('#modal-inspector .modal-content');
+                        if (response.success) {
+
+                            toastr.success(response.message, "Success !!!");
+
+                            resetFormInspector();
+
+                            $('#modal-inspector').modal('hide');
+
+                            //add inspector to select
+                            $('#inspector').append(new Option(name, response.inspector_id, false, false));
+                            $('#inspector').select2();
+
+                            $('#inspector').val(response.inspector_id);
+                            $('#inspector').trigger('change');
+
+                        } else {
+                            toastr.error(response.error, "Error !!!");
+                        }
+                    },
+                    failure: function (response) {
+                        mApp.unblock('#modal-inspector .modal-content');
+
+                        toastr.error(response.error, "Error !!!");
+                    }
+                });
+            }
+        };
+
+        function resetFormInspector() {
+            $('#inspector-form input').each(function (e) {
+                $element = $(this);
+                $element.val('');
+
+                $element.data("title", "").removeClass("has-error").tooltip("dispose");
+                $element.closest('.form-group').removeClass('has-error').addClass('success');
+            });
+        }
+    }
+
     return {
         //main function to initiate the module
         init: function () {
@@ -650,6 +788,10 @@ var DataTracking = function () {
             initAccionEditar();
             initAccionEliminar();
             initAccionFiltrar();
+
+            // inspectors
+            initFormInspector();
+            initAccionesInspector();
         }
 
     };

@@ -332,9 +332,10 @@ class ProjectService extends Base
             $arreglo_resultado['quantity'] = $entity->getQuantity();
             $arreglo_resultado['price'] = $entity->getPrice();
             $arreglo_resultado['date'] = $entity->getDate()->format('m/d/Y');
+            $arreglo_resultado['inspector_id'] = $entity->getInspector() != null ? $entity->getInspector()->getInspectorId() : '';
 
             $resultado['success'] = true;
-            $resultado['item'] = $arreglo_resultado;
+            $resultado['data_tracking'] = $arreglo_resultado;
         }
 
         return $resultado;
@@ -425,12 +426,9 @@ class ProjectService extends Base
      * @param $data_tracking_id
      * @param $project_id
      * @param $item_id
-     * @param $quantity
-     * @param $price
-     * @param $date
      * @return array
      */
-    public function SalvarDataTracking($data_tracking_id, $project_id, $item_id, $quantity, $price, $date)
+    public function SalvarDataTracking($data_tracking_id, $project_id, $item_id, $quantity, $price, $date, $inspector_id)
     {
 
         $em = $this->getDoctrine()->getManager();
@@ -465,6 +463,12 @@ class ProjectService extends Base
 
             $entity->setProject($project_entity);
             $entity->setItem($item_entity);
+
+            if ($inspector_id != '') {
+                $inspector_entity = $this->getDoctrine()->getRepository(Inspector::class)
+                    ->find($inspector_id);
+                $entity->setInspector($inspector_entity);
+            }
 
             $log_operacion = "Add";
             $log_descripcion = "The data tracking is add: " . $item_entity->getDescription();
