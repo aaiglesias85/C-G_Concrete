@@ -545,8 +545,8 @@ var DataTracking = function () {
 
         // change
         $('#company').change(changeCompany);
-        $('#filtro-fecha-inicial-item').change(changeCompany);
-        $('#filtro-fecha-fin-item').change(changeCompany);
+        // $('#filtro-fecha-inicial-item').change(changeCompany);
+        // $('#filtro-fecha-fin-item').change(changeCompany);
         $('#item').change(changeItem);
         $('#item-quantity').change(calcularTotalItem);
         $('#item-price').change(calcularTotalItem);
@@ -574,8 +574,8 @@ var DataTracking = function () {
                 dataType: "json",
                 data: {
                     'company_id': company_id,
-                    'from': from,
-                    'to': to
+                    // 'from': from,
+                    // 'to': to
                 },
                 success: function (response) {
                     mApp.unblock('#form-group-project');

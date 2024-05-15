@@ -14,6 +14,7 @@ class DataTrackingController extends AbstractController
 
     private $dataTrackingService;
     private $projectService;
+
     public function __construct(DataTrackingService $dataTrackingService, ProjectService $projectService)
     {
         $this->dataTrackingService = $dataTrackingService;
@@ -74,7 +75,7 @@ class DataTrackingController extends AbstractController
 
         try {
             $pages = 1;
-            $total = $this->dataTrackingService->TotalDataTrackings($sSearch, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin);
+            $total = $project_id == '' ? 0 : $this->dataTrackingService->TotalDataTrackings($sSearch, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin);
             if ($limit > 0) {
                 $pages = ceil($total / $limit); // calculate total pages
                 $page = max($page, 1); // get 1 page when $_REQUEST['page'] <= 0
@@ -94,7 +95,7 @@ class DataTrackingController extends AbstractController
                 'sort' => $sSortDir_0
             );
 
-            $data = $this->dataTrackingService->ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin);
+            $data = $project_id == '' ? [] : $this->dataTrackingService->ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin);
 
             $resultadoJson = array(
                 'meta' => $meta,

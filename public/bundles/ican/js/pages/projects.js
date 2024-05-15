@@ -529,7 +529,7 @@ var Projects = function () {
                         actualizarTableListaItems();
 
                         // habilitar tab
-                        totalTabs = 4;
+                        totalTabs = 3;
                         $('.nav-item-hide').removeClass('m--hide');
 
                         event_change = false;
