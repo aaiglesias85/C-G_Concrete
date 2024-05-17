@@ -63,7 +63,7 @@ class ProjectRepository extends EntityRepository
                 ->setParameter('fecha_final', $to);
         }
 
-        $consulta->orderBy('p.name', "ASC");
+        $consulta->orderBy('p.dueDate', "ASC");
 
         return $consulta->getQuery()->getResult();
     }
@@ -333,7 +333,7 @@ class ProjectRepository extends EntityRepository
      *
      * @return Project[]
      */
-    public function ListarProjectsParaDashboard($from = '', $to = '', $sort = 'DESC', $limit = 3)
+    public function ListarProjectsParaDashboard($from = '', $to = '', $sort = 'ASC', $limit = 3)
     {
         $consulta = $this->createQueryBuilder('p')
             ->leftJoin('p.company', 'c')

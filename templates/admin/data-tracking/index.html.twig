@@ -70,25 +70,26 @@
                         </div>
                         <!--begin: Search Form -->
                         <div class="m-form__actions m-form__actions--solid" style="margin-top: 0px;padding: 20px;">
+
                             <div class="form-group m-form__group">
-                                <label>Company</label>
+                                <label>Project</label>
                                 <div class="row">
-                                    <div class="col-md-12">
-                                        <select class="form-control m-select2 event-change" id="company">
+                                    <div class="col-md-12" id="select-project">
+                                        <select class="form-control m-select2 event-change" id="project">
                                             <option value="">Select</option>
-                                            {% for item in companies %}
-                                                <option value="{{ item.companyId }}">{{ item.name }}</option>
+                                            {% for item in projects %}
+                                                <option value="{{ item.projectId }}">{{ item.projectNumber }} - {{ item.name }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="form-group m-form__group" id="form-group-project">
-                                <label>Project</label>
+                            <div class="form-group m-form__group" id="form-group-item">
+                                <label>Item</label>
                                 <div class="row">
-                                    <div class="col-md-12" id="select-project">
-                                        <select class="form-control m-select2 event-change" id="project">
+                                    <div class="col-md-12">
+                                        <select class="form-control m-select2 select-item-data-tracking" id="filtro-item">
                                             <option value="">Select</option>
                                         </select>
                                     </div>
@@ -118,21 +119,6 @@
                                         <span class="input-group-text">
                                             <i class="la la-calendar glyphicon-th"></i>
                                         </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group m-form__group">
-                                <label>Item</label>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <select class="form-control m-select2" id="filtro-item">
-                                            <option value="">Select</option>
-                                            {% for item in items %}
-                                                <option value="{{ item.itemId }}">{{ item.description }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -201,17 +187,17 @@
 
     </div>
 
-    <div class="modal fade" id="modal-item" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="modal-data-tracking" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">New item</h5>
+                    <h5 class="modal-title">New Measurement</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form class="m-form" id="item-form" action="#"
+                    <form class="m-form" id="data-tracking-form" action="#"
                           enctype="multipart/form-data" method="post">
 
                         <input type="hidden" id="data_tracking_id" name="data_tracking_id"/>
@@ -227,7 +213,7 @@
                                     <div class='input-group date'>
                                         <input type='text' class="form-control m-input date-picker "
                                                placeholder="Select" autocomplete="off"
-                                               id="item-date" name="date"/>
+                                               id="data-tracking-date" name="date"/>
                                         <div class="input-group-append">
                                             <span class="input-group-text">
                                                 <i class="la la-calendar glyphicon-th"></i>
@@ -259,27 +245,35 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="form-group m-form__group ic-form-group">
-                            <label>
-                                <span class="ic-step-number">2</span>
-                                Item
-                                <span class="ic-small italic">(required)</span>
-                            </label>
                             <div class="row">
-                                <div class="col-md-12" id="select-item">
-                                    <select class="form-control m-select2" id="item">
-                                        <option value="">Select</option>
-                                        {% for item in items %}
-                                            <option value="{{ item.itemId }}" data-price="{{ item.price }}">
-                                                {{ item.description }} ${{ item.price | number_format(2, ',', '.') }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
+                                <div class="col-md-8">
+                                    <label>
+                                        <span class="ic-step-number">2</span>
+                                        Item
+                                        <span class="ic-small italic">(required)</span>
+                                    </label>
+                                    <div class="row">
+                                        <div class="col-md-10" id="select-item-data-tracking">
+                                            <select class="form-control m-select2 select-item-data-tracking" id="item-data-tracking">
+                                                <option value="">Select</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2" style="padding-top: 3px; padding-left: 0px;">
+                                            <a href="javascript:;" title="Add item" id="btn-add-item"
+                                               class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                                                <i class="la la-plus"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-4 m--hide" id="div-yield-calculation">
+                                    <label>Yield Calculation</label>
+                                    <input type="text" class="form-control" id="item-yield-calculation" disabled>
                                 </div>
                             </div>
                         </div>
-
                         <div class="form-group m-form__group ic-form-group">
                             <div class="row">
                                 <div class="col-md-4">
@@ -288,7 +282,7 @@
                                         Quatity
                                         <span class="ic-small italic">(required)</span>
                                     </label>
-                                    <input type="text" class="form-control form-control-number" id="item-quantity" name="quantity">
+                                    <input type="text" class="form-control form-control-number" id="data-tracking-quantity" name="quantity">
                                 </div>
                                 <div class="col-md-4">
                                     <label>
@@ -298,7 +292,7 @@
                                         <div class="input-group-prepend">
                                         <span class="input-group-text">$</span>
                                         </div>
-                                        <input type="text" class="form-control form-control-number" id="item-price"
+                                        <input type="text" class="form-control form-control-number" id="data-tracking-price"
                                                name="price">
                                     </div>
                                 </div>
@@ -310,17 +304,72 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text">$</span>
                                         </div>
-                                        <input type="text" class="form-control form-control-number" id="item-total"
+                                        <input type="text" class="form-control form-control-number" id="data-tracking-total"
                                                name="total" disabled>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="form-group m-form__group ic-form-group">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>
+                                        <span class="ic-step-number">4</span>
+                                        Station Number(s)
+                                        <span class="ic-small italic">(optional)</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="station_number" name="station_number">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                       Measured By
+                                    </label>
+                                    <input type="text" class="form-control" id="measured_by" name="measured_by">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group ic-form-group">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>
+                                        <span class="ic-step-number">5</span>
+                                        Conc Vendor
+                                        <span class="ic-small italic">(optional)</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="conc_vendor" name="conc_vendor">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        Crew Lead
+                                    </label>
+                                    <input type="text" class="form-control" id="crew_lead" name="crew_lead">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group ic-form-group">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>
+                                        <span class="ic-step-number">6</span>
+                                        Notes
+                                        <span class="ic-small italic">(optional)</span>
+                                    </label>
+                                    <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        Other Materials
+                                    </label>
+                                    <textarea class="form-control" id="other_materials" name="other_materials" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
 
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="btn-salvar-item">Save</button>
+                    <button type="button" class="btn btn-success" id="btn-salvar-data-tracking">Save</button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -382,6 +431,144 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="btn-salvar-inspector">Save</button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-item" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        New item
+
+                        <span style="margin-left: 10px">
+                            <span id="proyect-number-item" class="m-badge m-badge--info"></span>
+                            <span id="proyect-name-item"></span>
+                        </span>
+                    </h5>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+
+                </div>
+                <div class="modal-body">
+                    <form class="m-form" id="item-form" action="#"
+                          enctype="multipart/form-data" method="post">
+
+                        <div class="form-group m-form__group">
+                            <div>
+                                <input type="checkbox" data-switch="true" id="item-type"
+                                       checked="checked" data-on-text="Existing item"
+                                       data-off-text="New item" data-on-color="success"
+                                       data-off-color="danger">
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group">
+                            <label>
+                                Item
+                                <span class="ic-small italic">(required)</span>
+                            </label>
+
+                            <input type="text" class="form-control form-control-text m--hide"
+                                   id="item-name" name="item" placeholder="Enter the custom name"/>
+
+                            <div class="row" id="div-item">
+                                <div class="col-md-12" id="select-item">
+                                    <select class="form-control m-select2" id="item">
+                                        <option value="">Select</option>
+                                        {% for item in items %}
+                                            <option value="{{ item.itemId }}" data-price="{{ item.price }}"
+                                                    data-unit="{{ item.unit.description }}"
+                                                    data-yield="{{ item.yieldCalculation }}"
+                                                    data-equation="{% if item.equation != null %}{{ item.equation.equationId }}{% endif %}">
+                                                {{ item.description }} ${{ item.price | number_format(2, ',', '.') }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group">
+                            <label>
+                                Yield Calculation
+                                <span class="ic-small italic">(optional)</span>
+                            </label>
+                            <div class="row">
+                                <div class="col-md-12" id="select-yield-calculation">
+                                    <select class="form-control m-select2 event-change" id="yield-calculation"
+                                            name="yield">
+                                        <option value="">Select</option>
+                                        {% for item in yields_calculation %}
+                                            <option value="{{ item.id }}">{{ item.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group m--hide" id="select-equation">
+                            <label>
+                                Equation
+                                <span class="ic-small italic">(required)</span>
+                            </label>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <select class="form-control m-select2 event-change" id="equation"
+                                            name="equation">
+                                        <option value="">Select</option>
+                                        {% for item in equations %}
+                                            <option value="{{ item.equationId }}" data-equation="{{ item.equation }}"> {{ item.description }} {{ item.equation }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group m--hide" id="select-unit">
+                            <label>
+                                Unit
+                                <span class="ic-small italic">(required)</span>
+                            </label>
+                            <select class="form-control m-select2 event-change" id="unit" name="unit">
+                                <option value="">Select</option>
+                                {% for item in units %}
+                                    <option value="{{ item.unitId }}">{{ item.description }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+
+                        <div class="form-group m-form__group">
+                            <label>
+                                Price
+                                <span class="ic-small italic">(required)</span>
+                            </label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="input-group m-input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">$</span>
+                                        </div>
+                                        <input type="text" class="form-control form-control-number" id="item-price"
+                                               name="price">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="btn-salvar-item">Save</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+
                 </div>
             </div>
         </div>

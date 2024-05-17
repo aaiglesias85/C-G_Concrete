@@ -2,6 +2,7 @@ var DataTracking = function () {
 
     var oTable;
     var rowDelete = null;
+    var items = [];
 
     //Inicializar table
     var initTable = function () {
@@ -153,9 +154,6 @@ var DataTracking = function () {
 
         query.generalSearch = '';
 
-        var company_id = $('#company').val();
-        query.company_id = company_id;
-
         var project_id = $('#project').val();
         query.project_id = project_id;
 
@@ -174,7 +172,7 @@ var DataTracking = function () {
 
     //Reset forms
     var resetForms = function () {
-        $('#item-form input').each(function (e) {
+        $('#data-tracking-form input').each(function (e) {
             $element = $(this);
             $element.val('');
 
@@ -182,11 +180,19 @@ var DataTracking = function () {
             $element.closest('.form-group').removeClass('has-error').addClass('success');
         });
 
-        $('#item').val($('#filtro-item').val());
-        $('#item').trigger('change');
+        $('#data-tracking-form textarea').each(function (e) {
+            $element = $(this);
+            $element.val('');
+
+            $element.data("title", "").removeClass("has-error").tooltip("dispose");
+            $element.closest('.form-group').removeClass('has-error').addClass('success');
+        });
+
+        $('#item-data-tracking').val($('#filtro-item').val());
+        $('#item-data-tracking').trigger('change');
 
         var fecha_actual = new Date();
-        $('#item-date').val(fecha_actual.format('m/d/Y'));
+        $('#data-tracking-date').val(fecha_actual.format('m/d/Y'));
 
         $('#inspector').val('');
         $('#inspector').trigger('change');
@@ -194,12 +200,14 @@ var DataTracking = function () {
         var $element = $('.select2');
         $element.removeClass('has-error').tooltip("dispose");
 
+        $('#div-yield-calculation').removeClass('m--hide').addClass('m--hide');
+
     };
 
     //Validacion
     var initForm = function () {
         //Validacion
-        $("#item-form").validate({
+        $("#data-tracking-form").validate({
             rules: {
                 date: {
                     required: true
@@ -276,32 +284,39 @@ var DataTracking = function () {
 
             resetForms();
 
-            $('#modal-item').modal({
+            $('#modal-data-tracking').modal({
                 'show': true
             });
         };
     };
     //Salvar
     var initAccionSalvar = function () {
-        $(document).off('click', "#btn-salvar-item");
-        $(document).on('click', "#btn-salvar-item", function (e) {
+        $(document).off('click', "#btn-salvar-data-tracking");
+        $(document).on('click', "#btn-salvar-data-tracking", function (e) {
             btnClickSalvarForm();
         });
 
         function btnClickSalvarForm() {
 
-            var item_id = $('#item').val();
+            var item_id = $('#item-data-tracking').val();
             var project_id = $('#project').val();
-            if ($('#item-form').valid() && item_id != '' && project_id != '') {
+            if ($('#data-tracking-form').valid() && item_id != '' && project_id != '') {
 
                 var data_tracking_id = $('#data_tracking_id').val();
 
-                var quantity = $('#item-quantity').val();
-                var price = $('#item-price').val();
-                var date = $('#item-date').val();
+                var quantity = $('#data-tracking-quantity').val();
+                var price = $('#data-tracking-price').val();
+                var date = $('#data-tracking-date').val();
                 var inspector_id = $('#inspector').val();
+                var station_number = $('#station_number').val();
+                var measured_by = $('#measured_by').val();
+                var conc_vendor = $('#conc_vendor').val();
+                var crew_lead = $('#crew_lead').val();
+                var notes = $('#notes').val();
+                var other_materials = $('#other_materials').val();
 
-                MyApp.block('#modal-item .modal-content');
+
+                MyApp.block('#modal-data-tracking .modal-content');
 
                 $.ajax({
                     type: "POST",
@@ -314,10 +329,16 @@ var DataTracking = function () {
                         'quantity': quantity,
                         'price': price,
                         'date': date,
-                        'inspector_id': inspector_id
+                        'inspector_id': inspector_id,
+                        'station_number': station_number,
+                        'measured_by': measured_by,
+                        'conc_vendor': conc_vendor,
+                        'crew_lead': crew_lead,
+                        'notes': notes,
+                        'other_materials': other_materials
                     },
                     success: function (response) {
-                        mApp.unblock('#modal-item .modal-content');
+                        mApp.unblock('#modal-data-tracking .modal-content');
                         if (response.success) {
 
                             toastr.success(response.message, "Success");
@@ -326,8 +347,8 @@ var DataTracking = function () {
                             resetForms();
 
                             // cerrar modal solo si estoy editando
-                            if(data_tracking_id != ''){
-                                $('#modal-item').modal('hide');
+                            if (data_tracking_id != '') {
+                                $('#modal-data-tracking').modal('hide');
                             }
 
 
@@ -339,14 +360,14 @@ var DataTracking = function () {
                         }
                     },
                     failure: function (response) {
-                        mApp.unblock('#modal-item .modal-content');
+                        mApp.unblock('#modal-data-tracking .modal-content');
 
                         toastr.error(response.error, "");
                     }
                 });
             } else {
                 if (item_id == "") {
-                    var $element = $('#select-item .select2');
+                    var $element = $('#select-item-data-tracking .select2');
                     $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
                         .data("title", "This field is required")
                         .addClass("has-error")
@@ -368,7 +389,7 @@ var DataTracking = function () {
             e.preventDefault();
             resetForms();
 
-            $('#modal-item').modal({
+            $('#modal-data-tracking').modal({
                 'show': true
             });
 
@@ -380,7 +401,7 @@ var DataTracking = function () {
 
         function editRow(data_tracking_id) {
 
-            MyApp.block('#modal-item .modal-content');
+            MyApp.block('#modal-data-tracking .modal-content');
 
             $.ajax({
                 type: "POST",
@@ -390,37 +411,44 @@ var DataTracking = function () {
                     'data_tracking_id': data_tracking_id
                 },
                 success: function (response) {
-                    mApp.unblock('#modal-item .modal-content');
+                    mApp.unblock('#modal-data-tracking .modal-content');
                     if (response.success) {
                         //Datos project
 
-                        $('#item-date').val(response.data_tracking.date);
+                        $('#data-tracking-date').val(response.data_tracking.date);
 
-                        $('#item').off('change', changeItem);
-                        $('#item-quantity').off('change', calcularTotalItem);
-                        $('#item-price').off('change', calcularTotalItem);
+                        $('#item-data-tracking').off('change', changeItem);
+                        $('#data-tracking-quantity').off('change', calcularTotalItem);
+                        $('#data-tracking-price').off('change', calcularTotalItem);
 
-                        $('#item').val(response.data_tracking.item_id);
-                        $('#item').trigger('change');
+                        $('#item-data-tracking').val(response.data_tracking.item_id);
+                        $('#item-data-tracking').trigger('change');
 
-                        $('#item-quantity').val(response.data_tracking.quantity);
-                        $('#item-price').val(response.data_tracking.price);
+                        $('#data-tracking-quantity').val(response.data_tracking.quantity);
+                        $('#data-tracking-price').val(response.data_tracking.price);
 
                         calcularTotalItem();
 
-                        $('#item').on('change', changeItem);
-                        $('#item-quantity').on('change', calcularTotalItem);
-                        $('#item-price').on('change', calcularTotalItem);
+                        $('#item-data-tracking').on('change', changeItem);
+                        $('#data-tracking-quantity').on('change', calcularTotalItem);
+                        $('#data-tracking-price').on('change', calcularTotalItem);
 
                         $('#inspector').val(response.data_tracking.inspector_id);
                         $('#inspector').trigger('change');
+
+                        $('#station_number').val(response.data_tracking.station_number);
+                        $('#measured_by').val(response.data_tracking.measured_by);
+                        $('#conc_vendor').val(response.data_tracking.conc_vendor);
+                        $('#crew_lead').val(response.data_tracking.crew_lead);
+                        $('#notes').val(response.data_tracking.notes);
+                        $('#other_materials').val(response.data_tracking.other_materials);
 
                     } else {
                         toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#modal-item .modal-content');
+                    mApp.unblock('#modal-data-tracking .modal-content');
 
                     toastr.error(response.error, "");
                 }
@@ -561,57 +589,52 @@ var DataTracking = function () {
         });
 
         // change
-        $('#company').change(changeCompany);
-        // $('#filtro-fecha-inicial-item').change(changeCompany);
-        // $('#filtro-fecha-fin-item').change(changeCompany);
-        $('#item').change(changeItem);
-        $('#item-quantity').change(calcularTotalItem);
-        $('#item-price').change(calcularTotalItem);
+        $('#project').change(changeProject);
+        $('#item-data-tracking').change(changeItem);
+        $('#data-tracking-quantity').change(calcularTotalItem);
+        $('#data-tracking-price').change(calcularTotalItem);
     }
 
-    var changeCompany = function () {
-        var company_id = $('#company').val();
-        var from = $('#filtro-fecha-inicial-item').val();
-        var to = $('#filtro-fecha-fin-item').val();
+    var changeProject = function () {
+        var project_id = $('#project').val();
 
         // reset
-        $('#project option').each(function (e) {
+        $('.select-item-data-tracking option').each(function (e) {
             if ($(this).val() != "")
                 $(this).remove();
         });
-        $('#project').select2();
+        $('.select-item-data-tracking').select2();
 
-        if (company_id != '') {
+        if (project_id != '') {
 
-            MyApp.block('#form-group-project');
+            MyApp.block('#form-group-item');
 
             $.ajax({
                 type: "POST",
-                url: "project/listarOrdenados",
+                url: "project/listarItems",
                 dataType: "json",
                 data: {
-                    'company_id': company_id,
-                    // 'from': from,
-                    // 'to': to
+                    'project_id': project_id
                 },
                 success: function (response) {
-                    mApp.unblock('#form-group-project');
+                    mApp.unblock('#form-group-item');
                     if (response.success) {
 
                         //Llenar select
-                        var projects = response.projects;
-                        for (var i = 0; i < projects.length; i++) {
-                            var descripcion = `${projects[i].number} - ${projects[i].name}`;
-                            $('#project').append(new Option(descripcion, projects[i].project_id, false, false));
+                        items = response.items;
+                        console.log(items);
+
+                        for (var i = 0; i < items.length; i++) {
+                            $('.select-item-data-tracking').append(new Option(items[i].item, items[i].item_id, false, false));
                         }
-                        $('#project').select2();
+                        $('.select-item-data-tracking').select2();
 
                     } else {
                         toastr.error(response.error, "");
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#form-group-project');
+                    mApp.unblock('#form-group-item');
 
                     toastr.error(response.error, "");
                 }
@@ -620,26 +643,51 @@ var DataTracking = function () {
     }
 
     var changeItem = function () {
-        var item_id = $('#item').val();
+        var item_id = $('#item-data-tracking').val();
 
         // reset
-        $('#item-quantity').val('');
-        $('#item-price').val('');
-        $('#item-total').val('');
+        $('#data-tracking-quantity').val('');
+        $('#data-tracking-price').val('');
+        $('#data-tracking-total').val('');
+
+        $('#item-yield-calculation').val('');
+        $('#div-yield-calculation').removeClass('m--hide').addClass('m--hide');
 
         if (item_id != '') {
-            var price = $('#item option[value="' + item_id + '"]').data("price");
-            $('#item-price').val(price);
+            var item = items.find(function (v) {
+                return v.item_id == item_id;
+            });
+            var price = item.price;
+            $('#data-tracking-price').val(price);
+
+            if (item.yield_calculation_name != '') {
+                $('#div-yield-calculation').removeClass('m--hide');
+                $('#item-yield-calculation').val(item.yield_calculation_name);
+            }
+
 
             calcularTotalItem();
         }
     }
     var calcularTotalItem = function () {
-        var cantidad = $('#item-quantity').val();
-        var price = $('#item-price').val();
+
+        var item_id = $('#item-data-tracking').val();
+        var item = items.find(function (v) {
+            return v.item_id == item_id;
+        });
+
+
+        var cantidad = $('#data-tracking-quantity').val();
+        var price = $('#data-tracking-price').val();
         if (cantidad != '' && price != '') {
+
+            // aplicar el yield
+            if(item.yield_calculation == "equation"){
+                cantidad = MyApp.evaluateExpression(item.yield_calculation_name, cantidad);
+            }
+
             var total = parseFloat(cantidad) * parseFloat(price);
-            $('#item-total').val(total);
+            $('#data-tracking-total').val(total);
         }
     }
 

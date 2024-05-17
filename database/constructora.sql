@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 15-05-2024 a las 20:43:05
+-- Tiempo de generación: 16-05-2024 a las 04:02:21
 -- Versión del servidor: 11.2.2-MariaDB
 -- Versión de PHP: 8.1.12
 
@@ -77,37 +77,21 @@ CREATE TABLE `data_tracking` (
   `quantity` float(8,2) DEFAULT NULL,
   `price` float(8,2) DEFAULT NULL,
   `date` date DEFAULT NULL,
+  `station_number` varchar(255) DEFAULT NULL,
+  `measured_by` varchar(255) DEFAULT NULL,
+  `conc_vendor` varchar(255) DEFAULT NULL,
+  `crew_lead` varchar(255) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `other_materials` text DEFAULT NULL,
+  `total_conc_used` float(8,2) DEFAULT NULL,
+  `total_labor` float(8,2) DEFAULT NULL,
+  `total_stamps` float(8,2) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL,
   `item_id` int(11) DEFAULT NULL,
   `inspector_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `data_tracking`
---
-
-INSERT INTO `data_tracking` (`id`, `quantity`, `price`, `date`, `project_id`, `item_id`, `inspector_id`) VALUES
-(1, 130.00, 16.50, '2024-03-25', 1, 6, NULL),
-(2, 159.00, 47.18, '2024-03-18', 1, 17, NULL),
-(6, 3.00, 700.00, '2024-04-16', 1, 8, NULL),
-(7, 5.00, 29.00, '2024-04-16', 1, 1, NULL),
-(8, 6.00, 29.00, '2024-04-15', 1, 1, NULL),
-(9, 5.00, 2100.00, '2024-04-16', 1, 16, NULL),
-(10, 5.00, 1500.00, '2024-04-10', 1, 19, NULL),
-(11, 5.00, 700.00, '2024-03-13', 1, 8, NULL),
-(12, 50.00, 70.00, '2024-03-01', 1, 2, NULL),
-(13, 25.00, 16.50, '2024-02-01', 1, 6, NULL),
-(14, 12.00, 700.00, '2024-02-07', 1, 8, NULL),
-(15, 2.00, 2100.00, '2024-02-20', 1, 16, NULL),
-(16, 15.00, 150.00, '2024-02-29', 1, 20, NULL),
-(17, 25.00, 16.50, '2024-01-01', 1, 7, NULL),
-(18, 20.00, 30.00, '2024-01-08', 1, 14, NULL),
-(19, 10.00, 70.00, '2024-01-15', 1, 12, NULL),
-(20, 22.00, 150.00, '2024-01-22', 1, 20, NULL),
-(21, 50.00, 100.00, '2024-04-01', 2, 13, NULL),
-(22, 15.00, 16.50, '2024-04-17', 2, 6, NULL),
-(23, 100.00, 16.50, '2024-04-01', 3, 6, NULL),
-(24, 20.00, 58.00, '2024-04-16', 3, 4, NULL);
 
 -- --------------------------------------------------------
 
@@ -182,7 +166,8 @@ CREATE TABLE `inspector` (
 --
 
 INSERT INTO `inspector` (`inspector_id`, `name`, `phone`, `email`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Carlos Magill', '(678)558-2565', 'gill@arersnl.com', 1, '2024-04-13 00:03:19', '2024-04-13 00:03:50');
+(1, 'Carlos Magill', '(678)558-2565', 'gill@arersnl.com', 1, '2024-04-13 00:03:19', '2024-04-13 00:03:50'),
+(3, 'Marcel Curbelo Carmona', '(349)995-0162', 'cyborgmnk@gmail.com', 1, '2024-05-15 21:57:30', NULL);
 
 -- --------------------------------------------------------
 
@@ -438,7 +423,14 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (116, 'Delete', 'Project Item', 'The item: Test item of the project is deleted', '::1', '2024-05-14 15:23:26', 1),
 (117, 'Delete', 'Item', 'The item is deleted: Test item', '::1', '2024-05-14 15:23:37', 1),
 (118, 'Update', 'Project', 'The project is modified: FL MIAMI', '::1', '2024-05-14 15:52:43', 1),
-(119, 'Update', 'Project', 'The project is modified: FL COUNTY', '::1', '2024-05-14 15:52:54', 1);
+(119, 'Update', 'Project', 'The project is modified: FL COUNTY', '::1', '2024-05-14 15:52:54', 1),
+(120, 'Add', 'Inspector', 'The inspector is added: ', '::1', '2024-05-15 21:54:53', 1),
+(121, 'Add', 'Inspector', 'The inspector is added: Marcel Curbelo Carmona', '::1', '2024-05-15 21:57:30', 1),
+(122, 'Update', 'Data Tracking', 'The data tracking is modified: CONC CURB & GUTTEER 8INX30IN TP2', '::1', '2024-05-15 22:01:08', 1),
+(123, 'Update', 'Data Tracking', 'The data tracking is modified: CONC CURB & GUTTEER 8INX30IN TP2', '::1', '2024-05-15 22:02:15', 1),
+(124, 'Update', 'Data Tracking', 'The data tracking is modified: CONC SLOPE DRAIN ', '::1', '2024-05-15 22:02:20', 1),
+(125, 'Add', 'Data Tracking', 'The data tracking is add: Cubic Yards of Concrete', '::1', '2024-05-16 03:08:03', 1),
+(126, 'Add', 'Data Tracking', 'The data tracking is add: CONC CURB & GUTTEER 8INX30IN TP2', '::1', '2024-05-16 03:53:30', 1);
 
 -- --------------------------------------------------------
 
@@ -848,7 +840,7 @@ ALTER TABLE `company_contact`
 -- AUTO_INCREMENT de la tabla `data_tracking`
 --
 ALTER TABLE `data_tracking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `equation`
@@ -866,7 +858,7 @@ ALTER TABLE `function`
 -- AUTO_INCREMENT de la tabla `inspector`
 --
 ALTER TABLE `inspector`
-  MODIFY `inspector_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `inspector_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `invoice`
@@ -890,7 +882,7 @@ ALTER TABLE `item`
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=120;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT de la tabla `notification`
