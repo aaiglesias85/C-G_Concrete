@@ -22,12 +22,13 @@ class ProjectService extends Base
      * @param $item_id
      * @param $item_name
      * @param $unit_id
+     * @param $quantity
      * @param $price
      * @param $yield_calculation
      * @param $equation_id
      * @return array
      */
-    public function AgregarItem($project_item_id, $project_id, $item_id, $item_name, $unit_id, $price, $yield_calculation, $equation_id)
+    public function AgregarItem($project_item_id, $project_id, $item_id, $item_name, $unit_id, $quantity, $price, $yield_calculation, $equation_id)
     {
         $resultado = [];
 
@@ -50,6 +51,7 @@ class ProjectService extends Base
 
             $project_item_entity->setYieldCalculation($yield_calculation);
             $project_item_entity->setPrice($price);
+            $project_item_entity->setQuantity($quantity);
 
             $equation_entity = null;
             if ($equation_id != '') {
@@ -57,7 +59,6 @@ class ProjectService extends Base
                 $project_item_entity->setEquation($equation_entity);
             }
 
-            $item_entity = null;
             if ($item_id != '') {
                 $item_entity = $this->getDoctrine()->getRepository(Item::class)->find($item_id);
             } else {
@@ -89,9 +90,10 @@ class ProjectService extends Base
                 "item_id" => $project_item_entity->getItem()->getItemId(),
                 "item" => $project_item_entity->getItem()->getDescription(),
                 "unit" => $project_item_entity->getItem()->getUnit()->getDescription(),
+                "quantity" => $project_item_entity->getQuantity(),
                 "price" => $project_item_entity->getPrice(),
                 "yield_calculation" => $project_item_entity->getYieldCalculation(),
-                "yield_calculation_name" => $this->DevolverYieldCalculationDeItem($project_item_entity),
+                "yield_calculation_name" => $this->DevolverYieldCalculationDeItemProject($project_item_entity),
                 "equation_id" => $project_item_entity->getEquation() != null ? $project_item_entity->getEquation()->getEquationId() : ''
             ];
 
@@ -116,6 +118,15 @@ class ProjectService extends Base
             ->find($project_item_id);
         /**@var ProjectItem $entity */
         if ($entity != null) {
+
+            // data tracking
+            $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
+                ->ListarDataTrackingsDeItem($project_item_id);
+            if (count($data_tracking) > 0) {
+                $resultado['success'] = false;
+                $resultado['error'] = "The item could not be deleted, because it is related to a data tracking";
+                return $resultado;
+            }
 
             $item_name = $entity->getItem()->getDescription();
 
@@ -461,13 +472,14 @@ class ProjectService extends Base
 
             $price = $value->getPrice();
 
-            $yield_calculation_name = $this->DevolverYieldCalculationDeItem($value);
+            $yield_calculation_name = $this->DevolverYieldCalculationDeItemProject($value);
 
             $items[] = [
                 'project_item_id' => $value->getId(),
                 "item_id" => $value->getItem()->getItemId(),
                 "item" => $value->getItem()->getDescription(),
                 "unit" => $value->getItem()->getUnit()->getDescription(),
+                "quantity" => $value->getQuantity(),
                 "price" => $price,
                 "yield_calculation" => $value->getYieldCalculation(),
                 "yield_calculation_name" => $yield_calculation_name,
@@ -477,25 +489,6 @@ class ProjectService extends Base
         }
 
         return $items;
-    }
-
-    /**
-     * DevolverYieldCalculationDeItem
-     * @param ProjectItem $item_entity
-     * @return string
-     */
-    private function DevolverYieldCalculationDeItem($item_entity)
-    {
-        $yield_calculation = $item_entity->getYieldCalculation();
-
-        $yield_calculation_name = $this->BuscarYieldCalculation($yield_calculation);
-
-        // para la ecuacion devuelvo la ecuacion asociada
-        if ($yield_calculation == 'equation' && $item_entity->getEquation() != null) {
-            $yield_calculation_name = $item_entity->getEquation()->getEquation();
-        }
-
-        return $yield_calculation_name;
     }
 
     /**
@@ -845,6 +838,7 @@ class ProjectService extends Base
 
             $project_item_entity->setYieldCalculation($value->yield_calculation);
             $project_item_entity->setPrice($value->price);
+            $project_item_entity->setQuantity($value->quantity);
 
             $equation_entity = null;
             if ($value->equation_id != '') {

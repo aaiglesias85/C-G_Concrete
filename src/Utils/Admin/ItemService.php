@@ -103,13 +103,6 @@ class ItemService extends Base
             $texto_error = "The item could not be deleted, because it has associated projects";
         }
 
-        //data tracking
-        $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->ListarDataTrackingsDeItem($item_id);
-        if (!empty($data_tracking)) {
-            $texto_error = "The item could not be deleted, because it has associated in data tracking";
-        }
-
         //invoices
         $invoices = $this->getDoctrine()->getRepository(InvoiceItem::class)
             ->ListarInvoicesDeItem($item_id);

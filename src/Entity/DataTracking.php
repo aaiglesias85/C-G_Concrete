@@ -120,25 +120,15 @@ class DataTracking
     private $updatedAt;
 
     /**
-     * @var Project
+     * @var ProjectItem
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Project")
+     * @ORM\ManyToOne(targetEntity="App\Entity\ProjectItem")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="project_id", referencedColumnName="project_id")
+     *   @ORM\JoinColumn(name="project_item_id", referencedColumnName="id")
      * })
      */
-    private $project;
+    private $projectItem;
 
-
-    /**
-     * @var Item
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Item")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="item_id", referencedColumnName="item_id")
-     * })
-     */
-    private $item;
 
     /**
      * @var Inspector
@@ -191,29 +181,16 @@ class DataTracking
     }
 
     /**
-     * @return Project
+     * @return ProjectItem
      */
-    public function getProject()
+    public function getProjectItem()
     {
-        return $this->project;
+        return $this->projectItem;
     }
 
-    public function setProject($project)
+    public function setProjectItem($projectItem)
     {
-        $this->project = $project;
-    }
-
-    /**
-     * @return Item
-     */
-    public function getItem()
-    {
-        return $this->item;
-    }
-
-    public function setItem($item)
-    {
-        $this->item = $item;
+        $this->projectItem = $projectItem;
     }
 
     /**

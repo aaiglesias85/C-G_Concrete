@@ -140,8 +140,7 @@ class DataTrackingController extends AbstractController
     {
         $data_tracking_id = $request->get('data_tracking_id');
 
-        $project_id = $request->get('project_id');
-        $item_id = $request->get('item_id');
+        $project_item_id = $request->get('project_item_id');
         $quantity = $request->get('quantity');
         $price = $request->get('price');
         $date = $request->get('date');
@@ -160,7 +159,7 @@ class DataTrackingController extends AbstractController
 
         try {
 
-            $resultado = $this->trackingService->SalvarDataTracking($data_tracking_id, $project_id, $item_id, $quantity,
+            $resultado = $this->trackingService->SalvarDataTracking($data_tracking_id, $project_item_id, $quantity,
                 $price, $date, $inspector_id, $station_number, $measured_by, $conc_vendor, $crew_lead, $notes, $other_materials,
                 $total_conc_used, $total_labor, $total_stamps);
 

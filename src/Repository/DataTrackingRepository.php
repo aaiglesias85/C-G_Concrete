@@ -10,14 +10,15 @@ class DataTrackingRepository extends EntityRepository
 {
 
     /**
-     * ListarDataTracking: Lista los items
+     * ListarDataTracking: Lista el data tracking
      *
      * @return DataTracking[]
      */
     public function ListarDataTracking($project_id, $fecha_inicial = '', $fecha_fin = '')
     {
         $consulta = $this->createQueryBuilder('d_t')
-            ->leftJoin('d_t.project', 'p');
+            ->leftJoin('d_t.projectItem', 'p_i')
+            ->leftJoin('p_i.project', 'p');
 
         if ($project_id != '') {
             $consulta->andWhere('p.projectId = :project_id')
@@ -50,18 +51,18 @@ class DataTrackingRepository extends EntityRepository
 
 
     /**
-     * ListarDataTrackingsDeItem: Lista los projects de item
+     * ListarDataTrackingsDeItem: Lista el data tracking de item
      *
      * @return DataTracking[]
      */
-    public function ListarDataTrackingsDeItem($item_id)
+    public function ListarDataTrackingsDeItem($project_item_id)
     {
         $consulta = $this->createQueryBuilder('d_t')
-            ->leftJoin('d_t.item', 'i');
+            ->leftJoin('d_t.projectItem', 'p_i');
 
-        if ($item_id != '') {
-            $consulta->andWhere('i.itemId = :item_id')
-                ->setParameter('item_id', $item_id);
+        if ($project_item_id != '') {
+            $consulta->andWhere('p_i.id = :project_item_id')
+                ->setParameter('project_item_id', $project_item_id);
         }
 
 
@@ -105,10 +106,12 @@ class DataTrackingRepository extends EntityRepository
                                 $company_id = '', $project_id = '', $item_id = '', $fecha_inicial = '', $fecha_fin = '')
     {
         $consulta = $this->createQueryBuilder('d_t')
-            ->leftJoin('d_t.project', 'p')
+            ->leftJoin('d_t.projectItem', 'p_i')
+            ->leftJoin('p_i.project', 'p')
+            ->leftJoin('p_i.item', 'i')
+            ->leftJoin('i.unit', 'u')
             ->leftJoin('p.company', 'c')
-            ->leftJoin('d_t.item', 'i')
-            ->leftJoin('i.unit', 'u');
+            ->leftJoin('d_t.inspector', 'ins');
 
         if ($sSearch != "") {
             $consulta->andWhere('d_t.quantity LIKE :quantity OR d_t.price LIKE :price')
@@ -127,7 +130,7 @@ class DataTrackingRepository extends EntityRepository
         }
 
         if ($item_id != '') {
-            $consulta->andWhere('i.itemId = :item_id')
+            $consulta->andWhere('p_i.id = :item_id')
                 ->setParameter('item_id', $item_id);
         }
 
@@ -151,6 +154,18 @@ class DataTrackingRepository extends EntityRepository
         switch ($iSortCol_0) {
             case "item":
                 $consulta->orderBy("i.description", $sSortDir_0);
+                break;
+            case "yieldCalculationName":
+                $consulta->orderBy("p_i.yieldCalculation", $sSortDir_0);
+                break;
+            case "lostConcrete":
+                $consulta->orderBy("d_t.totalConcUsed", $sSortDir_0);
+                break;
+            case "inspector":
+                $consulta->orderBy("ins.name", $sSortDir_0);
+                break;
+            case "inspectorNumber":
+                $consulta->orderBy("ins.phone", $sSortDir_0);
                 break;
             case "unit":
                 $consulta->orderBy("u.description", $sSortDir_0);
@@ -182,7 +197,7 @@ class DataTrackingRepository extends EntityRepository
     {
         $em = $this->getEntityManager();
         $consulta = 'SELECT COUNT(d_t.id) FROM App\Entity\DataTracking d_t ';
-        $join = ' LEFT JOIN d_t.project p LEFT JOIN p.company c LEFT JOIN d_t.item i ';
+        $join = ' LEFT JOIN d_t.projectItem p_i LEFT JOIN p_i.project p LEFT JOIN p.company c LEFT JOIN p_i.item i ';
         $where = '';
 
         if ($sSearch != "") {
@@ -212,9 +227,9 @@ class DataTrackingRepository extends EntityRepository
         if ($item_id != '') {
             $esta_query = explode("WHERE", $where);
             if (count($esta_query) == 1)
-                $where .= 'WHERE (i.itemId = :item_id) ';
+                $where .= 'WHERE (p_i.id = :item_id) ';
             else
-                $where .= 'AND (i.itemId = :item_id) ';
+                $where .= 'AND (p_i.id = :item_id) ';
         }
 
         if ($fecha_inicial != "") {

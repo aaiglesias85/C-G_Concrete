@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 16-05-2024 a las 04:02:21
+-- Tiempo de generación: 17-05-2024 a las 19:04:32
 -- Versión del servidor: 11.2.2-MariaDB
 -- Versión de PHP: 8.1.12
 
@@ -88,8 +88,7 @@ CREATE TABLE `data_tracking` (
   `total_stamps` float(8,2) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `project_id` int(11) DEFAULT NULL,
-  `item_id` int(11) DEFAULT NULL,
+  `project_item_id` int(11) DEFAULT NULL,
   `inspector_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -430,7 +429,10 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (123, 'Update', 'Data Tracking', 'The data tracking is modified: CONC CURB & GUTTEER 8INX30IN TP2', '::1', '2024-05-15 22:02:15', 1),
 (124, 'Update', 'Data Tracking', 'The data tracking is modified: CONC SLOPE DRAIN ', '::1', '2024-05-15 22:02:20', 1),
 (125, 'Add', 'Data Tracking', 'The data tracking is add: Cubic Yards of Concrete', '::1', '2024-05-16 03:08:03', 1),
-(126, 'Add', 'Data Tracking', 'The data tracking is add: CONC CURB & GUTTEER 8INX30IN TP2', '::1', '2024-05-16 03:53:30', 1);
+(126, 'Add', 'Data Tracking', 'The data tracking is add: CONC CURB & GUTTEER 8INX30IN TP2', '::1', '2024-05-16 03:53:30', 1),
+(127, 'Add', 'Data Tracking', 'The data tracking is add: Cubic Yards of Concrete', '::1', '2024-05-17 15:05:17', 1),
+(128, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-05-17 18:24:44', 1),
+(129, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-05-17 18:31:58', 1);
 
 -- --------------------------------------------------------
 
@@ -491,7 +493,7 @@ CREATE TABLE `project` (
 INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `owner`, `subcontract`, `federal_funding`, `county`, `resurfacing`, `invoice_contact`, `certified_payrolls`, `start_date`, `end_date`, `due_date`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `company_id`, `inspector_id`) VALUES
 (1, '0009001', 'FL COUNTY', 'FL COUNTY', '', '', 0, '', 0, '', 0, NULL, NULL, '2024-05-31', 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-05-14 15:52:54', 1, 1),
 (2, '0009002', 'FL MIAMI', 'FL MIAMI', '', '', 0, '', 0, '', 0, NULL, NULL, '2024-05-28', 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-05-14 15:52:43', 1, 1),
-(3, '0009003', 'Houston Texas', 'Houston Texas', 'Marcel', '896532', 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 1, '86532', '89653', '2024-04-24 04:24:02', '2024-05-12 20:53:23', 3, 1);
+(3, '0009003', 'Houston Texas', 'Houston Texas', 'Marcel', '896532', 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 1, '86532', '89653', '2024-04-24 04:24:02', '2024-05-17 18:31:58', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -501,6 +503,7 @@ INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `owne
 
 CREATE TABLE `project_item` (
   `id` int(11) NOT NULL,
+  `quantity` float(8,2) DEFAULT NULL,
   `price` float(8,2) DEFAULT NULL,
   `yield_calculation` varchar(50) DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL,
@@ -512,11 +515,12 @@ CREATE TABLE `project_item` (
 -- Volcado de datos para la tabla `project_item`
 --
 
-INSERT INTO `project_item` (`id`, `price`, `yield_calculation`, `project_id`, `item_id`, `equation_id`) VALUES
-(1, 16.50, 'none', 3, 6, NULL),
-(2, 63.00, 'same', 3, 15, NULL),
-(4, 150.00, 'equation', 3, 20, 2),
-(5, 253.00, 'none', 1, 10, NULL);
+INSERT INTO `project_item` (`id`, `quantity`, `price`, `yield_calculation`, `project_id`, `item_id`, `equation_id`) VALUES
+(1, 1500.00, 16.50, 'none', 3, 6, NULL),
+(2, 2000.00, 63.00, 'same', 3, 15, NULL),
+(4, 1600.00, 150.00, 'equation', 3, 20, 2),
+(5, NULL, 253.00, 'none', 1, 10, NULL),
+(8, 2500.00, 25.00, 'equation', 3, 3, 1);
 
 -- --------------------------------------------------------
 
@@ -702,9 +706,8 @@ ALTER TABLE `company_contact`
 --
 ALTER TABLE `data_tracking`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `Ref6675` (`project_id`),
-  ADD KEY `Ref6776` (`item_id`),
-  ADD KEY `inspector_id` (`inspector_id`);
+  ADD KEY `inspector_id` (`inspector_id`),
+  ADD KEY `project_item_id` (`project_item_id`);
 
 --
 -- Indices de la tabla `equation`
@@ -882,7 +885,7 @@ ALTER TABLE `item`
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
 
 --
 -- AUTO_INCREMENT de la tabla `notification`
@@ -900,7 +903,7 @@ ALTER TABLE `project`
 -- AUTO_INCREMENT de la tabla `project_item`
 --
 ALTER TABLE `project_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `project_notes`
@@ -952,8 +955,8 @@ ALTER TABLE `company_contact`
 -- Filtros para la tabla `data_tracking`
 --
 ALTER TABLE `data_tracking`
-  ADD CONSTRAINT `Refitem76` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`),
-  ADD CONSTRAINT `Refproject75` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`);
+  ADD CONSTRAINT `Refinspector158` FOREIGN KEY (`inspector_id`) REFERENCES `inspector` (`inspector_id`),
+  ADD CONSTRAINT `Refprojectitem25` FOREIGN KEY (`project_item_id`) REFERENCES `project_item` (`id`);
 
 --
 -- Filtros para la tabla `invoice`

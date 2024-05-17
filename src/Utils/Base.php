@@ -5,6 +5,7 @@ namespace App\Utils;
 use App\Entity\Log;
 use App\Entity\Notification;
 use App\Entity\PermisoUsuario;
+use App\Entity\ProjectItem;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
@@ -829,6 +830,25 @@ class Base
         }
 
         return $name;
+    }
+
+    /**
+     * DevolverYieldCalculationDeItemProject
+     * @param ProjectItem $item_entity
+     * @return string
+     */
+    public function DevolverYieldCalculationDeItemProject($item_entity)
+    {
+        $yield_calculation = $item_entity->getYieldCalculation();
+
+        $yield_calculation_name = $this->BuscarYieldCalculation($yield_calculation);
+
+        // para la ecuacion devuelvo la ecuacion asociada
+        if ($yield_calculation == 'equation' && $item_entity->getEquation() != null) {
+            $yield_calculation_name = $item_entity->getEquation()->getEquation();
+        }
+
+        return $yield_calculation_name;
     }
 
 

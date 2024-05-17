@@ -21,6 +21,12 @@ class ProjectItem
      */
     private $id;
 
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="quantity", type="float", nullable=false)
+     */
+    private $quantity;
 
     /**
      * @var float
@@ -134,6 +140,16 @@ class ProjectItem
     public function setEquation($equation)
     {
         $this->equation = $equation;
+    }
+
+    public function getQuantity()
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity($quantity)
+    {
+        $this->quantity = $quantity;
     }
 
 }

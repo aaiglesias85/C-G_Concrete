@@ -561,12 +561,13 @@ class ProjectController extends AbstractController
         $item_id = $request->get('item_id');
         $item_name = $request->get('item');
         $unit_id = $request->get('unit_id');
+        $quantity = $request->get('quantity');
         $price = $request->get('price');
         $yield_calculation = $request->get('yield_calculation');
         $equation_id = $request->get('equation_id');
 
         try {
-            $resultado = $this->projectService->AgregarItem($project_item_id, $project_id, $item_id, $item_name, $unit_id, $price, $yield_calculation, $equation_id);
+            $resultado = $this->projectService->AgregarItem($project_item_id, $project_id, $item_id, $item_name, $unit_id, $quantity, $price, $yield_calculation, $equation_id);
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";

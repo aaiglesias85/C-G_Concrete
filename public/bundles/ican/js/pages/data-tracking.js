@@ -23,11 +23,84 @@ var DataTracking = function () {
             });
         }
 
-        aoColumns.push({
+        aoColumns.push(
+            {
+                field: "acciones",
+                width: 80,
+                title: "Actions",
+                sortable: false,
+                overflow: 'visible',
+                textAlign: 'center'
+            },
+            {
                 field: "date",
                 title: "Date",
                 width: 100,
                 textAlign: 'center'
+            },
+            {
+                field: "stationNumber",
+                title: "Station Number(s)",
+                width: 140,
+            },
+            {
+                field: "measuredBy",
+                title: "Measured By",
+                width: 180,
+            },
+            {
+                field: "totalConcUsed",
+                title: "Total Conc Used",
+                width: 120,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.totalConcUsed, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "lostConcrete",
+                title: "Lost Concrete",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.lostConcrete, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "totalLabor",
+                title: "Total Labor",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.totalLabor, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "totalStamps",
+                title: "Total Stamps",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.totalStamps, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "concVendor",
+                title: "Conc Vendor",
+            },
+            {
+                field: "inspector",
+                title: "Inspector",
+                width: 150,
+            },
+            {
+                field: "inspectorNumber",
+                title: "Inspector Number",
+                width: 140,
+            },
+            {
+                field: "crewLead",
+                title: "Crew Lead",
             },
             {
                 field: "item",
@@ -43,6 +116,11 @@ var DataTracking = function () {
                 title: "Quatity",
                 width: 100,
                 textAlign: 'center',
+            },
+            {
+                field: "yieldCalculationName",
+                title: "Yield Calculation",
+                width: 140,
             },
             {
                 field: "price",
@@ -63,12 +141,12 @@ var DataTracking = function () {
                 }
             },
             {
-                field: "acciones",
-                width: 80,
-                title: "Actions",
-                sortable: false,
-                overflow: 'visible',
-                textAlign: 'center'
+                field: "notes",
+                title: "Notes",
+            },
+            {
+                field: "otherMaterials",
+                title: "Other Materials"
             }
         );
         oTable = table.mDatatable({
@@ -298,9 +376,9 @@ var DataTracking = function () {
 
         function btnClickSalvarForm() {
 
-            var item_id = $('#item-data-tracking').val();
+            var project_item_id = $('#item-data-tracking').val();
             var project_id = $('#project').val();
-            if ($('#data-tracking-form').valid() && item_id != '' && project_id != '') {
+            if ($('#data-tracking-form').valid() && project_item_id != '' && project_id != '') {
 
                 var data_tracking_id = $('#data_tracking_id').val();
 
@@ -326,8 +404,7 @@ var DataTracking = function () {
                     dataType: "json",
                     data: {
                         'data_tracking_id': data_tracking_id,
-                        'project_id': project_id,
-                        'item_id': item_id,
+                        'project_item_id': project_item_id,
                         'quantity': quantity,
                         'price': price,
                         'date': date,
@@ -371,7 +448,7 @@ var DataTracking = function () {
                     }
                 });
             } else {
-                if (item_id == "") {
+                if (project_item_id == "") {
                     var $element = $('#select-item-data-tracking .select2');
                     $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
                         .data("title", "This field is required")
@@ -426,7 +503,7 @@ var DataTracking = function () {
                         $('#data-tracking-quantity').off('change', calcularTotalItem);
                         $('#data-tracking-price').off('change', calcularTotalItem);
 
-                        $('#item-data-tracking').val(response.data_tracking.item_id);
+                        $('#item-data-tracking').val(response.data_tracking.project_item_id);
                         $('#item-data-tracking').trigger('change');
 
                         $('#data-tracking-quantity').val(response.data_tracking.quantity);
@@ -706,7 +783,7 @@ var DataTracking = function () {
                         console.log(items);
 
                         for (var i = 0; i < items.length; i++) {
-                            $('.select-item-data-tracking').append(new Option(items[i].item, items[i].item_id, false, false));
+                            $('.select-item-data-tracking').append(new Option(items[i].item, items[i].project_item_id, false, false));
                         }
                         $('.select-item-data-tracking').select2();
 
@@ -732,10 +809,9 @@ var DataTracking = function () {
         $('#data-tracking-total').val('');
 
 
-
         if (item_id != '') {
             var item = items.find(function (v) {
-                return v.item_id == item_id;
+                return v.project_item_id == item_id;
             });
             var price = item.price;
             $('#data-tracking-price').val(price);
@@ -749,7 +825,7 @@ var DataTracking = function () {
 
         var item_id = $('#item-data-tracking').val();
         var item = items.find(function (v) {
-            return v.item_id == item_id;
+            return v.project_item_id == item_id;
         });
 
 
@@ -758,7 +834,7 @@ var DataTracking = function () {
         if (cantidad != '' && price != '') {
 
             // aplicar el yield
-            if(item.yield_calculation == "equation"){
+            if (item.yield_calculation == "equation") {
                 cantidad = MyApp.evaluateExpression(item.yield_calculation_name, cantidad);
             }
 
@@ -773,18 +849,18 @@ var DataTracking = function () {
     var calcularLostConcrete = function () {
         var item_id = $('#item-data-tracking').val();
         var item = items.find(function (v) {
-            return v.item_id == item_id;
+            return v.project_item_id == item_id;
         });
 
 
         var cantidad = $('#data-tracking-quantity').val();
         // aplicar el yield
-        if(item.yield_calculation == "equation"){
+        if (item.yield_calculation == "equation") {
             cantidad = MyApp.evaluateExpression(item.yield_calculation_name, cantidad);
         }
 
         var total_conc_used = $('#total_conc_used').val();
-        if(total_conc_used > 0){
+        if (total_conc_used > 0) {
             $('#lost_concrete').val(parseFloat(total_conc_used - cantidad));
         }
 
@@ -798,7 +874,7 @@ var DataTracking = function () {
 
         var item_id = $('#item-data-tracking').val();
         var item = items.find(function (v) {
-            return v.item_id == item_id;
+            return v.project_item_id == item_id;
         });
 
         if (item.yield_calculation_name != '') {
@@ -942,6 +1018,9 @@ var DataTracking = function () {
     var initFormItem = function () {
         $("#item-form").validate({
             rules: {
+                quantity: {
+                    required: true
+                },
                 item: {
                     required: true
                 },
@@ -1009,6 +1088,7 @@ var DataTracking = function () {
 
                 var unit_id = $('#unit').val();
                 var price = $('#item-price').val();
+                var quantity = $('#item-quantity').val();
                 var yield_calculation = $('#yield-calculation').val();
                 var equation_id = $('#equation').val();
 
@@ -1025,6 +1105,7 @@ var DataTracking = function () {
                         item: item,
                         unit_id: unit_id,
                         price: price,
+                        quantity: quantity,
                         yield_calculation: yield_calculation,
                         equation_id: equation_id
                     },
@@ -1040,7 +1121,7 @@ var DataTracking = function () {
 
                             //add items to select
                             items.push(response.item);
-                            $('.select-item-data-tracking').append(new Option(item, response.item.item_id, false, false));
+                            $('.select-item-data-tracking').append(new Option(item, response.item.project_item_id, false, false));
                             $('.select-item-data-tracking').select2();
 
                             $('#item-data-tracking').val(response.item.item_id);

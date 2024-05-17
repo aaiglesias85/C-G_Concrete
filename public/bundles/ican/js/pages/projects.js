@@ -943,6 +943,15 @@ var Projects = function () {
                 title: "Yield Calculation",
             },
             {
+                field: "quantity",
+                title: "Quantity",
+                width: 120,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.quantity, 2, '.', ',')}</span>`;
+                }
+            },
+            {
                 field: "price",
                 title: "Price",
                 width: 100,
@@ -1040,10 +1049,13 @@ var Projects = function () {
     var initFormItem = function () {
         $("#item-form").validate({
             rules: {
-                item: {
+                quantity: {
                     required: true
                 },
                 price: {
+                    required: true
+                },
+                item: {
                     required: true
                 },
             },
@@ -1109,6 +1121,7 @@ var Projects = function () {
                 var unit_id = $('#unit').val();
                 var unit = item_type ? $('#item option[value="' + item_id + '"]').data("unit") : $("#unit option:selected").text();
 
+                var quantity = $('#item-quantity').val();
                 var price = $('#item-price').val();
 
                 var yield_calculation = $('#yield-calculation').val();
@@ -1127,6 +1140,7 @@ var Projects = function () {
                         yield_calculation: yield_calculation,
                         yield_calculation_name: yield_calculation_name,
                         price: price,
+                        quantity: quantity,
                         posicion: items.length
                     });
 
@@ -1141,18 +1155,19 @@ var Projects = function () {
                         items[posicion].yield_calculation_name = yield_calculation_name;
                         items[posicion].equation_id = equation_id;
                         items[posicion].price = price;
+                        items[posicion].quantity = quantity;
                     }
                 }
 
                 //actualizar lista
                 actualizarTableListaItems();
 
-                // reset
-                resetFormItem();
-
                 if (nEditingRowItem != null) {
                     $('#modal-item').modal('hide');
                 }
+
+                // reset
+                resetFormItem();
 
             } else {
                 if (!isValidItem()) {
@@ -1211,6 +1226,7 @@ var Projects = function () {
                 $('#item').trigger('change');
 
                 $('#item-price').val(items[posicion].price);
+                $('#item-quantity').val(items[posicion].quantity);
 
                 $('#item').on('change', changeItem);
 
