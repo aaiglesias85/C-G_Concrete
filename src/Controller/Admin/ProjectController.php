@@ -549,4 +549,40 @@ class ProjectController extends AbstractController
         }
 
     }
+
+    /**
+     * agregarItem Acción que agrega un item en la BD
+     *
+     */
+    public function agregarItem(Request $request)
+    {
+        $project_item_id = $request->get('project_item_id');
+        $project_id = $request->get('project_id');
+        $item_id = $request->get('item_id');
+        $item_name = $request->get('item');
+        $unit_id = $request->get('unit_id');
+        $price = $request->get('price');
+        $yield_calculation = $request->get('yield_calculation');
+        $equation_id = $request->get('equation_id');
+
+        try {
+            $resultado = $this->projectService->AgregarItem($project_item_id, $project_id, $item_id, $item_name, $unit_id, $price, $yield_calculation, $equation_id);
+            if ($resultado['success']) {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['message'] = "The operation was successful";
+                $resultadoJson['item'] = $resultado['item'];
+            } else {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['error'] = $resultado['error'];
+            }
+
+            return $this->json($resultadoJson);
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+
+    }
 }

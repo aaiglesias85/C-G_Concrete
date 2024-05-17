@@ -272,7 +272,6 @@ class DataTrackingService extends Base
             $entity->setCrewLead($crew_lead);
             $entity->setNotes($notes);
             $entity->setOtherMaterials($other_materials);
-
             $entity->setTotalConcUsed($total_conc_used);
             $entity->setTotalLabor($total_labor);
             $entity->setTotalStamps($total_stamps);

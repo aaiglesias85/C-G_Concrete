@@ -18,6 +18,92 @@ class ProjectService extends Base
 {
 
     /**
+     * AgregarItem
+     * @param $item_id
+     * @param $item_name
+     * @param $unit_id
+     * @param $price
+     * @param $yield_calculation
+     * @param $equation_id
+     * @return array
+     */
+    public function AgregarItem($project_item_id, $project_id, $item_id, $item_name, $unit_id, $price, $yield_calculation, $equation_id)
+    {
+        $resultado = [];
+
+        $em = $this->getDoctrine()->getManager();
+
+        $project_entity = $this->getDoctrine()->getRepository(Project::class)->find($project_id);
+        if($project_entity != null){
+            $project_item_entity = null;
+
+            if (is_numeric($project_item_id)) {
+                $project_item_entity = $this->getDoctrine()->getRepository(ProjectItem::class)
+                    ->find($project_item_id);
+            }
+
+            $is_new_project_item = false;
+            if ($project_item_entity == null) {
+                $project_item_entity = new ProjectItem();
+                $is_new_project_item = true;
+            }
+
+            $project_item_entity->setYieldCalculation($yield_calculation);
+            $project_item_entity->setPrice($price);
+
+            $equation_entity = null;
+            if ($equation_id != '') {
+                $equation_entity = $this->getDoctrine()->getRepository(Equation::class)->find($equation_id);
+                $project_item_entity->setEquation($equation_entity);
+            }
+
+            $item_entity = null;
+            if ($item_id != '') {
+                $item_entity = $this->getDoctrine()->getRepository(Item::class)->find($item_id);
+            } else {
+                // add new item
+                $new_item_data = json_encode([
+                    'item' => $item_name,
+                    'price' => $price,
+                    'yield_calculation' => $yield_calculation,
+                    'unit_id' => $unit_id
+                ]);
+                $item_entity = $this->AgregarNewItem(json_decode($new_item_data), $equation_entity);
+            }
+
+            $project_item_entity->setItem($item_entity);
+
+            if ($is_new_project_item) {
+                $project_item_entity->setProject($project_entity);
+
+                $em->persist($project_item_entity);
+            }
+
+            $em->flush();
+
+            $resultado['success'] = true;
+
+            // devolver item
+            $resultado['item'] = [
+                'project_item_id' => $project_item_entity->getId(),
+                "item_id" => $project_item_entity->getItem()->getItemId(),
+                "item" => $project_item_entity->getItem()->getDescription(),
+                "unit" => $project_item_entity->getItem()->getUnit()->getDescription(),
+                "price" => $project_item_entity->getPrice(),
+                "yield_calculation" => $project_item_entity->getYieldCalculation(),
+                "yield_calculation_name" => $this->DevolverYieldCalculationDeItem($project_item_entity),
+                "equation_id" => $project_item_entity->getEquation() != null ? $project_item_entity->getEquation()->getEquationId() : ''
+            ];
+
+        }else{
+            $resultado['success'] = false;
+            $resultado['error'] = 'The project not exist';
+        }
+
+        return $resultado;
+    }
+
+    /**
      * EliminarItem: Elimina un item en la BD
      * @param int $project_item_id Id
      * @author Marcel

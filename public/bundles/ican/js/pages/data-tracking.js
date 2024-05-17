@@ -314,7 +314,9 @@ var DataTracking = function () {
                 var crew_lead = $('#crew_lead').val();
                 var notes = $('#notes').val();
                 var other_materials = $('#other_materials').val();
-
+                var total_conc_used = $('#total_conc_used').val();
+                var total_labor = $('#total_labor').val();
+                var total_stamps = $('#total_stamps').val();
 
                 MyApp.block('#modal-data-tracking .modal-content');
 
@@ -335,7 +337,10 @@ var DataTracking = function () {
                         'conc_vendor': conc_vendor,
                         'crew_lead': crew_lead,
                         'notes': notes,
-                        'other_materials': other_materials
+                        'other_materials': other_materials,
+                        'total_conc_used': total_conc_used,
+                        'total_labor': total_labor,
+                        'total_stamps': total_stamps
                     },
                     success: function (response) {
                         mApp.unblock('#modal-data-tracking .modal-content');
@@ -417,7 +422,7 @@ var DataTracking = function () {
 
                         $('#data-tracking-date').val(response.data_tracking.date);
 
-                        $('#item-data-tracking').off('change', changeItem);
+                        $('#item-data-tracking').off('change', changeItemDataTracking);
                         $('#data-tracking-quantity').off('change', calcularTotalItem);
                         $('#data-tracking-price').off('change', calcularTotalItem);
 
@@ -427,9 +432,10 @@ var DataTracking = function () {
                         $('#data-tracking-quantity').val(response.data_tracking.quantity);
                         $('#data-tracking-price').val(response.data_tracking.price);
 
+                        mostrarYieldCalculation();
                         calcularTotalItem();
 
-                        $('#item-data-tracking').on('change', changeItem);
+                        $('#item-data-tracking').on('change', changeItemDataTracking);
                         $('#data-tracking-quantity').on('change', calcularTotalItem);
                         $('#data-tracking-price').on('change', calcularTotalItem);
 
@@ -442,6 +448,11 @@ var DataTracking = function () {
                         $('#crew_lead').val(response.data_tracking.crew_lead);
                         $('#notes').val(response.data_tracking.notes);
                         $('#other_materials').val(response.data_tracking.other_materials);
+                        $('#total_conc_used').val(response.data_tracking.total_conc_used);
+                        $('#total_labor').val(response.data_tracking.total_labor);
+                        $('#total_stamps').val(response.data_tracking.total_stamps);
+
+                        calcularLostConcrete();
 
                     } else {
                         toastr.error(response.error, "");
@@ -588,11 +599,81 @@ var DataTracking = function () {
             "mask": "(999)999-9999"
         });
 
+        $("[data-switch=true]").bootstrapSwitch();
+
         // change
         $('#project').change(changeProject);
-        $('#item-data-tracking').change(changeItem);
+        $('#item-data-tracking').change(changeItemDataTracking);
         $('#data-tracking-quantity').change(calcularTotalItem);
         $('#data-tracking-price').change(calcularTotalItem);
+        $('#total_conc_used').change(calcularLostConcrete);
+
+        // change
+        $('#item').change(changeItem);
+        $('#yield-calculation').change(changeYield);
+
+        $(document).off('switchChange.bootstrapSwitch', '#item-type');
+        $(document).on('switchChange.bootstrapSwitch', '#item-type', changeItemType);
+    }
+
+    var changeItemType = function (event, state) {
+
+        // reset
+        $('#item').val('');
+        $('#item').trigger('change');
+        $('#div-item').removeClass('m--hide');
+
+        $('#item-name').val('');
+        $('#item-name').removeClass('m--hide').addClass('m--hide');
+
+        $('#unit').val('');
+        $('#unit').trigger('change');
+        $('#select-unit').removeClass('m--hide').addClass('m--hide');
+
+        if (!state) {
+            $('#div-item').removeClass('m--hide').addClass('m--hide');
+            $('#item-name').removeClass('m--hide');
+            $('#select-unit').removeClass('m--hide');
+        }
+    }
+
+    var changeYield = function () {
+        var yield_calculation = $('#yield-calculation').val();
+
+        // reset
+        $('#equation').val('');
+        $('#equation').trigger('change');
+        $('#select-equation').removeClass('m--hide').addClass('m--hide');
+
+        if (yield_calculation == 'equation') {
+            $('#select-equation').removeClass('m--hide');
+        }
+    }
+
+    var changeItem = function () {
+        var item_id = $('#item').val();
+
+        // reset
+        $('#item-price').val('');
+
+        $('#yield-calculation').val('');
+        $('#yield-calculation').trigger('change');
+
+        $('#equation').val('');
+        $('#equation').trigger('change');
+
+        if (item_id != '') {
+            var price = $('#item option[value="' + item_id + '"]').data("price");
+            $('#item-price').val(price);
+
+            var yield = $('#item option[value="' + item_id + '"]').data("yield");
+            $('#yield-calculation').val(yield);
+            $('#yield-calculation').trigger('change');
+
+            var equation = $('#item option[value="' + item_id + '"]').data("equation");
+            $('#equation').val(equation);
+            $('#equation').trigger('change');
+        }
     }
 
     var changeProject = function () {
@@ -642,7 +723,7 @@ var DataTracking = function () {
         }
     }
 
-    var changeItem = function () {
+    var changeItemDataTracking = function () {
         var item_id = $('#item-data-tracking').val();
 
         // reset
@@ -650,8 +731,7 @@ var DataTracking = function () {
         $('#data-tracking-price').val('');
         $('#data-tracking-total').val('');
 
-        $('#item-yield-calculation').val('');
-        $('#div-yield-calculation').removeClass('m--hide').addClass('m--hide');
+
 
         if (item_id != '') {
             var item = items.find(function (v) {
@@ -660,11 +740,7 @@ var DataTracking = function () {
             var price = item.price;
             $('#data-tracking-price').val(price);
 
-            if (item.yield_calculation_name != '') {
-                $('#div-yield-calculation').removeClass('m--hide');
-                $('#item-yield-calculation').val(item.yield_calculation_name);
-            }
-
+            mostrarYieldCalculation();
 
             calcularTotalItem();
         }
@@ -688,6 +764,46 @@ var DataTracking = function () {
 
             var total = parseFloat(cantidad) * parseFloat(price);
             $('#data-tracking-total').val(total);
+
+            // lost concret
+            calcularLostConcrete();
+        }
+    }
+
+    var calcularLostConcrete = function () {
+        var item_id = $('#item-data-tracking').val();
+        var item = items.find(function (v) {
+            return v.item_id == item_id;
+        });
+
+
+        var cantidad = $('#data-tracking-quantity').val();
+        // aplicar el yield
+        if(item.yield_calculation == "equation"){
+            cantidad = MyApp.evaluateExpression(item.yield_calculation_name, cantidad);
+        }
+
+        var total_conc_used = $('#total_conc_used').val();
+        if(total_conc_used > 0){
+            $('#lost_concrete').val(parseFloat(total_conc_used - cantidad));
+        }
+
+    }
+
+    var mostrarYieldCalculation = function () {
+
+        //reset
+        $('#item-yield-calculation').val('');
+        $('#div-yield-calculation').removeClass('m--hide').addClass('m--hide');
+
+        var item_id = $('#item-data-tracking').val();
+        var item = items.find(function (v) {
+            return v.item_id == item_id;
+        });
+
+        if (item.yield_calculation_name != '') {
+            $('#div-yield-calculation').removeClass('m--hide');
+            $('#item-yield-calculation').val(item.yield_calculation_name);
         }
     }
 
@@ -823,6 +939,259 @@ var DataTracking = function () {
         }
     }
 
+    var initFormItem = function () {
+        $("#item-form").validate({
+            rules: {
+                item: {
+                    required: true
+                },
+                price: {
+                    required: true
+                },
+            },
+            showErrors: function (errorMap, errorList) {
+                // Clean up any tooltips for valid elements
+                $.each(this.validElements(), function (index, element) {
+                    var $element = $(element);
+
+                    $element.data("title", "") // Clear the title - there is no error associated anymore
+                        .removeClass("has-error")
+                        .tooltip("dispose");
+
+                    $element
+                        .closest('.form-group')
+                        .removeClass('has-error').addClass('success');
+                });
+
+                // Create new tooltips for invalid elements
+                $.each(errorList, function (index, error) {
+                    var $element = $(error.element);
+
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", error.message)
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+
+                });
+            },
+        });
+    };
+    var initAccionesItems = function () {
+
+        $(document).off('click', "#btn-add-item");
+        $(document).on('click', "#btn-add-item", function (e) {
+            // reset
+            resetFormItem();
+
+            $('#modal-item').modal({
+                'show': true
+            });
+        });
+
+        $(document).off('click', "#btn-salvar-item");
+        $(document).on('click', "#btn-salvar-item", function (e) {
+            e.preventDefault();
+
+            var item_type = $('#item-type').prop('checked');
+
+            var item_id = $('#item').val();
+            var item = item_type ? $("#item option:selected").text() : $('#item-name').val();
+            if (item_type) {
+                $('#item-name').val(item);
+            }
+
+            if ($('#item-form').valid() && isValidItem() && isValidYield() && isValidUnit()) {
+
+                var unit_id = $('#unit').val();
+                var price = $('#item-price').val();
+                var yield_calculation = $('#yield-calculation').val();
+                var equation_id = $('#equation').val();
+
+                MyApp.block('#modal-item .modal-content');
+
+                $.ajax({
+                    type: "POST",
+                    url: "project/agregarItem",
+                    dataType: "json",
+                    data: {
+                        project_item_id: '',
+                        project_id: $('#project').val(),
+                        item_id: item_id,
+                        item: item,
+                        unit_id: unit_id,
+                        price: price,
+                        yield_calculation: yield_calculation,
+                        equation_id: equation_id
+                    },
+                    success: function (response) {
+                        mApp.unblock('#modal-item .modal-content');
+                        if (response.success) {
+
+                            toastr.success(response.message, "Success");
+
+                            resetFormItem();
+
+                            $('#modal-item').modal('hide');
+
+                            //add items to select
+                            items.push(response.item);
+                            $('.select-item-data-tracking').append(new Option(item, response.item.item_id, false, false));
+                            $('.select-item-data-tracking').select2();
+
+                            $('#item-data-tracking').val(response.item.item_id);
+                            $('#item-data-tracking').trigger('change');
+
+                        } else {
+                            toastr.error(response.error, "");
+                        }
+                    },
+                    failure: function (response) {
+                        mApp.unblock('#modal-item .modal-content');
+
+                        toastr.error(response.error, "");
+                    }
+                });
+
+            } else {
+                if (!isValidItem()) {
+                    var $element = $('#select-item .select2');
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", "This field is required")
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+                }
+                if (!isValidYield()) {
+                    var $element = $('#select-equation .select2');
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", "This field is required")
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+                }
+                if (!isValidUnit()) {
+                    var $element = $('#select-unit .select2');
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", "This field is required")
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+                }
+            }
+
+        });
+
+        function isValidItem() {
+            var valid = true;
+
+            var item_type = $('#item-type').prop('checked');
+            var item_id = $('#item').val();
+
+            if (item_type && item_id == '') {
+                valid = false;
+            }
+
+
+            return valid;
+        }
+
+        function isValidUnit() {
+            var valid = true;
+
+            var item_type = $('#item-type').prop('checked');
+            var unit_id = $('#unit').val();
+
+            if (!item_type && unit_id == '') {
+                valid = false;
+            }
+
+
+            return valid;
+        }
+
+        function isValidYield() {
+            var valid = true;
+
+            var yield_calculation = $('#yield-calculation').val();
+            var equation_id = $('#equation').val();
+            if (yield_calculation == 'equation' && equation_id == '') {
+                valid = false;
+            }
+
+
+            return valid;
+        }
+
+        function DevolverYieldCalculationDeItem() {
+
+            var yield_calculation = $('#yield-calculation').val();
+
+            var yield_calculation_name = yield_calculation != "" ? $('#yield-calculation option:selected').text() : "";
+
+            // para la ecuacion devuelvo la ecuacion asociada
+            if (yield_calculation == 'equation') {
+                var equation_id = $('#equation').val();
+                yield_calculation_name = $('#equation option[value="' + equation_id + '"]').data("equation");
+            }
+
+            return yield_calculation_name;
+        }
+    };
+    var resetFormItem = function () {
+        $('#item-form input').each(function (e) {
+            $element = $(this);
+            $element.val('');
+
+            $element.data("title", "").removeClass("has-error").tooltip("dispose");
+            $element.closest('.form-group').removeClass('has-error').addClass('success');
+        });
+
+        $('#item-type').prop('checked', true);
+        $("#item-type").bootstrapSwitch("state", true, true);
+
+        $('#item').val('');
+        $('#item').trigger('change');
+
+        $('#yield-calculation').val('');
+        $('#yield-calculation').trigger('change');
+
+        $('#equation').val('');
+        $('#equation').trigger('change');
+        $('#select-equation').removeClass('m--hide').addClass('m--hide');
+
+        $('#div-item').removeClass('m--hide');
+        $('#item-name').removeClass('m--hide').addClass('m--hide');
+
+        $('#unit').val('');
+        $('#unit').trigger('change');
+        $('#select-unit').removeClass('m--hide').addClass('m--hide');
+
+        var $element = $('.select2');
+        $element.removeClass('has-error').tooltip("dispose");
+
+        // add datos de proyecto
+        var project = $("#project option:selected").text().split('-');
+        $("#proyect-number-item").html(project[0]);
+        $("#proyect-name-item").html(project[1]);
+    };
+
     return {
         //main function to initiate the module
         init: function () {
@@ -840,6 +1209,10 @@ var DataTracking = function () {
             // inspectors
             initFormInspector();
             initAccionesInspector();
+
+            // items
+            initFormItem();
+            initAccionesItems();
         }
 
     };

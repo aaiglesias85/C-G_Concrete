@@ -56,3 +56,7 @@ listarItemsDeProjectAdmin:
 eliminarItemProjectAdmin:
   path: /project/eliminarItem
   defaults: { _controller: App\Controller\Admin\ProjectController::eliminarItem, _format: json }
+
+agregarItemProjectAdmin:
+  path: /project/agregarItem
+  defaults: { _controller: App\Controller\Admin\ProjectController::agregarItem, _format: json }
