@@ -162,16 +162,26 @@
                                         <input type="text" class="form-control event-change form-control-number" id="price" name="price">
                                     </div>
                                 </div>
-                                <div class="col-md-3" id="select-unit">
+                                <div class="col-md-4" id="select-unit">
                                     <label>Unit</label>
-                                    <select class="form-control m-select2 event-change" id="unit"
-                                            name="unit">
-                                        <option value="">Select</option>
-                                        {% for item in units %}
-                                            <option value="{{ item.unitId }}">{{ item.description }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
+
+                                    <div class="row">
+                                        <div class="col-md-10">
+                                            <select class="form-control m-select2 event-change" id="unit" name="unit">
+                                                <option value="">Select</option>
+                                                {% for item in units %}
+                                                    <option value="{{ item.unitId }}">{{ item.description }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2" style="padding-top: 3px; padding-left: 0px;">
+                                            <a href="javascript:;" title="Add unit" id="btn-add-unit"
+                                               class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                                                <i class="la la-plus"></i>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -194,14 +204,25 @@
                                 </div>
                                 <div class="col-md-4 m--hide" id="select-equation">
                                     <label>Equation</label>
-                                    <select class="form-control m-select2 event-change" id="equation"
-                                            name="equation">
-                                        <option value="">Select</option>
-                                        {% for item in equations %}
-                                            <option value="{{ item.equationId }}"> {{ item.description }} {{ item.equation }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
+
+                                    <div class="row">
+                                        <div class="col-md-10">
+                                            <select class="form-control m-select2 event-change" id="equation"
+                                                    name="equation">
+                                                <option value="">Select</option>
+                                                {% for item in equations %}
+                                                    <option value="{{ item.equationId }}"> {{ item.description }} {{ item.equation }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2" style="padding-top: 3px; padding-left: 0px;">
+                                            <a href="javascript:;" title="Add equation" id="btn-add-equation"
+                                               class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                                                <i class="la la-plus"></i>
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -246,9 +267,24 @@
 
     </div>
 
+
+    <!-- components -->
+    {{ render(controller('App\\Controller\\Admin\\DefaultController::renderModalEquation')) }}
+    {{ render(controller('App\\Controller\\Admin\\DefaultController::renderModalUnit')) }}
+
 {% endblock %}
 
 {% block javascriptsspecific %}
+
+
+    <!-- init components -->
+    <script>
+        jQuery(document).ready(function () {
+            ModalUnit.init();
+            ModalEquation.init();
+        });
+    </script>
+
     <script src="{{ asset('bundles/ican/js/pages/items.js') }}?{{ 'now' | date('U') }}"></script>
     <script>
 

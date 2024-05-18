@@ -2,6 +2,9 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Equation;
+use App\Entity\Item;
+use App\Entity\Unit;
 use App\Utils\Admin\DefaultService;
 use App\Utils\Admin\LogService;
 use App\Utils\Admin\NotificationService;
@@ -98,4 +101,47 @@ class DefaultController extends AbstractController
         ));
     }
 
+    public function renderModalItemProject()
+    {
+
+        // items
+        $items = $this->defaultService->getDoctrine()->getRepository(Item::class)
+            ->ListarOrdenados();
+
+        $equations = $this->defaultService->getDoctrine()->getRepository(Equation::class)
+            ->ListarOrdenados();
+
+        $units = $this->defaultService->getDoctrine()->getRepository(Unit::class)
+            ->ListarOrdenados();
+
+        $yields_calculation = $this->defaultService->ListarYieldsCalculation();
+
+        return $this->render('admin/block/modal-item-project.html.twig', array(
+            'items' => $items,
+            'equations' => $equations,
+            'yields_calculation' => $yields_calculation,
+            'units' => $units
+        ));
+    }
+
+    public function renderModalInspector()
+    {
+        return $this->render('admin/block/modal-inspector.html.twig', array(
+
+        ));
+    }
+
+    public function renderModalEquation()
+    {
+        return $this->render('admin/block/modal-equation.html.twig', array(
+
+        ));
+    }
+
+    public function renderModalUnit()
+    {
+        return $this->render('admin/block/modal-unit.html.twig', array(
+
+        ));
+    }
 }

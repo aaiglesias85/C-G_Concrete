@@ -176,6 +176,7 @@ class EquationService extends Base
             $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
             $resultado['success'] = true;
+            $resultado['equation_id'] = $equation_id;
 
             return $resultado;
         }
@@ -216,6 +217,7 @@ class EquationService extends Base
         $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
         $resultado['success'] = true;
+        $resultado['equation_id'] = $entity->getEquationId();
 
         return $resultado;
     }

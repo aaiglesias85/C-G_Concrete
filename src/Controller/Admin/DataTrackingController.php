@@ -40,26 +40,10 @@ class DataTrackingController extends AbstractController
                 $inspectors = $this->projectService->getDoctrine()->getRepository(Inspector::class)
                     ->ListarOrdenados();
 
-                // items
-                $items = $this->projectService->getDoctrine()->getRepository(Item::class)
-                    ->ListarOrdenados();
-
-                $equations = $this->projectService->getDoctrine()->getRepository(Equation::class)
-                    ->ListarOrdenados();
-
-                $units = $this->projectService->getDoctrine()->getRepository(Unit::class)
-                    ->ListarOrdenados();
-
-                $yields_calculation = $this->projectService->ListarYieldsCalculation();
-
                 return $this->render('admin/data-tracking/index.html.twig', array(
                     'permiso' => $permiso[0],
                     'projects' => $projects,
-                    'inspectors' => $inspectors,
-                    'items' => $items,
-                    'equations' => $equations,
-                    'yields_calculation' => $yields_calculation,
-                    'units' => $units
+                    'inspectors' => $inspectors
                 ));
             }
         } else {

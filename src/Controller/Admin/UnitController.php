@@ -113,6 +113,7 @@ class UnitController extends AbstractController
 
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
+                $resultadoJson['unit_id'] = $resultado['unit_id'];
 
                 return $this->json($resultadoJson);
             } else {

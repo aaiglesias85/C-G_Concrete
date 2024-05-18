@@ -345,7 +345,7 @@ var MyApp = function () {
     // para permitir varios modals abiertos al mismo tiempo
     var initBugModals = function () {
         $('body').on('hidden.bs.modal', function () {
-            console.log('hidden.bs.modal', $('.modal.show').length);
+            // console.log('hidden.bs.modal', $('.modal.show').length);
             if ($('.modal.show').length > 0) {
                 $('body').addClass('modal-open');
             }

@@ -686,16 +686,22 @@
                                 Equation
                                 <span class="ic-small italic">(required)</span>
                             </label>
+
                             <div class="row">
-                                <div class="col-md-12">
-                                    <select class="form-control m-select2 event-change" id="equation"
-                                            name="equation">
+                                <div class="col-md-10">
+                                    <select class="form-control m-select2 event-change" id="equation" name="equation">
                                         <option value="">Select</option>
                                         {% for item in equations %}
-                                            <option value="{{ item.equationId }}" data-equation="{{ item.equation }}"> {{ item.description }} {{ item.equation }}
+                                            <option value="{{ item.equationId }}"> {{ item.description }} {{ item.equation }}
                                             </option>
                                         {% endfor %}
                                     </select>
+                                </div>
+                                <div class="col-md-2" style="padding-top: 3px; padding-left: 0px;">
+                                    <a href="javascript:;" title="Add equation" id="btn-add-equation"
+                                       class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                                        <i class="la la-plus"></i>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -705,13 +711,24 @@
                                 Unit
                                 <span class="ic-small italic">(required)</span>
                             </label>
-                            <select class="form-control m-select2 event-change" id="unit" name="unit">
-                                <option value="">Select</option>
-                                {% for item in units %}
-                                    <option value="{{ item.unitId }}">{{ item.description }}
-                                    </option>
-                                {% endfor %}
-                            </select>
+
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <select class="form-control m-select2 event-change" id="unit" name="unit">
+                                        <option value="">Select</option>
+                                        {% for item in units %}
+                                            <option value="{{ item.unitId }}">{{ item.description }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-2" style="padding-top: 3px; padding-left: 0px;">
+                                    <a href="javascript:;" title="Add unit" id="btn-add-unit"
+                                       class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                                        <i class="la la-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="form-group m-form__group">
@@ -863,6 +880,10 @@
         </div>
     </div>
 
+    <!-- components -->
+    {{ render(controller('App\\Controller\\Admin\\DefaultController::renderModalEquation')) }}
+    {{ render(controller('App\\Controller\\Admin\\DefaultController::renderModalUnit')) }}
+
 {% endblock %}
 
 {% block javascriptsspecific %}
@@ -873,6 +894,14 @@
     -->
     <!-- <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/23.2.5/js/dx.web.js"></script> -->
     <!-- <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/23.2.5/js/dx.viz.js"></script> -->
+
+    <!-- init components -->
+    <script>
+        jQuery(document).ready(function () {
+            ModalUnit.init();
+            ModalEquation.init();
+        });
+    </script>
 
     <script src="{{ asset('bundles/ican/js/pages/projects.js') }}?{{ 'now' | date('U') }}"></script>
     <script>

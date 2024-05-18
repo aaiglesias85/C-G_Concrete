@@ -168,6 +168,7 @@ class UnitService extends Base
             $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
             $resultado['success'] = true;
+            $resultado['unit_id'] = $unit_id;
 
             return $resultado;
         }
@@ -207,6 +208,7 @@ class UnitService extends Base
         $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
         $resultado['success'] = true;
+        $resultado['unit_id'] = $entity->getUnitId();
 
         return $resultado;
     }

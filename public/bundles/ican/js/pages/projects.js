@@ -1774,6 +1774,44 @@ var Projects = function () {
         $("#proyect-name-note").html($('#name').val());
     };
 
+    // unit
+    var initAccionesUnit = function () {
+        $(document).off('click', "#btn-add-unit");
+        $(document).on('click', "#btn-add-unit", function (e) {
+            ModalUnit.mostrarModal();
+        });
+
+        $('#modal-unit').on('hidden.bs.modal', function () {
+            var unit = ModalUnit.getUnit();
+            if(unit != null){
+                $('#unit').append(new Option(unit.description, unit.unit_id, false, false));
+                $('#unit').select2();
+
+                $('#unit').val(unit.unit_id);
+                $('#unit').trigger('change');
+            }
+        });
+    }
+
+    // equation
+    var initAccionesEquation = function () {
+        $(document).off('click', "#btn-add-equation");
+        $(document).on('click', "#btn-add-equation", function (e) {
+            ModalEquation.mostrarModal();
+        });
+
+        $('#modal-equation').on('hidden.bs.modal', function () {
+            var equation = ModalEquation.getEquation();
+            if(equation != null){
+                $('#equation').append(new Option(`${equation.description} ${equation.equation}`, equation.equation_id, false, false));
+                $('#equation').select2();
+
+                $('#equation').val(equation.equation_id);
+                $('#equation').trigger('change');
+            }
+        });
+    }
+
 
     return {
         //main function to initiate the module
@@ -1795,6 +1833,10 @@ var Projects = function () {
             initTableItems();
             initFormItem();
             initAccionesItems();
+            // units
+            initAccionesUnit();
+            // equations
+            initAccionesEquation();
 
             // notes
             initTableNotes();

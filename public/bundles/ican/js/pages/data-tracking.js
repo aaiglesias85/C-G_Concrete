@@ -672,10 +672,6 @@ var DataTracking = function () {
 
         $('.m-select2').select2();
 
-        $('#inspector-phone').inputmask("mask", {
-            "mask": "(999)999-9999"
-        });
-
         $("[data-switch=true]").bootstrapSwitch();
 
         // change
@@ -895,382 +891,50 @@ var DataTracking = function () {
     }
 
     // inspector
-    var initFormInspector = function () {
-        //Validacion
-        $("#inspector-form").validate({
-            rules: {
-                name: {
-                    required: true
-                },
-                email: {
-                    email: true
-                }
-            },
-            showErrors: function (errorMap, errorList) {
-                // Clean up any tooltips for valid elements
-                $.each(this.validElements(), function (index, element) {
-                    var $element = $(element);
-
-                    $element.data("title", "") // Clear the title - there is no error associated anymore
-                        .removeClass("has-error")
-                        .tooltip("dispose");
-
-                    $element
-                        .closest('.form-group')
-                        .removeClass('has-error').addClass('success');
-                });
-
-                // Create new tooltips for invalid elements
-                $.each(errorList, function (index, error) {
-                    var $element = $(error.element);
-
-                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
-                        .data("title", error.message)
-                        .addClass("has-error")
-                        .tooltip({
-                            placement: 'bottom'
-                        }); // Create a new tooltip based on the error messsage we just set in the title
-
-                    $element.closest('.form-group')
-                        .removeClass('has-success').addClass('has-error');
-
-                });
-            }
-        });
-
-    };
     var initAccionesInspector = function () {
         $(document).off('click', "#btn-add-inspector");
         $(document).on('click', "#btn-add-inspector", function (e) {
-
-            resetFormInspector();
-
-            $('#modal-inspector').modal('show');
+            ModalInspector.mostrarModal();
         });
 
-        $(document).off('click', "#btn-salvar-inspector");
-        $(document).on('click', "#btn-salvar-inspector", function (e) {
-            btnClickSalvarFormInspector();
-        });
+        $('#modal-inspector').on('hidden.bs.modal', function () {
+            var inspector = ModalInspector.getInspector();
+            if(inspector != null){
+                $('#inspector').append(new Option(inspector.name, inspector.inspector_id, false, false));
+                $('#inspector').select2();
 
-        function btnClickSalvarFormInspector() {
-
-            if ($('#inspector-form').valid()) {
-
-                var name = $('#inspector-name').val();
-                var email = $('#inspector-email').val();
-                var phone = $('#inspector-phone').val();
-
-                MyApp.block('#modal-inspector .modal-content');
-
-                $.ajax({
-                    type: "POST",
-                    url: "inspector/salvarInspector",
-                    dataType: "json",
-                    data: {
-                        'inspector_id': '',
-                        'name': name,
-                        'email': email,
-                        'phone': phone,
-                        'status': 1
-                    },
-                    success: function (response) {
-                        mApp.unblock('#modal-inspector .modal-content');
-                        if (response.success) {
-
-                            toastr.success(response.message, "Success !!!");
-
-                            resetFormInspector();
-
-                            $('#modal-inspector').modal('hide');
-
-                            //add inspector to select
-                            $('#inspector').append(new Option(name, response.inspector_id, false, false));
-                            $('#inspector').select2();
-
-                            $('#inspector').val(response.inspector_id);
-                            $('#inspector').trigger('change');
-
-                        } else {
-                            toastr.error(response.error, "Error !!!");
-                        }
-                    },
-                    failure: function (response) {
-                        mApp.unblock('#modal-inspector .modal-content');
-
-                        toastr.error(response.error, "Error !!!");
-                    }
-                });
+                $('#inspector').val(inspector.inspector_id);
+                $('#inspector').trigger('change');
             }
-        };
-
-        function resetFormInspector() {
-            $('#inspector-form input').each(function (e) {
-                $element = $(this);
-                $element.val('');
-
-                $element.data("title", "").removeClass("has-error").tooltip("dispose");
-                $element.closest('.form-group').removeClass('has-error').addClass('success');
-            });
-        }
+        });
     }
 
-    var initFormItem = function () {
-        $("#item-form").validate({
-            rules: {
-                quantity: {
-                    required: true
-                },
-                item: {
-                    required: true
-                },
-                price: {
-                    required: true
-                },
-            },
-            showErrors: function (errorMap, errorList) {
-                // Clean up any tooltips for valid elements
-                $.each(this.validElements(), function (index, element) {
-                    var $element = $(element);
-
-                    $element.data("title", "") // Clear the title - there is no error associated anymore
-                        .removeClass("has-error")
-                        .tooltip("dispose");
-
-                    $element
-                        .closest('.form-group')
-                        .removeClass('has-error').addClass('success');
-                });
-
-                // Create new tooltips for invalid elements
-                $.each(errorList, function (index, error) {
-                    var $element = $(error.element);
-
-                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
-                        .data("title", error.message)
-                        .addClass("has-error")
-                        .tooltip({
-                            placement: 'bottom'
-                        }); // Create a new tooltip based on the error messsage we just set in the title
-
-                    $element.closest('.form-group')
-                        .removeClass('has-success').addClass('has-error');
-
-                });
-            },
-        });
-    };
+    // Items
     var initAccionesItems = function () {
 
         $(document).off('click', "#btn-add-item");
         $(document).on('click', "#btn-add-item", function (e) {
-            // reset
-            resetFormItem();
 
-            $('#modal-item').modal({
-                'show': true
-            });
-        });
+            // add datos de proyecto
+            var project = $("#project option:selected").text().split('-');
 
-        $(document).off('click', "#btn-salvar-item");
-        $(document).on('click', "#btn-salvar-item", function (e) {
-            e.preventDefault();
-
-            var item_type = $('#item-type').prop('checked');
-
-            var item_id = $('#item').val();
-            var item = item_type ? $("#item option:selected").text() : $('#item-name').val();
-            if (item_type) {
-                $('#item-name').val(item);
-            }
-
-            if ($('#item-form').valid() && isValidItem() && isValidYield() && isValidUnit()) {
-
-                var unit_id = $('#unit').val();
-                var price = $('#item-price').val();
-                var quantity = $('#item-quantity').val();
-                var yield_calculation = $('#yield-calculation').val();
-                var equation_id = $('#equation').val();
-
-                MyApp.block('#modal-item .modal-content');
-
-                $.ajax({
-                    type: "POST",
-                    url: "project/agregarItem",
-                    dataType: "json",
-                    data: {
-                        project_item_id: '',
-                        project_id: $('#project').val(),
-                        item_id: item_id,
-                        item: item,
-                        unit_id: unit_id,
-                        price: price,
-                        quantity: quantity,
-                        yield_calculation: yield_calculation,
-                        equation_id: equation_id
-                    },
-                    success: function (response) {
-                        mApp.unblock('#modal-item .modal-content');
-                        if (response.success) {
-
-                            toastr.success(response.message, "Success");
-
-                            resetFormItem();
-
-                            $('#modal-item').modal('hide');
-
-                            //add items to select
-                            items.push(response.item);
-                            $('.select-item-data-tracking').append(new Option(item, response.item.project_item_id, false, false));
-                            $('.select-item-data-tracking').select2();
-
-                            $('#item-data-tracking').val(response.item.item_id);
-                            $('#item-data-tracking').trigger('change');
-
-                        } else {
-                            toastr.error(response.error, "");
-                        }
-                    },
-                    failure: function (response) {
-                        mApp.unblock('#modal-item .modal-content');
-
-                        toastr.error(response.error, "");
-                    }
-                });
-
-            } else {
-                if (!isValidItem()) {
-                    var $element = $('#select-item .select2');
-                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
-                        .data("title", "This field is required")
-                        .addClass("has-error")
-                        .tooltip({
-                            placement: 'bottom'
-                        }); // Create a new tooltip based on the error messsage we just set in the title
-
-                    $element.closest('.form-group')
-                        .removeClass('has-success').addClass('has-error');
-                }
-                if (!isValidYield()) {
-                    var $element = $('#select-equation .select2');
-                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
-                        .data("title", "This field is required")
-                        .addClass("has-error")
-                        .tooltip({
-                            placement: 'bottom'
-                        }); // Create a new tooltip based on the error messsage we just set in the title
-
-                    $element.closest('.form-group')
-                        .removeClass('has-success').addClass('has-error');
-                }
-                if (!isValidUnit()) {
-                    var $element = $('#select-unit .select2');
-                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
-                        .data("title", "This field is required")
-                        .addClass("has-error")
-                        .tooltip({
-                            placement: 'bottom'
-                        }); // Create a new tooltip based on the error messsage we just set in the title
-
-                    $element.closest('.form-group')
-                        .removeClass('has-success').addClass('has-error');
-                }
-            }
+            ModalItemProject.mostrarModal(project[0], project[1]);
 
         });
 
-        function isValidItem() {
-            var valid = true;
+        $('#modal-item').on('hidden.bs.modal', function () {
+            var item = ModalItemProject.getItem();
+            if(item != null){
+                //add items to select
+                items.push(item);
+                $('.select-item-data-tracking').append(new Option(item.item, item.project_item_id, false, false));
+                $('.select-item-data-tracking').select2();
 
-            var item_type = $('#item-type').prop('checked');
-            var item_id = $('#item').val();
-
-            if (item_type && item_id == '') {
-                valid = false;
+                $('#item-data-tracking').val(item.project_item_id);
+                $('#item-data-tracking').trigger('change');
             }
-
-
-            return valid;
-        }
-
-        function isValidUnit() {
-            var valid = true;
-
-            var item_type = $('#item-type').prop('checked');
-            var unit_id = $('#unit').val();
-
-            if (!item_type && unit_id == '') {
-                valid = false;
-            }
-
-
-            return valid;
-        }
-
-        function isValidYield() {
-            var valid = true;
-
-            var yield_calculation = $('#yield-calculation').val();
-            var equation_id = $('#equation').val();
-            if (yield_calculation == 'equation' && equation_id == '') {
-                valid = false;
-            }
-
-
-            return valid;
-        }
-
-        function DevolverYieldCalculationDeItem() {
-
-            var yield_calculation = $('#yield-calculation').val();
-
-            var yield_calculation_name = yield_calculation != "" ? $('#yield-calculation option:selected').text() : "";
-
-            // para la ecuacion devuelvo la ecuacion asociada
-            if (yield_calculation == 'equation') {
-                var equation_id = $('#equation').val();
-                yield_calculation_name = $('#equation option[value="' + equation_id + '"]').data("equation");
-            }
-
-            return yield_calculation_name;
-        }
-    };
-    var resetFormItem = function () {
-        $('#item-form input').each(function (e) {
-            $element = $(this);
-            $element.val('');
-
-            $element.data("title", "").removeClass("has-error").tooltip("dispose");
-            $element.closest('.form-group').removeClass('has-error').addClass('success');
         });
 
-        $('#item-type').prop('checked', true);
-        $("#item-type").bootstrapSwitch("state", true, true);
-
-        $('#item').val('');
-        $('#item').trigger('change');
-
-        $('#yield-calculation').val('');
-        $('#yield-calculation').trigger('change');
-
-        $('#equation').val('');
-        $('#equation').trigger('change');
-        $('#select-equation').removeClass('m--hide').addClass('m--hide');
-
-        $('#div-item').removeClass('m--hide');
-        $('#item-name').removeClass('m--hide').addClass('m--hide');
-
-        $('#unit').val('');
-        $('#unit').trigger('change');
-        $('#select-unit').removeClass('m--hide').addClass('m--hide');
-
-        var $element = $('.select2');
-        $element.removeClass('has-error').tooltip("dispose");
-
-        // add datos de proyecto
-        var project = $("#project option:selected").text().split('-');
-        $("#proyect-number-item").html(project[0]);
-        $("#proyect-name-item").html(project[1]);
     };
 
     return {
@@ -1288,11 +952,9 @@ var DataTracking = function () {
             initAccionFiltrar();
 
             // inspectors
-            initFormInspector();
             initAccionesInspector();
 
             // items
-            initFormItem();
             initAccionesItems();
         }
 
