@@ -4,219 +4,153 @@ var DataTracking = function () {
     var rowDelete = null;
     var items = [];
 
-    //Inicializar table
-    var initTable = function () {
-        MyApp.block('#data-tracking-table-editable');
+    // init Calendario
+    var calendar = null;
+    var data_tracking = [];
 
-        var table = $('#data-tracking-table-editable');
+    var initCalendario = function () {
+        // default date
+        var todayDate = moment().startOf('day');
+        var TODAY = todayDate.format('YYYY-MM-DD');
 
-        var aoColumns = [];
+        // poner fecha del filtro inicial si lo selecciono, esto para que el calendario empiece ahi
+        var fechaInicial = $('#fechaInicial').val();
+        if (fechaInicial != "") {
+            fechaInicial = MyApp.convertirStringAFecha(fechaInicial);
+            TODAY = fechaInicial.format('Y-m-d');
+        }
 
-        if (permiso.eliminar) {
-            aoColumns.push({
-                field: "id",
-                title: "#",
-                sortable: false, // disable sort for this column
-                width: 40,
-                textAlign: 'center',
-                selector: {class: 'm-checkbox--solid m-checkbox--brand'}
+        // init calendar
+        var calendarEl = document.getElementById('kt_calendar');
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            locale: 'en-US',
+            plugins: ['interaction', 'dayGrid', 'timeGrid', 'list'],
+            isRTL: mUtil.isRTL(),
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+
+            height: 800,
+            contentHeight: 780,
+            aspectRatio: 3,  // see: https://fullcalendar.io/docs/aspectRatio
+
+            nowIndicator: true,
+            now: TODAY + 'T09:25:00', // just for demo
+
+            views: {
+                dayGridMonth: {buttonText: 'Month'},
+                timeGridWeek: {buttonText: 'Week'},
+                timeGridDay: {buttonText: 'Day'}
+            },
+
+            defaultView: 'dayGridMonth',
+            defaultDate: TODAY,
+
+            editable: true,
+            eventLimit: true, // allow "more" link when too many events
+            navLinks: true,
+            events: data_tracking,
+            eventRender: function (info) {
+                var element = $(info.el);
+                var event = info.event;
+                console.log(event);
+
+                if (info.event.extendedProps) {
+
+                    //Para editar
+                    element.attr('data-id', event.extendedProps.data_tracking_id);
+
+                    var descripcion = (event.extendedProps.notes.length > 100) ? event.extendedProps.notes.substring(0, 100) + "..." : event.extendedProps.notes;
+
+                    var content = '';
+                    if (element.hasClass('fc-day-grid-event')) {
+
+                        element.data('title', event.title);
+
+                        content = `
+                                    <b>${event.extendedProps.date}</b></br>
+                                    ${descripcion}</br>
+                                    <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
+                                    <b>Lost Concrete: ${event.extendedProps.lostConcrete}</b>
+                            `;
+
+                        element.data('content', content);
+                        element.data('html', true);
+
+                        element.data('placement', 'top');
+                        mApp.initPopover(element);
+
+                    } else if (element.hasClass('fc-time-grid-event')) {
+
+
+                        element.data('title', event.title);
+
+                        content = `
+                                    <b>${event.extendedProps.date}</b></br>
+                                    ${descripcion}</br>
+                                    <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
+                                    <b>Lost Concrete: ${event.extendedProps.lostConcrete}</b>
+                            `;
+
+                        element.data('content', content);
+                        element.data('html', true);
+
+                        element.data('placement', 'top');
+                        mApp.initPopover(element);
+
+                    } else if (element.find('.fc-list-item-title').lenght !== 0) {
+
+                        element.data('title', event.title);
+
+                        content = `
+                                    <b>${event.extendedProps.date}</b></br>
+                                    ${descripcion}</br>
+                                    <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
+                                    <b>Lost Concrete: ${event.extendedProps.lostConcrete}</b>
+                            `;
+
+                        element.data('content', content);
+                        element.data('html', true);
+
+                        element.data('placement', 'top');
+                        mApp.initPopover(element);
+                    }
+                }
+            }
+        });
+        // render calendar
+        calendar.render();
+
+        // event date click
+        if (permiso.agregar == 1) {
+            calendar.on('dateClick', function (info) {
+                //console.log(info);
+                //console.log('clicked on ' + info.dateStr);
+
+                resetForms();
+
+                var fecha = info.date;
+                fecha = fecha.format('m/d/Y');
+                $('#data-tracking-date').val(fecha);
+
+                // open modal
+                $('#modal-data-tracking').modal('show');
+
             });
         }
 
-        aoColumns.push(
-            {
-                field: "acciones",
-                width: 80,
-                title: "Actions",
-                sortable: false,
-                overflow: 'visible',
-                textAlign: 'center'
-            },
-            {
-                field: "date",
-                title: "Date",
-                width: 100,
-                textAlign: 'center'
-            },
-            {
-                field: "stationNumber",
-                title: "Station Number(s)",
-                width: 140,
-            },
-            {
-                field: "measuredBy",
-                title: "Measured By",
-                width: 180,
-            },
-            {
-                field: "totalConcUsed",
-                title: "Total Conc Used",
-                width: 120,
-                textAlign: 'center',
-                template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.totalConcUsed, 2, '.', ',')}</span>`;
-                }
-            },
-            {
-                field: "lostConcrete",
-                title: "Lost Concrete",
-                width: 100,
-                textAlign: 'center',
-                template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.lostConcrete, 2, '.', ',')}</span>`;
-                }
-            },
-            {
-                field: "totalLabor",
-                title: "Total Labor",
-                width: 100,
-                textAlign: 'center',
-                template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.totalLabor, 2, '.', ',')}</span>`;
-                }
-            },
-            {
-                field: "totalStamps",
-                title: "Total Stamps",
-                width: 100,
-                textAlign: 'center',
-                template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.totalStamps, 2, '.', ',')}</span>`;
-                }
-            },
-            {
-                field: "concVendor",
-                title: "Conc Vendor",
-            },
-            {
-                field: "inspector",
-                title: "Inspector",
-                width: 150,
-            },
-            {
-                field: "inspectorNumber",
-                title: "Inspector Number",
-                width: 140,
-            },
-            {
-                field: "crewLead",
-                title: "Crew Lead",
-            },
-            {
-                field: "item",
-                title: "Item",
-            },
-            {
-                field: "unit",
-                title: "Unit",
-                width: 100,
-            },
-            {
-                field: "quantity",
-                title: "Quatity",
-                width: 100,
-                textAlign: 'center',
-            },
-            {
-                field: "yieldCalculationName",
-                title: "Yield Calculation",
-                width: 140,
-            },
-            {
-                field: "price",
-                title: "Price",
-                width: 100,
-                textAlign: 'center',
-                template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.price, 2, '.', ',')}</span>`;
-                }
-            },
-            {
-                field: "total",
-                title: "Total",
-                width: 100,
-                textAlign: 'center',
-                template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.total, 2, '.', ',')}</span>`;
-                }
-            },
-            {
-                field: "notes",
-                title: "Notes",
-            },
-            {
-                field: "otherMaterials",
-                title: "Other Materials"
-            }
-        );
-        oTable = table.mDatatable({
-            // datasource definition
-            data: {
-                type: 'remote',
-                source: {
-                    read: {
-                        url: 'data-tracking/listarDataTracking',
-                    }
-                },
-                pageSize: 10,
-                saveState: {
-                    cookie: false,
-                    webstorage: false
-                },
-                serverPaging: true,
-                serverFiltering: true,
-                serverSorting: true
-            },
-            // layout definition
-            layout: {
-                theme: 'default', // datatable theme
-                class: '', // custom wrapper class
-                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
-                //height: '550', // datatable's body's fixed height
-                footer: false // display/hide footer
-            },
-            // column sorting
-            sortable: true,
-            pagination: true,
-            // columns definition
-            columns: aoColumns,
-            // toolbar
-            toolbar: {
-                // toolbar items
-                items: {
-                    // pagination
-                    pagination: {
-                        // page size select
-                        pageSizeSelect: [10, 25, 30, 50, -1] // display dropdown to select pagination size. -1 is used for "ALl" option
-                    }
-                }
-            },
-        });
-
-        //Events
-        oTable
-            .on('m-datatable--on-ajax-done', function () {
-                mApp.unblock('#data-tracking-table-editable');
-            })
-            .on('m-datatable--on-ajax-fail', function (e, jqXHR) {
-                mApp.unblock('#data-tracking-table-editable');
-            })
-            .on('m-datatable--on-goto-page', function (e, args) {
-                MyApp.block('#data-tracking-table-editable');
-            })
-            .on('m-datatable--on-reloaded', function (e) {
-                MyApp.block('#data-tracking-table-editable');
-            })
-            .on('m-datatable--on-sort', function (e, args) {
-                MyApp.block('#data-tracking-table-editable');
-            })
-            .on('m-datatable--on-check', function (e, args) {
-                //eventsWriter('Checkbox active: ' + args.toString());
-            })
-            .on('m-datatable--on-uncheck', function (e, args) {
-                //eventsWriter('Checkbox inactive: ' + args.toString());
-            });
-    };
+    }
+    var actualizarCalendario = function () {
+        //reset
+        if (calendar != null) {
+            calendar.destroy();
+            calendar = null;
+        }
+        // init
+        initCalendario();
+    }
 
     //Filtrar
     var initAccionFiltrar = function () {
@@ -228,24 +162,43 @@ var DataTracking = function () {
 
     };
     var btnClickFiltrar = function () {
-        var query = oTable.getDataSourceQuery();
-
-        query.generalSearch = '';
 
         var project_id = $('#project').val();
-        query.project_id = project_id;
+        var generalSearch = $('#lista-data-tracking .m_form_search').val();
+        var fechaInicial = $('#fechaInicial').val();
+        var fechaFin = $('#fechaFin').val();
 
-        var item_id = $('#filtro-item').val();
-        query.item_id = item_id;
+        MyApp.block('#lista-data-tracking');
 
-        var fechaInicial = $('#filtro-fecha-inicial-item').val();
-        query.fechaInicial = fechaInicial;
+        $.ajax({
+            type: "POST",
+            url: "data-tracking/listarDataTracking",
+            dataType: "json",
+            data: {
+                'project_id': project_id,
+                'search': generalSearch,
+                'fechaInicial': fechaInicial,
+                'fechaFin': fechaFin
+            },
+            success: function (response) {
+                mApp.unblock('#lista-data-tracking');
+                if (response.success) {
 
-        var fechaFin = $('#filtro-fecha-fin-item').val();
-        query.fechaFin = fechaFin;
+                    data_tracking = response.data_tracking;
+                    // update calendar
+                    actualizarCalendario();
 
-        oTable.setDataSourceQuery(query);
-        oTable.load();
+                } else {
+                    toastr.error(response.error, "Error !!!");
+                }
+            },
+            failure: function (response) {
+                mApp.unblock('#lista-data-tracking');
+
+                toastr.error(response.error, "Error !!!");
+            }
+        });
+
     }
 
     //Reset forms
@@ -266,9 +219,6 @@ var DataTracking = function () {
             $element.closest('.form-group').removeClass('has-error').addClass('success');
         });
 
-        $('#item-data-tracking').val($('#filtro-item').val());
-        $('#item-data-tracking').trigger('change');
-
         var fecha_actual = new Date();
         $('#data-tracking-date').val(fecha_actual.format('m/d/Y'));
 
@@ -278,7 +228,14 @@ var DataTracking = function () {
         var $element = $('.select2');
         $element.removeClass('has-error').tooltip("dispose");
 
-        $('#div-yield-calculation').removeClass('m--hide').addClass('m--hide');
+        // items
+        items_data_tracking = [];
+        actualizarTableListaItems();
+
+        //Mostrar el primer tab
+        resetWizard();
+
+        $('#btn-eliminar-data-tracking').removeClass('m--hide').addClass('m--hide');
 
     };
 
@@ -290,12 +247,9 @@ var DataTracking = function () {
                 date: {
                     required: true
                 },
-                quantity: {
-                    required: true,
-                },
-                price: {
+                total_conc_used: {
                     required: true
-                },
+                }
             },
             showErrors: function (errorMap, errorList) {
                 // Clean up any tooltips for valid elements
@@ -333,8 +287,8 @@ var DataTracking = function () {
 
     //Nuevo
     var initAccionNuevo = function () {
-        $(document).off('click', "#btn-nuevo-project");
-        $(document).on('click', "#btn-nuevo-project", function (e) {
+        $(document).off('click', "#btn-nuevo-data-tracking");
+        $(document).on('click', "#btn-nuevo-data-tracking", function (e) {
             btnClickNuevo();
         });
 
@@ -376,14 +330,10 @@ var DataTracking = function () {
 
         function btnClickSalvarForm() {
 
-            var project_item_id = $('#item-data-tracking').val();
+            var data_tracking_id = $('#data_tracking_id').val();
             var project_id = $('#project').val();
-            if ($('#data-tracking-form').valid() && project_item_id != '' && project_id != '') {
+            if ($('#data-tracking-form').valid() && ( data_tracking_id != '' || (data_tracking_id == '' && project_id != ''))) {
 
-                var data_tracking_id = $('#data_tracking_id').val();
-
-                var quantity = $('#data-tracking-quantity').val();
-                var price = $('#data-tracking-price').val();
                 var date = $('#data-tracking-date').val();
                 var inspector_id = $('#inspector').val();
                 var station_number = $('#station_number').val();
@@ -404,9 +354,7 @@ var DataTracking = function () {
                     dataType: "json",
                     data: {
                         'data_tracking_id': data_tracking_id,
-                        'project_item_id': project_item_id,
-                        'quantity': quantity,
-                        'price': price,
+                        'project_id': project_id,
                         'date': date,
                         'inspector_id': inspector_id,
                         'station_number': station_number,
@@ -417,7 +365,8 @@ var DataTracking = function () {
                         'other_materials': other_materials,
                         'total_conc_used': total_conc_used,
                         'total_labor': total_labor,
-                        'total_stamps': total_stamps
+                        'total_stamps': total_stamps,
+                        'items': JSON.stringify(items_data_tracking)
                     },
                     success: function (response) {
                         mApp.unblock('#modal-data-tracking .modal-content');
@@ -428,11 +377,7 @@ var DataTracking = function () {
                             // reset
                             resetForms();
 
-                            // cerrar modal solo si estoy editando
-                            if (data_tracking_id != '') {
-                                $('#modal-data-tracking').modal('hide');
-                            }
-
+                            $('#modal-data-tracking').modal('hide');
 
                             //actualizar lista
                             btnClickFiltrar();
@@ -447,38 +392,33 @@ var DataTracking = function () {
                         toastr.error(response.error, "");
                     }
                 });
-            } else {
-                if (project_item_id == "") {
-                    var $element = $('#select-item-data-tracking .select2');
-                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
-                        .data("title", "This field is required")
-                        .addClass("has-error")
-                        .tooltip({
-                            placement: 'bottom'
-                        }); // Create a new tooltip based on the error messsage we just set in the title
-
-                    $element.closest('.form-group')
-                        .removeClass('has-success').addClass('has-error');
-                }
             }
         };
     }
 
     //Editar
     var initAccionEditar = function () {
-        $(document).off('click', "#data-tracking-table-editable a.edit");
-        $(document).on('click', "#data-tracking-table-editable a.edit", function (e) {
-            e.preventDefault();
-            resetForms();
 
-            $('#modal-data-tracking').modal({
-                'show': true
-            });
+        $(document).off('click', ".fc-event, .fc-list-item");
+        $(document).on('click', ".fc-event, .fc-list-item", function (e) {
 
             var data_tracking_id = $(this).data('id');
-            $('#data_tracking_id').val(data_tracking_id);
 
-            editRow(data_tracking_id);
+            if (data_tracking_id != '') {
+
+                //reset
+                resetForms();
+
+                // open modal
+                $('#modal-data-tracking').modal('show');
+
+                $('#btn-eliminar-data-tracking').removeClass('m--hide');
+
+                $('#data_tracking_id').val(data_tracking_id);
+
+                editRow(data_tracking_id);
+            }
+
         });
 
         function editRow(data_tracking_id) {
@@ -499,23 +439,6 @@ var DataTracking = function () {
 
                         $('#data-tracking-date').val(response.data_tracking.date);
 
-                        $('#item-data-tracking').off('change', changeItemDataTracking);
-                        $('#data-tracking-quantity').off('change', calcularTotalItem);
-                        $('#data-tracking-price').off('change', calcularTotalItem);
-
-                        $('#item-data-tracking').val(response.data_tracking.project_item_id);
-                        $('#item-data-tracking').trigger('change');
-
-                        $('#data-tracking-quantity').val(response.data_tracking.quantity);
-                        $('#data-tracking-price').val(response.data_tracking.price);
-
-                        mostrarYieldCalculation();
-                        calcularTotalItem();
-
-                        $('#item-data-tracking').on('change', changeItemDataTracking);
-                        $('#data-tracking-quantity').on('change', calcularTotalItem);
-                        $('#data-tracking-price').on('change', calcularTotalItem);
-
                         $('#inspector').val(response.data_tracking.inspector_id);
                         $('#inspector').trigger('change');
 
@@ -529,7 +452,13 @@ var DataTracking = function () {
                         $('#total_labor').val(response.data_tracking.total_labor);
                         $('#total_stamps').val(response.data_tracking.total_stamps);
 
-                        calcularLostConcrete();
+                        // items
+                        items_data_tracking = response.data_tracking.items;
+                        actualizarTableListaItems();
+
+                        // project items
+                        items = response.data_tracking.project_items;
+                        actualizarSelectProjectItems();
 
                     } else {
                         toastr.error(response.error, "");
@@ -543,22 +472,32 @@ var DataTracking = function () {
             });
 
         }
+
+        function actualizarSelectProjectItems(){
+            // reset
+            $('.select-item-data-tracking option').each(function (e) {
+                if ($(this).val() != "")
+                    $(this).remove();
+            });
+            $('.select-item-data-tracking').select2();
+
+            for (var i = 0; i < items.length; i++) {
+                $('.select-item-data-tracking').append(new Option(items[i].item, items[i].project_item_id, false, false));
+            }
+            $('.select-item-data-tracking').select2();
+        }
     };
     //Eliminar
     var initAccionEliminar = function () {
-        $(document).off('click', "#data-tracking-table-editable a.delete");
-        $(document).on('click', "#data-tracking-table-editable a.delete", function (e) {
-            e.preventDefault();
-
-            rowDelete = $(this).data('id');
-            $('#modal-eliminar').modal({
-                'show': true
-            });
-        });
 
         $(document).off('click', "#btn-eliminar-data-tracking");
         $(document).on('click', "#btn-eliminar-data-tracking", function (e) {
-            btnClickEliminar();
+            e.preventDefault();
+
+            rowDelete = $('#data_tracking_id').val();
+            $('#modal-eliminar').modal({
+                'show': true
+            });
         });
 
         $(document).off('click', "#btn-delete");
@@ -566,35 +505,10 @@ var DataTracking = function () {
             btnClickModalEliminar();
         });
 
-        $(document).off('click', "#btn-delete-selection");
-        $(document).on('click', "#btn-delete-selection", function (e) {
-            btnClickModalEliminarSeleccion();
-        });
-
-        function btnClickEliminar() {
-            var ids = '';
-            $('.m-datatable__cell--check .m-checkbox--brand > input[type="checkbox"]').each(function () {
-                if ($(this).prop('checked')) {
-                    var value = $(this).attr('value');
-                    if (value != undefined) {
-                        ids += value + ',';
-                    }
-                }
-            });
-
-            if (ids != '') {
-                $('#modal-eliminar-seleccion').modal({
-                    'show': true
-                });
-            } else {
-                toastr.error('Select items to delete', "");
-            }
-        };
-
         function btnClickModalEliminar() {
             var data_tracking_id = rowDelete;
 
-            MyApp.block('#data-tracking-table-editable');
+            MyApp.block('#modal-data-tracking .modal-content');
 
             $.ajax({
                 type: "POST",
@@ -604,11 +518,13 @@ var DataTracking = function () {
                     'data_tracking_id': data_tracking_id
                 },
                 success: function (response) {
-                    mApp.unblock('#data-tracking-table-editable');
+                    mApp.unblock('#modal-data-tracking .modal-content');
 
                     if (response.success) {
 
                         btnClickFiltrar();
+
+                        $('#modal-data-tracking').modal('hide');
 
                         toastr.success(response.message, "Success");
 
@@ -617,47 +533,7 @@ var DataTracking = function () {
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#data-tracking-table-editable');
-
-                    toastr.error(response.error, "");
-                }
-            });
-        };
-
-        function btnClickModalEliminarSeleccion() {
-            var ids = '';
-            $('.m-datatable__cell--check .m-checkbox--brand > input[type="checkbox"]').each(function () {
-                if ($(this).prop('checked')) {
-                    var value = $(this).attr('value');
-                    if (value != undefined) {
-                        ids += value + ',';
-                    }
-                }
-            });
-
-            MyApp.block('#data-tracking-table-editable');
-
-            $.ajax({
-                type: "POST",
-                url: "data-tracking/eliminarDataTrackings",
-                dataType: "json",
-                data: {
-                    'ids': ids
-                },
-                success: function (response) {
-                    mApp.unblock('#data-tracking-table-editable');
-                    if (response.success) {
-
-                        btnClickFiltrar();
-
-                        toastr.success(response.message, "Success !!!");
-
-                    } else {
-                        toastr.error(response.error, "");
-                    }
-                },
-                failure: function (response) {
-                    mApp.unblock('#data-tracking-table-editable');
+                    mApp.unblock('#modal-data-tracking .modal-content');
 
                     toastr.error(response.error, "");
                 }
@@ -676,10 +552,6 @@ var DataTracking = function () {
 
         // change
         $('#project').change(changeProject);
-        $('#item-data-tracking').change(changeItemDataTracking);
-        $('#data-tracking-quantity').change(calcularTotalItem);
-        $('#data-tracking-price').change(calcularTotalItem);
-        $('#total_conc_used').change(calcularLostConcrete);
 
         // change
         $('#item').change(changeItem);
@@ -761,7 +633,7 @@ var DataTracking = function () {
 
         if (project_id != '') {
 
-            MyApp.block('#form-group-item');
+            MyApp.block('#modal-data-tracking .modal-content');
 
             $.ajax({
                 type: "POST",
@@ -771,7 +643,7 @@ var DataTracking = function () {
                     'project_id': project_id
                 },
                 success: function (response) {
-                    mApp.unblock('#form-group-item');
+                    mApp.unblock('#modal-data-tracking .modal-content');
                     if (response.success) {
 
                         //Llenar select
@@ -788,94 +660,11 @@ var DataTracking = function () {
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#form-group-item');
+                    mApp.unblock('#modal-data-tracking .modal-content');
 
                     toastr.error(response.error, "");
                 }
             });
-        }
-    }
-
-    var changeItemDataTracking = function () {
-        var item_id = $('#item-data-tracking').val();
-
-        // reset
-        $('#data-tracking-quantity').val('');
-        $('#data-tracking-price').val('');
-        $('#data-tracking-total').val('');
-
-
-        if (item_id != '') {
-            var item = items.find(function (v) {
-                return v.project_item_id == item_id;
-            });
-            var price = item.price;
-            $('#data-tracking-price').val(price);
-
-            mostrarYieldCalculation();
-
-            calcularTotalItem();
-        }
-    }
-    var calcularTotalItem = function () {
-
-        var item_id = $('#item-data-tracking').val();
-        var item = items.find(function (v) {
-            return v.project_item_id == item_id;
-        });
-
-
-        var cantidad = $('#data-tracking-quantity').val();
-        var price = $('#data-tracking-price').val();
-        if (cantidad != '' && price != '') {
-
-            // aplicar el yield
-            if (item.yield_calculation == "equation") {
-                cantidad = MyApp.evaluateExpression(item.yield_calculation_name, cantidad);
-            }
-
-            var total = parseFloat(cantidad) * parseFloat(price);
-            $('#data-tracking-total').val(total);
-
-            // lost concret
-            calcularLostConcrete();
-        }
-    }
-
-    var calcularLostConcrete = function () {
-        var item_id = $('#item-data-tracking').val();
-        var item = items.find(function (v) {
-            return v.project_item_id == item_id;
-        });
-
-
-        var cantidad = $('#data-tracking-quantity').val();
-        // aplicar el yield
-        if (item.yield_calculation == "equation") {
-            cantidad = MyApp.evaluateExpression(item.yield_calculation_name, cantidad);
-        }
-
-        var total_conc_used = $('#total_conc_used').val();
-        if (total_conc_used > 0) {
-            $('#lost_concrete').val(parseFloat(total_conc_used - cantidad));
-        }
-
-    }
-
-    var mostrarYieldCalculation = function () {
-
-        //reset
-        $('#item-yield-calculation').val('');
-        $('#div-yield-calculation').removeClass('m--hide').addClass('m--hide');
-
-        var item_id = $('#item-data-tracking').val();
-        var item = items.find(function (v) {
-            return v.project_item_id == item_id;
-        });
-
-        if (item.yield_calculation_name != '') {
-            $('#div-yield-calculation').removeClass('m--hide');
-            $('#item-yield-calculation').val(item.yield_calculation_name);
         }
     }
 
@@ -910,7 +699,7 @@ var DataTracking = function () {
     }
 
     // Items
-    var initAccionesItems = function () {
+    var initAccionesModalItems = function () {
 
         $(document).off('click', "#btn-add-item");
         $(document).on('click', "#btn-add-item", function (e) {
@@ -937,13 +726,405 @@ var DataTracking = function () {
 
     };
 
+
+    //Wizard
+    var activeTab = 1;
+    var totalTabs = 2;
+    var initWizard = function () {
+        $(document).off('click', "#modal-data-tracking .wizard-tab");
+        $(document).on('click', "#modal-data-tracking .wizard-tab", function (e) {
+            e.preventDefault();
+            var item = $(this).data('item');
+
+            // validar
+            if (item > activeTab && !validWizard()) {
+                mostrarTab();
+                return;
+            }
+
+            activeTab = parseInt(item);
+
+            //bug visual de la tabla que muestra las cols corridas
+            switch (activeTab) {
+                case 2:
+                    actualizarTableListaItems()
+                    break;
+            }
+
+        });
+    };
+    var mostrarTab = function () {
+        setTimeout(function () {
+            switch (activeTab) {
+                case 1:
+                    $('#tab-general').tab('show');
+                    break;
+                case 2:
+                    $('#tab-items').tab('show');
+                    actualizarTableListaItems();
+                    break;
+            }
+        }, 0);
+    }
+    var resetWizard = function () {
+        activeTab = 1;
+        totalTabs = 2;
+        mostrarTab();
+    }
+    var validWizard = function () {
+        var result = true;
+        if (activeTab == 1) {
+
+            if (!$('#data-tracking-form').valid()) {
+                result = false;
+            }
+
+        }
+
+        return result;
+    }
+
+    // items
+    var oTableItems;
+    var items_data_tracking = [];
+    var nEditingRowItem = null;
+    var rowDeleteItem = null;
+    var initTableItems = function () {
+        MyApp.block('#items-table-editable');
+
+        var table = $('#items-table-editable');
+
+        var aoColumns = [
+            {
+                field: "item",
+                title: "Item",
+            },
+            {
+                field: "unit",
+                title: "Unit",
+                width: 100,
+            },
+            {
+                field: "quantity",
+                title: "Quantity",
+                width: 120,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.quantity, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "posicion",
+                width: 120,
+                title: "Actions",
+                sortable: false,
+                overflow: 'visible',
+                textAlign: 'center',
+                template: function (row) {
+                    return `
+                    <a href="javascript:;" data-posicion="${row.posicion}" class="edit m-portlet__nav-link btn m-btn m-btn--hover-success m-btn--icon m-btn--icon-only m-btn--pill" title="Edit item"><i class="la la-edit"></i></a>
+                    <a href="javascript:;" data-posicion="${row.posicion}" class="delete m-portlet__nav-link btn m-btn m-btn--hover-danger m-btn--icon m-btn--icon-only m-btn--pill" title="Delete item"><i class="la la-trash"></i></a>
+                    `;
+                }
+            }
+        ];
+        oTableItems = table.mDatatable({
+            // datasource definition
+            data: {
+                type: 'local',
+                source: items_data_tracking,
+                pageSize: 10,
+                saveState: {
+                    cookie: false,
+                    webstorage: false
+                }
+            },
+            // layout definition
+            layout: {
+                theme: 'default', // datatable theme
+                class: '', // custom wrapper class
+                scroll: false, // enable/disable datatable scroll both horizontal and vertical when needed.
+                //height: 550, // datatable's body's fixed height
+                footer: false // display/hide footer
+            },
+            // column sorting
+            sortable: true,
+            pagination: true,
+            // columns definition
+            columns: aoColumns,
+            // toolbar
+            toolbar: {
+                // toolbar items
+                items: {
+                    // pagination
+                    pagination: {
+                        // page size select
+                        pageSizeSelect: [10, 25, 30, 50, -1] // display dropdown to select pagination size. -1 is used for "ALl" option
+                    }
+                }
+            },
+            search: {
+                input: $('#lista-items .m_form_search'),
+            }
+        });
+
+        //Events
+        oTableItems
+            .on('m-datatable--on-ajax-done', function () {
+                mApp.unblock('#items-table-editable');
+            })
+            .on('m-datatable--on-ajax-fail', function (e, jqXHR) {
+                mApp.unblock('#items-table-editable');
+            })
+            .on('m-datatable--on-goto-page', function (e, args) {
+                MyApp.block('#items-table-editable');
+            })
+            .on('m-datatable--on-reloaded', function (e) {
+                MyApp.block('#items-table-editable');
+            })
+            .on('m-datatable--on-sort', function (e, args) {
+                MyApp.block('#items-table-editable');
+            })
+            .on('m-datatable--on-check', function (e, args) {
+                //eventsWriter('Checkbox active: ' + args.toString());
+            })
+            .on('m-datatable--on-uncheck', function (e, args) {
+                //eventsWriter('Checkbox inactive: ' + args.toString());
+            });
+    };
+    var actualizarTableListaItems = function () {
+        if (oTableItems) {
+            oTableItems.destroy();
+        }
+
+        initTableItems();
+    }
+    var initFormItem = function () {
+        $("#data-tracking-item-form").validate({
+            rules: {
+                quantity: {
+                    required: true
+                },
+            },
+            showErrors: function (errorMap, errorList) {
+                // Clean up any tooltips for valid elements
+                $.each(this.validElements(), function (index, element) {
+                    var $element = $(element);
+
+                    $element.data("title", "") // Clear the title - there is no error associated anymore
+                        .removeClass("has-error")
+                        .tooltip("dispose");
+
+                    $element
+                        .closest('.form-group')
+                        .removeClass('has-error').addClass('success');
+                });
+
+                // Create new tooltips for invalid elements
+                $.each(errorList, function (index, error) {
+                    var $element = $(error.element);
+
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", error.message)
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+
+                });
+            },
+        });
+    };
+    var initAccionesItems = function () {
+
+        $(document).off('click', "#btn-agregar-item");
+        $(document).on('click', "#btn-agregar-item", function (e) {
+            // reset
+            resetFormItem();
+
+            $('#modal-data-tracking-item').modal({
+                'show': true
+            });
+        });
+
+        $(document).off('click', "#btn-salvar-data-tracking-item");
+        $(document).on('click', "#btn-salvar-data-tracking-item", function (e) {
+            e.preventDefault();
+
+
+            var item_id = $('#item-data-tracking').val();
+
+            if ($('#data-tracking-item-form').valid() && item_id != '') {
+
+                var item = items.find(function (val) {
+                   return  val.project_item_id == item_id;
+                });
+
+                var quantity = $('#data-tracking-quantity').val();
+
+                if (nEditingRowItem == null) {
+
+                    items_data_tracking.push({
+                        data_tracking_item_id: '',
+                        item_id: item_id,
+                        item: item.item,
+                        unit: item.unit,
+                        price: item.price,
+                        quantity: quantity,
+                        posicion: items.length
+                    });
+
+                } else {
+                    var posicion = nEditingRowItem;
+                    if (items_data_tracking[posicion]) {
+                        items_data_tracking[posicion].item_id = item_id;
+                        items_data_tracking[posicion].item = item.item;
+                        items_data_tracking[posicion].unit = item.unit;
+                        items_data_tracking[posicion].price = item.price;
+                        items_data_tracking[posicion].quantity = quantity;
+                    }
+                }
+
+                //actualizar lista
+                actualizarTableListaItems();
+
+                if (nEditingRowItem != null) {
+                    $('#modal-data-tracking-item').modal('hide');
+                }
+
+                // reset
+                resetFormItem();
+
+            } else {
+                if (item_id == '') {
+                    var $element = $('#select-item-data-tracking .select2');
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", "This field is required")
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+                }
+            }
+
+        });
+
+        $(document).off('click', "#items-table-editable a.edit");
+        $(document).on('click', "#items-table-editable a.edit", function (e) {
+            var posicion = $(this).data('posicion');
+            if (items[posicion]) {
+
+                // reset
+                resetFormItem();
+
+                nEditingRowItem = posicion;
+
+                $('#item-data-tracking').val(items_data_tracking[posicion].item_id);
+                $('#item-data-tracking').trigger('change');
+
+                $('#data-tracking-quantity').val(items_data_tracking[posicion].quantity);
+
+                // open modal
+                $('#modal-data-tracking-item').modal('show');
+
+            }
+        });
+
+        $(document).off('click', "#items-table-editable a.delete");
+        $(document).on('click', "#items-table-editable a.delete", function (e) {
+
+            e.preventDefault();
+            rowDeleteItem = $(this).data('posicion');
+            $('#modal-eliminar-item').modal({
+                'show': true
+            });
+        });
+
+        $(document).off('click', "#btn-delete-item");
+        $(document).on('click', "#btn-delete-item", function (e) {
+
+            e.preventDefault();
+            var posicion = rowDeleteItem;
+
+            if (items_data_tracking[posicion]) {
+
+                if (items_data_tracking[posicion].data_tracking_item_id != '') {
+                    MyApp.block('#items-table-editable');
+
+                    $.ajax({
+                        type: "POST",
+                        url: "data-tracking/eliminarItem",
+                        dataType: "json",
+                        data: {
+                            'data_tracking_item_id': items_data_tracking[posicion].data_tracking_item_id
+                        },
+                        success: function (response) {
+                            mApp.unblock('#items-table-editable');
+                            if (response.success) {
+
+                                toastr.success(response.message, "Success");
+
+                                deleteItem(posicion);
+
+                            } else {
+                                toastr.error(response.error, "");
+                            }
+                        },
+                        failure: function (response) {
+                            mApp.unblock('#items-table-editable');
+
+                            toastr.error(response.error, "");
+                        }
+                    });
+                } else {
+                    deleteItem(posicion);
+                }
+            }
+
+        });
+
+        function deleteItem(posicion) {
+            //Eliminar
+            items_data_tracking.splice(posicion, 1);
+            //actualizar posiciones
+            for (var i = 0; i < items_data_tracking.length; i++) {
+                items_data_tracking[i].posicion = i;
+            }
+            //actualizar lista
+            actualizarTableListaItems();
+        }
+    };
+    var resetFormItem = function () {
+        $('#data-tracking-item-form input').each(function (e) {
+            $element = $(this);
+            $element.val('');
+
+            $element.data("title", "").removeClass("has-error").tooltip("dispose");
+            $element.closest('.form-group').removeClass('has-error').addClass('success');
+        });
+
+        $('#item-data-tracking').val('');
+        $('#item-data-tracking').trigger('change');
+
+        var $element = $('.select2');
+        $element.removeClass('has-error').tooltip("dispose");
+
+        nEditingRowItem = null;
+    };
+
     return {
         //main function to initiate the module
         init: function () {
 
             initWidgets();
-            initTable();
             initForm();
+            initWizard();
 
             initAccionNuevo();
             initAccionSalvar();
@@ -951,11 +1132,19 @@ var DataTracking = function () {
             initAccionEliminar();
             initAccionFiltrar();
 
-            // inspectors
+            //modal inspectors
             initAccionesInspector();
 
+            // modal items
+            initAccionesModalItems();
+
             // items
+            initTableItems();
+            initFormItem();
             initAccionesItems();
+
+            // listar data tracking
+            btnClickFiltrar();
         }
 
     };

@@ -22,20 +22,6 @@ class DataTracking
     private $id;
 
     /**
-     * @var float
-     *
-     * @ORM\Column(name="quantity", type="float", nullable=false)
-     */
-    private $quantity;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="price", type="float", nullable=false)
-     */
-    private $price;
-
-    /**
      * @var \DateTime
      *
      * @ORM\Column(name="date", type="date", nullable=false)
@@ -47,28 +33,28 @@ class DataTracking
      *
      * @ORM\Column(name="station_number", type="string", length=255, nullable=false)
      */
-    private $station_number;
+    private $stationNumber;
 
     /**
      * @var string
      *
      * @ORM\Column(name="measured_by", type="string", length=255, nullable=false)
      */
-    private $measured_by;
+    private $measuredBy;
 
     /**
      * @var string
      *
      * @ORM\Column(name="conc_vendor", type="string", length=255, nullable=false)
      */
-    private $conc_vendor;
+    private $concVendor;
 
     /**
      * @var string
      *
      * @ORM\Column(name="crew_lead", type="string", length=255, nullable=false)
      */
-    private $crew_lead;
+    private $crewLead;
 
     /**
      * @var string
@@ -82,7 +68,7 @@ class DataTracking
      *
      * @ORM\Column(name="other_materials", type="string", length=255, nullable=false)
      */
-    private $other_materials;
+    private $otherMaterials;
 
     /**
      * @var float
@@ -96,14 +82,14 @@ class DataTracking
      *
      * @ORM\Column(name="total_labor", type="float", nullable=false)
      */
-    private $total_labor;
+    private $totalLabor;
 
     /**
      * @var float
      *
      * @ORM\Column(name="total_stamps", type="float", nullable=false)
      */
-    private $total_stamps;
+    private $totalStamps;
 
     /**
      * @var \DateTime
@@ -120,14 +106,14 @@ class DataTracking
     private $updatedAt;
 
     /**
-     * @var ProjectItem
+     * @var Project
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\ProjectItem")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Project")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="project_item_id", referencedColumnName="id")
+     *   @ORM\JoinColumn(name="project_id", referencedColumnName="project_id")
      * })
      */
-    private $projectItem;
+    private $project;
 
 
     /**
@@ -150,26 +136,6 @@ class DataTracking
         return $this->id;
     }
 
-    public function getQuantity()
-    {
-        return $this->quantity;
-    }
-
-    public function setQuantity($quantity)
-    {
-        $this->quantity = $quantity;
-    }
-
-    public function getPrice()
-    {
-        return $this->price;
-    }
-
-    public function setPrice($price)
-    {
-        $this->price = $price;
-    }
-
     public function getDate(): \DateTime
     {
         return $this->date;
@@ -181,16 +147,16 @@ class DataTracking
     }
 
     /**
-     * @return ProjectItem
+     * @return Project
      */
-    public function getProjectItem()
+    public function getProject()
     {
-        return $this->projectItem;
+        return $this->project;
     }
 
-    public function setProjectItem($projectItem)
+    public function setProject($project)
     {
-        $this->projectItem = $projectItem;
+        $this->project = $project;
     }
 
     /**
@@ -228,42 +194,42 @@ class DataTracking
 
     public function getStationNumber()
     {
-        return $this->station_number;
+        return $this->stationNumber;
     }
 
     public function setStationNumber($station_number)
     {
-        $this->station_number = $station_number;
+        $this->stationNumber = $station_number;
     }
 
     public function getMeasuredBy()
     {
-        return $this->measured_by;
+        return $this->measuredBy;
     }
 
     public function setMeasuredBy($measured_by)
     {
-        $this->measured_by = $measured_by;
+        $this->measuredBy = $measured_by;
     }
 
     public function getConcVendor()
     {
-        return $this->conc_vendor;
+        return $this->concVendor;
     }
 
     public function setConcVendor($conc_vendor)
     {
-        $this->conc_vendor = $conc_vendor;
+        $this->concVendor = $conc_vendor;
     }
 
     public function getCrewLead()
     {
-        return $this->crew_lead;
+        return $this->crewLead;
     }
 
     public function setCrewLead($crew_lead)
     {
-        $this->crew_lead = $crew_lead;
+        $this->crewLead = $crew_lead;
     }
 
     public function getNotes()
@@ -278,12 +244,12 @@ class DataTracking
 
     public function getOtherMaterials()
     {
-        return $this->other_materials;
+        return $this->otherMaterials;
     }
 
     public function setOtherMaterials($other_materials)
     {
-        $this->other_materials = $other_materials;
+        $this->otherMaterials = $other_materials;
     }
 
     public function getTotalConcUsed()
@@ -298,21 +264,21 @@ class DataTracking
 
     public function getTotalLabor()
     {
-        return $this->total_labor;
+        return $this->totalLabor;
     }
 
     public function setTotalLabor($total_labor)
     {
-        $this->total_labor = $total_labor;
+        $this->totalLabor = $total_labor;
     }
 
     public function getTotalStamps()
     {
-        return $this->total_stamps;
+        return $this->totalStamps;
     }
 
     public function setTotalStamps($total_stamps)
     {
-        $this->total_stamps = $total_stamps;
+        $this->totalStamps = $total_stamps;
     }
 }

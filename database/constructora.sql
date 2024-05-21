@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 17-05-2024 a las 19:04:32
+-- Tiempo de generación: 21-05-2024 a las 02:48:31
 -- Versión del servidor: 11.2.2-MariaDB
 -- Versión de PHP: 8.1.12
 
@@ -74,8 +74,6 @@ INSERT INTO `company_contact` (`contact_id`, `name`, `email`, `phone`, `company_
 
 CREATE TABLE `data_tracking` (
   `id` int(11) NOT NULL,
-  `quantity` float(8,2) DEFAULT NULL,
-  `price` float(8,2) DEFAULT NULL,
   `date` date DEFAULT NULL,
   `station_number` varchar(255) DEFAULT NULL,
   `measured_by` varchar(255) DEFAULT NULL,
@@ -88,8 +86,22 @@ CREATE TABLE `data_tracking` (
   `total_stamps` float(8,2) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `project_item_id` int(11) DEFAULT NULL,
+  `project_id` int(11) DEFAULT NULL,
   `inspector_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `data_tracking_item`
+--
+
+CREATE TABLE `data_tracking_item` (
+  `id` int(11) NOT NULL,
+  `quantity` float(8,2) DEFAULT NULL,
+  `price` float(8,2) DEFAULT NULL,
+  `data_tracking_id` int(11) DEFAULT NULL,
+  `project_item_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -111,7 +123,8 @@ CREATE TABLE `equation` (
 
 INSERT INTO `equation` (`equation_id`, `description`, `equation`, `status`) VALUES
 (1, 'SW, 4 IN, SY', '(x*4)/36', 1),
-(2, 'SW, 4 IN, SF', '(x*4)/324', 1);
+(2, 'SW, 4 IN, SF', '(x*4)/324', 1),
+(3, 'SW 6 IN, SF', '(x*6)/25', 1);
 
 -- --------------------------------------------------------
 
@@ -166,7 +179,8 @@ CREATE TABLE `inspector` (
 
 INSERT INTO `inspector` (`inspector_id`, `name`, `phone`, `email`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'Carlos Magill', '(678)558-2565', 'gill@arersnl.com', 1, '2024-04-13 00:03:19', '2024-04-13 00:03:50'),
-(3, 'Marcel Curbelo Carmona', '(349)995-0162', 'cyborgmnk@gmail.com', 1, '2024-05-15 21:57:30', NULL);
+(3, 'Marcel Curbelo Carmona', '(349)995-0162', 'cyborgmnk@gmail.com', 1, '2024-05-15 21:57:30', NULL),
+(4, 'Cristián Gwinner', '(025)940-5185', 'cgwinner@canteras.cl', 1, '2024-05-18 16:08:15', NULL);
 
 -- --------------------------------------------------------
 
@@ -432,7 +446,15 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (126, 'Add', 'Data Tracking', 'The data tracking is add: CONC CURB & GUTTEER 8INX30IN TP2', '::1', '2024-05-16 03:53:30', 1),
 (127, 'Add', 'Data Tracking', 'The data tracking is add: Cubic Yards of Concrete', '::1', '2024-05-17 15:05:17', 1),
 (128, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-05-17 18:24:44', 1),
-(129, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-05-17 18:31:58', 1);
+(129, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-05-17 18:31:58', 1),
+(130, 'Add', 'Data Tracking', 'The data tracking is add: CONCRETE V GUTTER', '::1', '2024-05-17 20:06:16', 1),
+(131, 'Update', 'Data Tracking', 'The data tracking is modified: CONCRETE V GUTTER', '::1', '2024-05-17 20:18:21', 1),
+(132, 'Add', 'Inspector', 'The inspector is added: Cristián Gwinner', '::1', '2024-05-18 16:08:15', 1),
+(133, 'Add', 'Equation', 'The equation is added: SW 6 IN, SF', '::1', '2024-05-18 16:31:11', 1),
+(134, 'Add', 'Unit', 'The unit is added: ZX', '::1', '2024-05-18 16:55:58', 1),
+(135, 'Delete', 'Unit', 'The unit is deleted: ZX', '::1', '2024-05-18 16:56:25', 1),
+(136, 'Add', 'Unit', 'The unit is added: ZY', '::1', '2024-05-18 18:46:54', 1),
+(137, 'Delete', 'Unit', 'The unit is deleted: ZY', '::1', '2024-05-18 18:47:10', 1);
 
 -- --------------------------------------------------------
 
@@ -520,7 +542,9 @@ INSERT INTO `project_item` (`id`, `quantity`, `price`, `yield_calculation`, `pro
 (2, 2000.00, 63.00, 'same', 3, 15, NULL),
 (4, 1600.00, 150.00, 'equation', 3, 20, 2),
 (5, NULL, 253.00, 'none', 1, 10, NULL),
-(8, 2500.00, 25.00, 'equation', 3, 3, 1);
+(8, 2500.00, 25.00, 'equation', 3, 3, 1),
+(9, 2500.00, 16.50, 'none', 3, 7, NULL),
+(10, 5000.00, 70.00, 'equation', 3, 12, 1);
 
 -- --------------------------------------------------------
 
@@ -707,7 +731,15 @@ ALTER TABLE `company_contact`
 ALTER TABLE `data_tracking`
   ADD PRIMARY KEY (`id`),
   ADD KEY `inspector_id` (`inspector_id`),
-  ADD KEY `project_item_id` (`project_item_id`);
+  ADD KEY `project_id` (`project_id`);
+
+--
+-- Indices de la tabla `data_tracking_item`
+--
+ALTER TABLE `data_tracking_item`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `Ref7185` (`data_tracking_id`),
+  ADD KEY `Ref7686` (`project_item_id`);
 
 --
 -- Indices de la tabla `equation`
@@ -846,10 +878,16 @@ ALTER TABLE `data_tracking`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `data_tracking_item`
+--
+ALTER TABLE `data_tracking_item`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `equation`
 --
 ALTER TABLE `equation`
-  MODIFY `equation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `equation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `function`
@@ -861,7 +899,7 @@ ALTER TABLE `function`
 -- AUTO_INCREMENT de la tabla `inspector`
 --
 ALTER TABLE `inspector`
-  MODIFY `inspector_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `inspector_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `invoice`
@@ -885,7 +923,7 @@ ALTER TABLE `item`
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=138;
 
 --
 -- AUTO_INCREMENT de la tabla `notification`
@@ -903,7 +941,7 @@ ALTER TABLE `project`
 -- AUTO_INCREMENT de la tabla `project_item`
 --
 ALTER TABLE `project_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `project_notes`
@@ -927,7 +965,7 @@ ALTER TABLE `rol_permission`
 -- AUTO_INCREMENT de la tabla `unit`
 --
 ALTER TABLE `unit`
-  MODIFY `unit_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `unit_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `user`
@@ -956,7 +994,14 @@ ALTER TABLE `company_contact`
 --
 ALTER TABLE `data_tracking`
   ADD CONSTRAINT `Refinspector158` FOREIGN KEY (`inspector_id`) REFERENCES `inspector` (`inspector_id`),
-  ADD CONSTRAINT `Refprojectitem25` FOREIGN KEY (`project_item_id`) REFERENCES `project_item` (`id`);
+  ADD CONSTRAINT `Refproject25` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`);
+
+--
+-- Filtros para la tabla `data_tracking_item`
+--
+ALTER TABLE `data_tracking_item`
+  ADD CONSTRAINT `Refdata_tracking85` FOREIGN KEY (`data_tracking_id`) REFERENCES `data_tracking` (`id`),
+  ADD CONSTRAINT `Refproject_item86` FOREIGN KEY (`project_item_id`) REFERENCES `project_item` (`id`);
 
 --
 -- Filtros para la tabla `invoice`

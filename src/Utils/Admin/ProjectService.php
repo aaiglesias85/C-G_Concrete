@@ -3,6 +3,7 @@
 namespace App\Utils\Admin;
 
 use App\Entity\Company;
+use App\Entity\DataTrackingItem;
 use App\Entity\Equation;
 use App\Entity\Inspector;
 use App\Entity\Invoice;
@@ -120,7 +121,7 @@ class ProjectService extends Base
         if ($entity != null) {
 
             // data tracking
-            $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
+            $data_tracking = $this->getDoctrine()->getRepository(DataTrackingItem::class)
                 ->ListarDataTrackingsDeItem($project_item_id);
             if (count($data_tracking) > 0) {
                 $resultado['success'] = false;
@@ -525,6 +526,13 @@ class ProjectService extends Base
             $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
                 ->ListarDataTracking($project_id);
             foreach ($data_tracking as $data) {
+
+                $items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                    ->ListarItems($data->getId());
+                foreach ($items as $item){
+                    $em->remove($item);
+                }
+
                 $em->remove($data);
             }
 
@@ -593,6 +601,13 @@ class ProjectService extends Base
                             $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
                                 ->ListarDataTracking($project_id);
                             foreach ($data_tracking as $data) {
+
+                                $items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                                    ->ListarItems($data->getId());
+                                foreach ($items as $item){
+                                    $em->remove($item);
+                                }
+
                                 $em->remove($data);
                             }
 

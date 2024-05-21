@@ -58,53 +58,18 @@ class DataTrackingController extends AbstractController
     public function listar(Request $request)
     {
 
-        // search filter by keywords
-        $query = !empty($request->get('query')) ? $request->get('query') : array();
-        $sSearch = isset($query['generalSearch']) && is_string($query['generalSearch']) ? $query['generalSearch'] : '';
-        $company_id = isset($query['company_id']) && is_string($query['company_id']) ? $query['company_id'] : '';
-        $project_id = isset($query['project_id']) && is_string($query['project_id']) ? $query['project_id'] : '';
-        $item_id = isset($query['item_id']) && is_string($query['item_id']) ? $query['item_id'] : '';
-        $fecha_inicial = isset($query['fechaInicial']) && is_string($query['fechaInicial']) ? $query['fechaInicial'] : '';
-        $fecha_fin = isset($query['fechaFin']) && is_string($query['fechaFin']) ? $query['fechaFin'] : '';
-
-        //Sort
-        $sort = !empty($request->get('sort')) ? $request->get('sort') : array();
-        $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'desc';
-        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'date';
-        //$start and $limit
-        $pagination = !empty($request->get('pagination')) ? $request->get('pagination') : array();
-        $page = !empty($pagination['page']) ? (int)$pagination['page'] : 1;
-        $limit = !empty($pagination['perpage']) ? (int)$pagination['perpage'] : -1;
-        $start = 0;
+        $sSearch = $request->get('search');
+        $project_id = $request->get('project_id');
+        $fecha_inicial = $request->get('fechaInicial');
+        $fecha_fin = $request->get('fechaFin');
 
         try {
-            $pages = 1;
-            $total = $project_id == '' ? 0 : $this->trackingService->TotalDataTrackings($sSearch, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin);
-            if ($limit > 0) {
-                $pages = ceil($total / $limit); // calculate total pages
-                $page = max($page, 1); // get 1 page when $_REQUEST['page'] <= 0
-                $page = min($page, $pages); // get last page when $_REQUEST['page'] > $totalPages
-                $start = ($page - 1) * $limit;
-                if ($start < 0) {
-                    $start = 0;
-                }
-            }
 
-            $meta = array(
-                'page' => $page,
-                'pages' => $pages,
-                'perpage' => $limit,
-                'total' => $total,
-                'field' => $iSortCol_0,
-                'sort' => $sSortDir_0
-            );
 
-            $data = $project_id == '' ? [] : $this->trackingService->ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin);
+            $lista = $this->trackingService->ListarDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin);
 
-            $resultadoJson = array(
-                'meta' => $meta,
-                'data' => $data
-            );
+            $resultadoJson['success'] = true;
+            $resultadoJson['data_tracking'] = $lista;
 
             return $this->json($resultadoJson);
 
@@ -124,11 +89,8 @@ class DataTrackingController extends AbstractController
     {
         $data_tracking_id = $request->get('data_tracking_id');
 
-        $project_item_id = $request->get('project_item_id');
-        $quantity = $request->get('quantity');
-        $price = $request->get('price');
+        $project_id = $request->get('project_id');
         $date = $request->get('date');
-
         $inspector_id = $request->get('inspector_id');
         $station_number = $request->get('station_number');
         $measured_by = $request->get('measured_by');
@@ -136,16 +98,19 @@ class DataTrackingController extends AbstractController
         $crew_lead = $request->get('crew_lead');
         $notes = $request->get('notes');
         $other_materials = $request->get('other_materials');
-
         $total_conc_used = $request->get('total_conc_used');
         $total_labor = $request->get('total_labor');
         $total_stamps = $request->get('total_stamps');
 
+        // items
+        $items = $request->get('items');
+        $items = json_decode($items);
+
         try {
 
-            $resultado = $this->trackingService->SalvarDataTracking($data_tracking_id, $project_item_id, $quantity,
-                $price, $date, $inspector_id, $station_number, $measured_by, $conc_vendor, $crew_lead, $notes, $other_materials,
-                $total_conc_used, $total_labor, $total_stamps);
+            $resultado = $this->trackingService->SalvarDataTracking($data_tracking_id, $project_id, $date, $inspector_id,
+                $station_number, $measured_by, $conc_vendor, $crew_lead, $notes, $other_materials,
+                $total_conc_used, $total_labor, $total_stamps, $items);
 
             if ($resultado['success']) {
 
@@ -232,7 +197,7 @@ class DataTrackingController extends AbstractController
         $data_tracking_id = $request->get('data_tracking_id');
 
         try {
-            $resultado = $this->trackingService->CargarDatosDataTracking($data_tracking_id);
+            $resultado = $this->trackingService->CargarDatosDataTracking($data_tracking_id, $this->projectService);
             if ($resultado['success']) {
 
                 $resultadoJson['success'] = $resultado['success'];
@@ -245,6 +210,35 @@ class DataTrackingController extends AbstractController
 
                 return $this->json($resultadoJson);
             }
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+    }
+
+    /**
+     * eliminarItem Acción que elimina un dataTracking en la BD
+     *
+     */
+    public function eliminarItem(Request $request)
+    {
+        $data_tracking_item_id = $request->get('data_tracking_item_id');
+
+        try {
+            $resultado = $this->trackingService->EliminarItemDataTracking($data_tracking_item_id);
+            if ($resultado['success']) {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['message'] = "The operation was successful";
+
+            } else {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['error'] = $resultado['error'];
+            }
+
+            return $this->json($resultadoJson);
+
         } catch (\Exception $e) {
             $resultadoJson['success'] = false;
             $resultadoJson['error'] = $e->getMessage();

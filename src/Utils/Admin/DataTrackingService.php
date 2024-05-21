@@ -3,6 +3,7 @@
 namespace App\Utils\Admin;
 
 use App\Entity\DataTracking;
+use App\Entity\DataTrackingItem;
 use App\Entity\Inspector;
 use App\Entity\Item;
 use App\Entity\Project;
@@ -13,13 +14,52 @@ class DataTrackingService extends Base
 {
 
     /**
+     * EliminarItemDataTracking: Elimina un item details en la BD
+     * @param int $data_tracking_item_id Id
+     * @author Marcel
+     */
+    public function EliminarItemDataTracking($data_tracking_item_id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+            ->find($data_tracking_item_id);
+        /**@var DataTrackingItem $entity */
+        if ($entity != null) {
+
+
+            $project_name = $entity->getProjectItem()->getProject()->getProjectNumber() . " - " . $entity->getProjectItem()->getProject()->getName();
+            $date = $entity->getDataTracking()->getDate()->format('m/d/Y');
+
+            $item_name = $entity->getProjectItem()->getItem()->getDescription();
+
+            $em->remove($entity);
+            $em->flush();
+
+            //Salvar log
+            $log_operacion = "Delete";
+            $log_categoria = "Data Tracking";
+            $log_descripcion = "The item of the data tracking is deleted, Item: $item_name, Project: $project_name, Date: $date";
+            $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
+
+            $resultado['success'] = true;
+        } else {
+            $resultado['success'] = false;
+            $resultado['error'] = "The requested record does not exist";
+        }
+
+        return $resultado;
+    }
+
+    /**
      * CargarDatosDataTracking: Carga los datos de un item project
      *
      * @param int $data_tracking_id Id
+     * @param ProjectService $projectService
      *
      * @author Marcel
      */
-    public function CargarDatosDataTracking($data_tracking_id)
+    public function CargarDatosDataTracking($data_tracking_id, $projectService)
     {
         $resultado = array();
         $arreglo_resultado = array();
@@ -29,9 +69,8 @@ class DataTrackingService extends Base
         /** @var DataTracking $entity */
         if ($entity != null) {
 
-            $arreglo_resultado['project_item_id'] = $entity->getProjectItem()->getId();
-            $arreglo_resultado['quantity'] = $entity->getQuantity();
-            $arreglo_resultado['price'] = $entity->getPrice();
+            $project_id = $entity->getProject()->getProjectId();
+            $arreglo_resultado['project_id'] = $project_id;
             $arreglo_resultado['date'] = $entity->getDate()->format('m/d/Y');
             $arreglo_resultado['inspector_id'] = $entity->getInspector() != null ? $entity->getInspector()->getInspectorId() : '';
             $arreglo_resultado['station_number'] = $entity->getStationNumber();
@@ -44,11 +83,45 @@ class DataTrackingService extends Base
             $arreglo_resultado['total_labor'] = $entity->getTotalLabor();
             $arreglo_resultado['total_stamps'] = $entity->getTotalStamps();
 
+            // items
+            $items = $this->ListarItemsDeDataTracking($data_tracking_id);
+            $arreglo_resultado['items'] = $items;
+
+            // project items
+            $arreglo_resultado['project_items'] = $projectService->ListarItemsDeProject($project_id);
+
             $resultado['success'] = true;
             $resultado['data_tracking'] = $arreglo_resultado;
         }
 
         return $resultado;
+    }
+
+    /**
+     * ListarItemsDeDataTracking
+     * @param $data_tracking_id
+     * @return array
+     */
+    public function ListarItemsDeDataTracking($data_tracking_id)
+    {
+        $items = [];
+
+        $lista = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+            ->ListarItems($data_tracking_id);
+        foreach ($lista as $key => $value) {
+
+            $items[] = [
+                'data_tracking_item_id' => $value->getId(),
+                "item_id" => $value->getProjectItem()->getId(),
+                "item" => $value->getProjectItem()->getItem()->getDescription(),
+                "unit" => $value->getProjectItem()->getItem()->getUnit()->getDescription(),
+                "quantity" => $value->getQuantity(),
+                "price" => $value->getPrice(),
+                "posicion" => $key
+            ];
+        }
+
+        return $items;
     }
 
     /**
@@ -65,7 +138,15 @@ class DataTrackingService extends Base
         /**@var DataTracking $entity */
         if ($entity != null) {
 
-            $item_name = $entity->getProjectItem()->getItem()->getDescription();
+            // items
+            $items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                ->ListarItems($data_tracking_id);
+            foreach ($items as $item) {
+                $em->remove($item);
+            }
+
+            $project_name = $entity->getProject()->getProjectNumber() . " - " . $entity->getProject()->getName();
+            $date = $entity->getDate()->format('m/d/Y');
 
             $em->remove($entity);
             $em->flush();
@@ -73,7 +154,7 @@ class DataTrackingService extends Base
             //Salvar log
             $log_operacion = "Delete";
             $log_categoria = "Data Tracking";
-            $log_descripcion = "The data tracking is deleted: $item_name";
+            $log_descripcion = "The data tracking is deleted, Project: $project_name, Date: $date";
             $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
             $resultado['success'] = true;
@@ -106,7 +187,15 @@ class DataTrackingService extends Base
                     /**@var DataTracking $entity */
                     if ($entity != null) {
 
-                        $item_name = $entity->getProjectItem()->getItem()->getDescription();
+                        // items
+                        $items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                            ->ListarItems($data_tracking_id);
+                        foreach ($items as $item) {
+                            $em->remove($item);
+                        }
+
+                        $project_name = $entity->getProject()->getProjectNumber() . " - " . $entity->getProject()->getName();
+                        $date = $entity->getDate()->format('m/d/Y');
 
                         $em->remove($entity);
                         $cant_eliminada++;
@@ -114,7 +203,7 @@ class DataTrackingService extends Base
                         //Salvar log
                         $log_operacion = "Delete";
                         $log_categoria = "Item Project";
-                        $log_descripcion = "The item details project is deleted: $item_name";
+                        $log_descripcion = "The data tracking is deleted, Project: $project_name, Date: $date";
                         $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
                     }
@@ -142,89 +231,137 @@ class DataTrackingService extends Base
      * @param $project_item_id
      * @return array
      */
-    public function SalvarDataTracking($data_tracking_id, $project_item_id, $quantity, $price, $date, $inspector_id,
+    public function SalvarDataTracking($data_tracking_id, $project_id, $date, $inspector_id,
                                        $station_number, $measured_by, $conc_vendor, $crew_lead, $notes, $other_materials,
-                                       $total_conc_used, $total_labor, $total_stamps)
+                                       $total_conc_used, $total_labor, $total_stamps, $items)
     {
 
         $em = $this->getDoctrine()->getManager();
 
-        $project_item_entity = $this->getDoctrine()->getRepository(ProjectItem::class)
-            ->find($project_item_id);
+        // validar project
+        $project_entity = null;
+        if ($data_tracking_id == '') {
+            $project_entity = $this->getDoctrine()->getRepository(Project::class)
+                ->find($project_id);
+            if ($project_entity == null) {
+                $resultado['success'] = false;
+                $resultado['error'] = "The project not exist.";
 
-        /** @var ProjectItem $project_item_entity */
-        if ($project_item_entity != null) {
-
-            $entity = null;
-            $is_new = false;
-
-            if (is_numeric($data_tracking_id)) {
-                $entity = $this->getDoctrine()->getRepository(DataTracking::class)
-                    ->find($data_tracking_id);
+                return $resultado;
             }
+        }
 
-            if ($entity == null) {
-                $entity = new DataTracking();
-                $is_new = true;
-            }
+        $entity = null;
+        $is_new = false;
 
-            $entity->setQuantity($quantity);
-            $entity->setPrice($price);
+        if (is_numeric($data_tracking_id)) {
+            $entity = $this->getDoctrine()->getRepository(DataTracking::class)
+                ->find($data_tracking_id);
+        }
 
-            if ($date != '') {
-                $date = \DateTime::createFromFormat('m/d/Y', $date);
-                $entity->setDate($date);
-            }
+        if ($entity == null) {
+            $entity = new DataTracking();
+            $is_new = true;
+        }
 
-            $entity->setProjectItem($project_item_entity);
+        if ($date != '') {
+            $entity->setDate(\DateTime::createFromFormat('m/d/Y', $date));
+        }
 
-            if ($inspector_id != '') {
-                $inspector_entity = $this->getDoctrine()->getRepository(Inspector::class)
-                    ->find($inspector_id);
-                $entity->setInspector($inspector_entity);
-            }
+        if ($inspector_id != '') {
+            $inspector_entity = $this->getDoctrine()->getRepository(Inspector::class)
+                ->find($inspector_id);
+            $entity->setInspector($inspector_entity);
+        }
 
-            $entity->setStationNumber($station_number);
-            $entity->setMeasuredBy($measured_by);
-            $entity->setConcVendor($conc_vendor);
-            $entity->setCrewLead($crew_lead);
-            $entity->setNotes($notes);
-            $entity->setOtherMaterials($other_materials);
-            $entity->setTotalConcUsed($total_conc_used);
-            $entity->setTotalLabor($total_labor);
-            $entity->setTotalStamps($total_stamps);
+        $entity->setStationNumber($station_number);
+        $entity->setMeasuredBy($measured_by);
+        $entity->setConcVendor($conc_vendor);
+        $entity->setCrewLead($crew_lead);
+        $entity->setNotes($notes);
+        $entity->setOtherMaterials($other_materials);
+        $entity->setTotalConcUsed($total_conc_used);
+        $entity->setTotalLabor($total_labor);
+        $entity->setTotalStamps($total_stamps);
+
+        if ($is_new) {
+
+            $entity->setProject($project_entity);
+
+            $entity->setCreatedAt(new \DateTime());
+
+            $em->persist($entity);
 
             $log_operacion = "Add";
-            $log_descripcion = "The data tracking is add: " . $project_item_entity->getItem()->getDescription();
-
-            if ($is_new) {
-
-                $entity->setCreatedAt(new \DateTime());
-
-                $em->persist($entity);
-            } else {
-
-                $entity->setUpdatedAt(new \DateTime());
-
-                $log_operacion = "Update";
-                $log_descripcion = "The data tracking is modified: " . $project_item_entity->getItem()->getDescription();
-            }
-
-            $em->flush();
-
-            //Salvar log
-            $log_categoria = "Data Tracking";
-            $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
-
-            $resultado['success'] = true;
+            $project_desc = $project_entity->getProjectNumber() . ' - ' . $project_entity->getName();
+            $log_descripcion = "The data tracking is add, Project: $project_desc, Date: $date";
 
         } else {
-            $resultado['success'] = false;
-            $resultado['error'] = "The project item not exist.";
+
+            $entity->setUpdatedAt(new \DateTime());
+
+            $project_entity = $entity->getProject();
+
+            $log_operacion = "Update";
+            $project_desc = $project_entity->getProjectNumber() . ' - ' . $project_entity->getName();
+            $log_descripcion = "The data tracking is modified, Project: $project_desc, Date: $date";
         }
+
+        // items
+        $this->SalvarItems($entity, $items);
+
+        $em->flush();
+
+        //Salvar log
+        $log_categoria = "Data Tracking";
+        $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
+
+        $resultado['success'] = true;
 
         return $resultado;
 
+    }
+
+    /**
+     * SalvarItems
+     * @param array $items
+     * @param DataTracking $entity
+     * @return array
+     */
+    public function SalvarItems($entity, $items)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        foreach ($items as $value) {
+
+            $data_tracking_item_entity = null;
+
+            if (is_numeric($value->data_tracking_item_id)) {
+                $data_tracking_item_entity = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                    ->find($value->data_tracking_item_id);
+            }
+
+            $is_new_data_tracking_item = false;
+            if ($data_tracking_item_entity == null) {
+                $data_tracking_item_entity = new DataTrackingItem();
+                $is_new_data_tracking_item = true;
+            }
+
+            $data_tracking_item_entity->setPrice($value->price);
+            $data_tracking_item_entity->setQuantity($value->quantity);
+
+            if ($value->item_id != '') {
+                $project_item_entity = $this->getDoctrine()->getRepository(ProjectItem::class)
+                    ->find($value->item_id);
+                $data_tracking_item_entity->setProjectItem($project_item_entity);
+            }
+
+            if ($is_new_data_tracking_item) {
+                $data_tracking_item_entity->setDataTracking($entity);
+
+                $em->persist($data_tracking_item_entity);
+            }
+        }
     }
 
 
@@ -237,43 +374,28 @@ class DataTrackingService extends Base
      *
      * @author Marcel
      */
-    public function ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $company_id,
-                                        $project_id, $item_id, $fecha_inicial, $fecha_fin)
+    public function ListarDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin)
     {
         $arreglo_resultado = array();
-        $cont = 0;
 
         $lista = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin);
+            ->ListarDataTrackingsParaCalendario($sSearch, $project_id, $fecha_inicial, $fecha_fin);
 
         foreach ($lista as $value) {
             $data_tracking_id = $value->getId();
 
-            $acciones = $this->ListarAcciones($data_tracking_id);
+            $lost_concrete = $this->CalcularLostConcrete($value);
 
-            $item_entity = $value->getProjectItem()->getItem();
-            $quantity = $value->getQuantity();
-            $total_conc_used = $value->getTotalConcUsed();
-
-            // aplicar el yield
-            $yield_calculation_name = $this->DevolverYieldCalculationDeItemProject($value->getProjectItem());
-
-            $quantity_yield = $quantity;
-            if ($value->getProjectItem()->getYieldCalculation() == "equation" && $value->getProjectItem()->getEquation() != null) {
-                $quantity_yield = $this->evaluateExpression($value->getProjectItem()->getEquation()->getEquation(), $quantity);
-            }
-
-            $lost_concrete = $total_conc_used - $quantity_yield;
-
-            $price = $value->getPrice();
-            $total = $quantity_yield * $price;
-
-            $arreglo_resultado[$cont] = array(
-                "id" => $data_tracking_id,
+            $arreglo_resultado[] = [
+                "data_tracking_id" => $data_tracking_id,
+                'title' => $value->getProject()->getProjectNumber() . " - Pay Item Measured",
+                'start' => $value->getDate()->format('Y-m-d H:i'),
+                'end' => $value->getDate()->format('Y-m-d') . " 23:59",
+                'className' => "fc-event-default",
                 "date" => $value->getDate()->format('m/d/Y'),
                 "stationNumber" => $value->getStationNumber(),
                 "measuredBy" => $value->getMeasuredBy(),
-                "totalConcUsed" => $total_conc_used,
+                "totalConcUsed" => $value->getTotalConcUsed(),
                 "lostConcrete" => $lost_concrete,
                 "concVendor" => $value->getConcVendor(),
                 "inspector" => $value->getInspector() != null ? $value->getInspector()->getName() : '',
@@ -282,20 +404,41 @@ class DataTrackingService extends Base
                 "notes" => $value->getNotes(),
                 "totalLabor" => $value->getTotalLabor(),
                 "totalStamps" => $value->getTotalStamps(),
-                "otherMaterials" => $value->getOtherMaterials(),
-                "item" => $item_entity->getDescription(),
-                "unit" => $item_entity->getUnit()->getDescription(),
-                "quantity" => $quantity,
-                "price" => number_format($price, 2, '.', ','),
-                "total" => number_format($total, 2, '.', ','),
-                "yieldCalculationName" => $yield_calculation_name,
-                "acciones" => $acciones
-            );
-
-            $cont++;
+                "otherMaterials" => $value->getOtherMaterials()
+            ];
         }
 
         return $arreglo_resultado;
+    }
+
+    /**
+     * CalcularLostConcrete
+     * @param DataTracking $value
+     * @return float
+     */
+    private function CalcularLostConcrete($value)
+    {
+        $total_conc_item = 0;
+        $total_conc_used = $value->getTotalConcUsed();
+
+        $data_tracking_id = $value->getId();
+
+        $data_tracking_items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+            ->ListarItems($data_tracking_id);
+        foreach ($data_tracking_items as $data_tracking_item) {
+
+            // aplicar el yield
+            $quantity = $data_tracking_item->getQuantity();
+            $quantity_yield = $quantity;
+            if ($data_tracking_item->getProjectItem()->getYieldCalculation() == "equation" && $data_tracking_item->getProjectItem()->getEquation() != null) {
+                $quantity_yield = $this->evaluateExpression($data_tracking_item->getProjectItem()->getEquation()->getEquation(), $quantity);
+            }
+
+            $total_conc_item += $quantity_yield;
+
+        }
+
+        return round($total_conc_used - $total_conc_item, 2);
     }
 
     /**
@@ -303,10 +446,10 @@ class DataTrackingService extends Base
      * @param string $sSearch Para buscar
      * @author Marcel
      */
-    public function TotalDataTrackings($sSearch, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin)
+    public function TotalDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin)
     {
         $total = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->TotalDataTrackings($sSearch, $company_id, $project_id, $item_id, $fecha_inicial, $fecha_fin);
+            ->TotalDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin);
 
         return $total;
     }

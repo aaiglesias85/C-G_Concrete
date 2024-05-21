@@ -4,6 +4,9 @@
 
 {% block stylesheetspecific %}
 
+    <link href="{{ asset('bundles/ican/plugins/fullcalendar/fullcalendar.bundle.css') }}" rel="stylesheet"
+          type="text/css"/>
+
     <!-- DevExtreme theme -->
     <!--
     <link rel="stylesheet" href="https://cdn3.devexpress.com/jslib/23.2.5/css/dx.light.css">
@@ -12,117 +15,120 @@
 {% endblock %}
 
 {% block content %}
-    <!-- BEGIN: Subheader -->
-    <div class="m-subheader ">
-        <div class="d-flex align-items-center">
-            <div class="mr-auto">
-                <h3 class="m-subheader__title m-subheader__title--separator">Data Tracking</h3>
-                <ul class="m-subheader__breadcrumbs m-nav m-nav--inline">
-                    <li class="m-nav__item m-nav__item--home">
-                        <a href="{{ url('home') }}" class="m-nav__link m-nav__link--icon">
-                            <i class="m-nav__link-icon la la-home"></i>
-                        </a>
-                    </li>
-                    <li class="m-nav__separator">-</li>
-                    <li class="m-nav__item">
-                        <a href="" class="m-nav__link">
-                            <span class="m-nav__link-text">Data Tracking</span>
-                        </a>
-                    </li>
-                    <li class="m-nav__separator">-</li>
-                    <li class="m-nav__item">
-                        <a href="" class="m-nav__link">
-                            <span class="m-nav__link-text">Manage data tracking project</span>
+<!-- BEGIN: Subheader -->
+<div class="m-subheader ">
+    <div class="d-flex align-items-center">
+        <div class="mr-auto">
+            <h3 class="m-subheader__title m-subheader__title--separator">Data Tracking</h3>
+            <ul class="m-subheader__breadcrumbs m-nav m-nav--inline">
+                <li class="m-nav__item m-nav__item--home">
+                    <a href="{{ url('home') }}" class="m-nav__link m-nav__link--icon">
+                        <i class="m-nav__link-icon la la-home"></i>
+                    </a>
+                </li>
+                <li class="m-nav__separator">-</li>
+                <li class="m-nav__item">
+                    <a href="" class="m-nav__link">
+                        <span class="m-nav__link-text">Data Tracking</span>
+                    </a>
+                </li>
+                <li class="m-nav__separator">-</li>
+                <li class="m-nav__item">
+                    <a href="" class="m-nav__link">
+                        <span class="m-nav__link-text">Manage data tracking project</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- END: Subheader -->
+
+<div class="m-content">
+
+    <div id="lista-data-tracking" class="m-portlet m-portlet--mobile" m-portlet="true">
+        <div class="m-portlet__head">
+            <div class="m-portlet__head-caption">
+                <div class="m-portlet__head-title">
+                    <h3 class="m-portlet__head-text">
+                        Data Tracking
+                    </h3>
+                </div>
+            </div>
+            <div class="m-portlet__head-tools">
+                <ul class="m-portlet__nav">
+                    <li class="m-portlet__nav-item">
+                        <a href="javascript:;" m-portlet-tool="fullscreen"
+                           class="m-portlet__nav-link m-portlet__nav-link--icon">
+                            <i class="la la-expand"></i>
                         </a>
                     </li>
                 </ul>
             </div>
         </div>
-    </div>
-    <!-- END: Subheader -->
-
-    <div class="m-content">
-        <div id="lista-data-tracking" class="m-portlet m-portlet--mobile" m-portlet="true">
-            <div class="m-portlet__head">
-                <div class="m-portlet__head-caption">
-                    <div class="m-portlet__head-title">
-                        <h3 class="m-portlet__head-text">
-                            Data Tracking
-                        </h3>
-                    </div>
-                </div>
-                <div class="m-portlet__head-tools">
-                    <ul class="m-portlet__nav">
-                        <li class="m-portlet__nav-item">
-                            <a href="javascript:;" m-portlet-tool="fullscreen"
-                               class="m-portlet__nav-link m-portlet__nav-link--icon">
-                                <i class="la la-expand"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="m-portlet__body">
-                <div class="row m-row--col-separator-md m-row--col-separator-dashed-md">
-                    <div class="col-md-3 m-form">
-                        <div class="m-form__heading">
-                            <h3 class="m-form__heading-title">Filters:</h3>
-                        </div>
-                        <!--begin: Search Form -->
-                        <div class="m-form__actions m-form__actions--solid" style="margin-top: 0px;padding: 20px;">
-
-                            <div class="form-group m-form__group">
-                                <label>Project</label>
-                                <div class="row">
-                                    <div class="col-md-12" id="select-project">
-                                        <select class="form-control m-select2 event-change" id="project">
-                                            <option value="">Select</option>
-                                            {% for item in projects %}
-                                                <option value="{{ item.projectId }}">{{ item.projectNumber }} - {{ item.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
+        <div class="m-portlet__body">
+            <!--begin: Search Form -->
+            <div class="m-form m-form--label-align-right m--margin-bottom-15">
+                <div class="row align-items-center">
+                    <div class="col-xl-12 order-1">
+                        <div class="form-group m-form__group row align-items-center">
+                            <div class="col-md-2">
+                                {% if permiso.agregar %}
+                                    <a id="btn-nuevo-data-tracking"
+                                       class="btn btn-success m-btn m-btn--custom m-btn--icon m-btn--air"
+                                       href="javascript:;">
+                                            <span>
+                                                <i class="la la-plus"></i>
+                                                <span>New Measurement</span>
+                                            </span>
+                                    </a>
+                                {% endif %}
                             </div>
 
-                            <div class="form-group m-form__group" id="form-group-item">
-                                <label>Item</label>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <select class="form-control m-select2 select-item-data-tracking" id="filtro-item">
-                                            <option value="">Select</option>
-                                        </select>
-                                    </div>
-                                </div>
+                            <div class="col-md-2" id="select-project">
+                                <select class="form-control m-select2 event-change" id="project">
+                                    <option value="">Project</option>
+                                    {% for item in projects %}
+                                        <option value="{{ item.projectId }}">{{ item.projectNumber }}
+                                            - {{ item.name }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
 
-                            <div class="form-group m-form__group">
-                                <label>From</label>
+                            <div class="col-md-2">
                                 <div class='input-group date'>
-                                    <input type='text' class="form-control m-input date-picker "
+                                    <input type='text' class="form-control m-input date-picker"
                                            placeholder="From" autocomplete="off"
-                                           id="filtro-fecha-inicial-item"/>
+                                           id="fechaInicial"/>
                                     <div class="input-group-append">
-                                                            <span class="input-group-text">
-                                                                <i class="la la-calendar glyphicon-th"></i>
-                                                            </span>
+                                            <span class="input-group-text">
+                                                <i class="la la-calendar glyphicon-th"></i>
+                                            </span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group m-form__group">
-                                <label>To</label>
+                            <div class="col-md-2">
                                 <div class='input-group date'>
-                                    <input type='text' class="form-control m-input date-picker "
+                                    <input type='text' class="form-control m-input date-picker"
                                            placeholder="To" autocomplete="off"
-                                           id="filtro-fecha-fin-item"/>
+                                           id="fechaFin"/>
                                     <div class="input-group-append">
-                                        <span class="input-group-text">
-                                            <i class="la la-calendar glyphicon-th"></i>
-                                        </span>
+                                            <span class="input-group-text">
+                                                <i class="la la-calendar glyphicon-th"></i>
+                                            </span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group m-form__group">
+                            <div class="col-md-2">
+                                <div class="m-input-icon m-input-icon--left">
+                                    <input type="text" class="form-control m-input m_form_search"
+                                           placeholder="Search...">
+                                    <span class="m-input-icon__icon m-input-icon__icon--left">
+									<span><i class="la la-search"></i></span>
+								</span>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
                                 <a href="javascript:;" id="btn-filtrar"
                                    class="btn btn-info m-btn m-btn--custom m-btn--icon m-btn--air">
                                 <span>
@@ -132,282 +138,339 @@
                                 </a>
                             </div>
                         </div>
-                        <!--end: Search Form -->
                     </div>
-                    <div class="col-md-9">
-                        <!--begin: actions -->
-                        <div class="m-form m-form--label-align-right m--margin-bottom-15">
-                            <div class="row align-items-center">
-                                <div class="col-xl-12 order-1">
-                                    <div class="form-group m-form__group row align-items-center">
-                                        <div class="col-md-2">
-                                            {% if permiso.agregar %}
-                                                <a id="btn-nuevo-project"
-                                                   class="btn btn-success m-btn m-btn--custom m-btn--icon m-btn--air"
-                                                   href="javascript:;">
-							<span>
-								<i class="la la-plus"></i>
-								<span>
-									 New Measurement
-								</span>
-							</span>
-                                                </a>
-                                            {% endif %}
-                                        </div>
-                                        <div class="col-md-8"></div>
-                                        <div class="col-md-2">
-                                            {% if permiso.eliminar %}
-                                                <a id="btn-eliminar-data-tracking"
-                                                   class="btn btn-danger m-btn m-btn--custom m-btn--icon m-btn--air m--pull-right"
-                                                   href="javascript:;">
-							<span>
-								<i class="la la-trash-o"></i>
-								<span>
-									Delete
-								</span>
-							</span>
-                                                </a>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
 
-                            </div>
-                        </div>
-                        <!--end: actions -->
-
-                        <!--begin: Datatable -->
-                        <div class="m_datatable" id="data-tracking-table-editable"></div>
-                        <!--end: Datatable -->
-                    </div>
                 </div>
-
             </div>
-        </div>
+            <!--end: Search Form -->
 
+            <!--begin: calendar -->
+            <div id="kt_calendar"></div>
+            <!--end: calendar -->
+
+        </div>
     </div>
 
-    <div class="modal fade" id="modal-data-tracking" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">New Measurement</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form class="m-form" id="data-tracking-form" action="#"
-                          enctype="multipart/form-data" method="post">
+</div>
 
-                        <input type="hidden" id="data_tracking_id" name="data_tracking_id"/>
+<div class="modal fade" id="modal-data-tracking" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Measurement</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
 
-                        <div class="form-group m-form__group ic-form-group">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label>
-                                        <span class="ic-step-number">1</span>
-                                        Date
-                                        <span class="ic-small italic">(required)</span>
-                                    </label>
-                                    <div class='input-group date'>
-                                        <input type='text' class="form-control m-input date-picker "
-                                               placeholder="Select" autocomplete="off"
-                                               id="data-tracking-date" name="date"/>
-                                        <div class="input-group-append">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active wizard-tab" data-item="1"
+                           data-toggle="tab" href="#tab-content-general" id="tab-general">
+                            General
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link wizard-tab" data-item="2"
+                           data-toggle="tab" href="#tab-content-items" id="tab-items">
+                            Items
+                        </a>
+                    </li>
+
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab-content-general" role="tabpanel">
+                        <form class="m-form" id="data-tracking-form" action="#"
+                              enctype="multipart/form-data" method="post">
+
+                            <input type="hidden" id="data_tracking_id" name="data_tracking_id"/>
+
+                            <div class="form-group m-form__group ic-form-group">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label>
+                                            <span class="ic-step-number">1</span>
+                                            Date
+                                            <span class="ic-small italic">(required)</span>
+                                        </label>
+                                        <div class='input-group date'>
+                                            <input type='text' class="form-control m-input date-picker "
+                                                   placeholder="Select" autocomplete="off"
+                                                   id="data-tracking-date" name="date"/>
+                                            <div class="input-group-append">
                                             <span class="input-group-text">
                                                 <i class="la la-calendar glyphicon-th"></i>
                                             </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label>
-                                        Inspector
-                                    </label>
-                                    <div class="row">
-                                        <div class="col-md-10">
-                                            <select class="form-control m-select2 event-change" id="inspector" name="inspector">
-                                                <option value="">Select</option>
-                                                {% for item in inspectors %}
-                                                    <option value="{{ item.inspectorId }}">{{ item.name }}</option>
-                                                {% endfor %}
-                                            </select>
+                                    <div class="col-md-6">
+                                        <label>
+                                            Inspector
+                                        </label>
+                                        <div class="row">
+                                            <div class="col-md-10">
+                                                <select class="form-control m-select2 event-change" id="inspector"
+                                                        name="inspector">
+                                                    <option value="">Select</option>
+                                                    {% for item in inspectors %}
+                                                        <option value="{{ item.inspectorId }}">{{ item.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2" style="padding-top: 3px; padding-left: 0px;">
+                                                <a href="javascript:;" title="Add inspector" id="btn-add-inspector"
+                                                   class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                                                    <i class="la la-plus"></i>
+                                                </a>
+                                            </div>
                                         </div>
-                                        <div class="col-md-2" style="padding-top: 3px; padding-left: 0px;">
-                                            <a href="javascript:;" title="Add inspector" id="btn-add-inspector"
-                                               class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
-                                                <i class="la la-plus"></i>
-                                            </a>
-                                        </div>
-                                    </div>
 
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group ic-form-group">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <label>
-                                        <span class="ic-step-number">2</span>
-                                        Pay Item Measured
-                                        <span class="ic-small italic">(required)</span>
-                                    </label>
-                                    <div class="row">
-                                        <div class="col-md-10" id="select-item-data-tracking">
-                                            <select class="form-control m-select2 select-item-data-tracking" id="item-data-tracking">
-                                                <option value="">Select</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-2" style="padding-top: 3px; padding-left: 0px;">
-                                            <a href="javascript:;" title="Add item" id="btn-add-item"
-                                               class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
-                                                <i class="la la-plus"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <div class="col-md-4 m--hide" id="div-yield-calculation">
-                                    <label>Yield Calculation</label>
-                                    <input type="text" class="form-control" id="item-yield-calculation" disabled>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group ic-form-group">
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label>
-                                        Quatity
-                                        <span class="ic-small italic">(required)</span>
-                                    </label>
-                                    <input type="text" class="form-control form-control-number" id="data-tracking-quantity" name="quantity">
-                                </div>
-                                <div class="col-md-3">
-                                    <label>
-                                        Price
-                                    </label>
-                                    <div class="input-group m-input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">$</span>
-                                        </div>
-                                        <input type="text" class="form-control form-control-number" id="data-tracking-price"
-                                               name="price">
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>
-                                        Pay Item Measured Total
-                                    </label>
-                                    <div class="input-group m-input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">$</span>
-                                        </div>
-                                        <input type="text" class="form-control form-control-number" id="data-tracking-total"
-                                               name="total" disabled>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <label>
-                                        Total Concrete Used (CY)
-                                    </label>
-                                    <input type="text" class="form-control form-control-number" id="total_conc_used" name="total_conc_used">
-                                </div>
-                                <div class="col-md-3">
-                                    <label>
-                                        Lost Concrete
-                                    </label>
-                                    <input type="text" class="form-control form-control-number" id="lost_concrete" name="lost_concrete" disabled>
-                                </div>
-                                <div class="col-md-3">
-                                    <label>
-                                        Total Labor
-                                    </label>
-                                    <input type="text" class="form-control form-control-number" id="total_labor" name="total_labor">
-                                </div>
-                                <div class="col-md-3">
-                                    <label>
-                                        Total Stamps
-                                    </label>
-                                    <input type="text" class="form-control form-control-number" id="total_stamps" name="total_stamps">
+                            <div class="form-group m-form__group ic-form-group">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label>
+                                            <span class="ic-step-number">2</span>
+                                            Station Number(s)
+                                            <span class="ic-small italic">(optional)</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="station_number"
+                                               name="station_number">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>
+                                            Measured By
+                                        </label>
+                                        <input type="text" class="form-control" id="measured_by" name="measured_by">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="form-group m-form__group ic-form-group">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label>
-                                        <span class="ic-step-number">4</span>
-                                        Station Number(s)
-                                        <span class="ic-small italic">(optional)</span>
-                                    </label>
-                                    <input type="text" class="form-control" id="station_number" name="station_number">
-                                </div>
-                                <div class="col-md-6">
-                                    <label>
-                                       Measured By
-                                    </label>
-                                    <input type="text" class="form-control" id="measured_by" name="measured_by">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group ic-form-group">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label>
-                                        <span class="ic-step-number">5</span>
-                                        Conc Vendor
-                                        <span class="ic-small italic">(optional)</span>
-                                    </label>
-                                    <input type="text" class="form-control" id="conc_vendor" name="conc_vendor">
-                                </div>
-                                <div class="col-md-6">
-                                    <label>
-                                        Crew Lead
-                                    </label>
-                                    <input type="text" class="form-control" id="crew_lead" name="crew_lead">
+                            <div class="form-group m-form__group ic-form-group">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label>
+                                            <span class="ic-step-number">3</span>
+                                            Conc Vendor
+                                            <span class="ic-small italic">(optional)</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="conc_vendor" name="conc_vendor">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>
+                                            Crew Lead
+                                        </label>
+                                        <input type="text" class="form-control" id="crew_lead" name="crew_lead">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="form-group m-form__group ic-form-group">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label>
-                                        <span class="ic-step-number">6</span>
-                                        Notes
-                                        <span class="ic-small italic">(optional)</span>
-                                    </label>
-                                    <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
-                                </div>
-                                <div class="col-md-6">
-                                    <label>
-                                        Other Materials
-                                    </label>
-                                    <textarea class="form-control" id="other_materials" name="other_materials" rows="3"></textarea>
-                                </div>
-                            </div>
-                        </div>
 
+                            <div class="form-group m-form__group ic-form-group">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label>
+                                            <span class="ic-step-number">4</span>
+                                            Total Concrete Used (CY)
+                                            <span class="ic-small italic">(optional)</span>
+                                        </label>
+                                        <input type="text" class="form-control form-control-number"
+                                               id="total_conc_used" name="total_conc_used">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>
+                                            Total Labor
+                                        </label>
+                                        <input type="text" class="form-control form-control-number" id="total_labor"
+                                               name="total_labor">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>
+                                            Total Stamps
+                                        </label>
+                                        <input type="text" class="form-control form-control-number"
+                                               id="total_stamps" name="total_stamps">
+                                    </div>
+                                </div>
+                            </div>
 
-                    </form>
+                            <div class="form-group m-form__group ic-form-group">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label>
+                                            <span class="ic-step-number">5</span>
+                                            Notes
+                                            <span class="ic-small italic">(optional)</span>
+                                        </label>
+                                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>
+                                            Other Materials
+                                        </label>
+                                        <textarea class="form-control" id="other_materials" name="other_materials"
+                                                  rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="tab-content-items" role="tabpanel">
+                        <div class="row" id="lista-items">
+                            <div class="col-lg-12">
+                                <!--begin: Search Form -->
+                                <div class="m-form m-form--label-align-right">
+                                    <div class="row align-items-center">
+                                        <div class="col-xl-12 order-1">
+                                            <div class="form-group m-form__group row align-items-center">
+                                                {% if permiso.agregar or permiso.editar %}
+                                                    <div class="col-md-2">
+                                                        <div class="btn-group">
+                                                            <button id="btn-agregar-item" class="btn btn-success"
+                                                                    style="margin-bottom: 20px; margin-top: 10px;">
+                                                                New <i class="la la-plus"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+
+                                                <div class="col-md-6"></div>
+                                                <div class="col-md-4">
+                                                    <div class="m-input-icon m-input-icon--left">
+                                                        <input type="text"
+                                                               class="form-control m-input m_form_search"
+                                                               placeholder="Search...">
+                                                        <span class="m-input-icon__icon m-input-icon__icon--left">
+                                                        <span><i class="la la-search"></i></span>
+                                                    </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <!--end: Search Form -->
+                                <!--begin: Datatable -->
+                                <div class="m_datatable" id="items-table-editable"></div>
+                                <!--end: Datatable -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
+            </div>
+            <div class="modal-footer">
+                {% if permiso.agregar or permiso.editar %}
                     <button type="button" class="btn btn-success" id="btn-salvar-data-tracking">Save</button>
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                </div>
+                {% endif %}
+
+                {% if permiso.eliminar %}
+                    <button type="button" class="btn btn-danger m--hide" id="btn-eliminar-data-tracking">Delete</button>
+                {% endif %}
+
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- components -->
-    {{ render(controller('App\\Controller\\Admin\\DefaultController::renderModalInspector')) }}
+<!-- items -->
+<div class="modal fade" id="modal-data-tracking-item" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    New Pay Item Measured
+                </h5>
+
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+
+            </div>
+            <div class="modal-body">
+                <form class="m-form" id="data-tracking-item-form" action="#"
+                      enctype="multipart/form-data" method="post">
+
+                    <input type="hidden" id="data_tracking_item_id" name="data_tracking_item_id"/>
+
+                    <div class="form-group m-form__group">
+                        <label>
+                            Pay Item Measured
+                            <span class="ic-small italic">(required)</span>
+                        </label>
+                        <div class="row">
+                            <div class="col-md-10" id="select-item-data-tracking">
+                                <select class="form-control m-select2 select-item-data-tracking"
+                                        id="item-data-tracking">
+                                    <option value="">Select</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2" style="padding-top: 3px; padding-left: 0px;">
+                                <a href="javascript:;" title="Add item" id="btn-add-item"
+                                   class="btn btn-success m-btn m-btn--icon m-btn--icon-only">
+                                    <i class="la la-plus"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group m-form__group">
+                        <label>
+                            Quatity
+                            <span class="ic-small italic">(required)</span>
+                        </label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control form-control-number"
+                                       id="data-tracking-quantity" name="quantity">
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btn-salvar-data-tracking-item">Save</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-eliminar-item" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5>Are you sure you want to delete the selected item?</h5>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal" id="btn-delete-item">Yes
+                </button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- components -->
+{{ render(controller('App\\Controller\\Admin\\DefaultController::renderModalInspector')) }}
     {{ render(controller('App\\Controller\\Admin\\DefaultController::renderModalItemProject')) }}
 
 {% endblock %}
 
 {% block javascriptsspecific %}
+
+    <script src="{{ asset('bundles/ican/plugins/fullcalendar/fullcalendar.bundle.js') }}"></script>
 
     <!-- DevExtreme libraries (reference only one of them) -->
     <!--
