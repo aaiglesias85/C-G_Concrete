@@ -70,7 +70,7 @@ var DataTracking = function () {
                         element.data('title', event.title);
 
                         content = `
-                                    <b>${event.extendedProps.date}</b></br>
+                                    <b>${event.extendedProps.fecha}</b></br>
                                     ${descripcion}</br>
                                     <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
                                     <b>Lost Concrete: ${event.extendedProps.lostConcrete}</b>
@@ -88,7 +88,7 @@ var DataTracking = function () {
                         element.data('title', event.title);
 
                         content = `
-                                    <b>${event.extendedProps.date}</b></br>
+                                    <b>${event.extendedProps.fecha}</b></br>
                                     ${descripcion}</br>
                                     <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
                                     <b>Lost Concrete: ${event.extendedProps.lostConcrete}</b>
@@ -105,7 +105,7 @@ var DataTracking = function () {
                         element.data('title', event.title);
 
                         content = `
-                                    <b>${event.extendedProps.date}</b></br>
+                                    <b>${event.extendedProps.fecha}</b></br>
                                     ${descripcion}</br>
                                     <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
                                     <b>Lost Concrete: ${event.extendedProps.lostConcrete}</b>

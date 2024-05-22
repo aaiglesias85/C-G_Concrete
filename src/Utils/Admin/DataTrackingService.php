@@ -392,7 +392,7 @@ class DataTrackingService extends Base
                 'start' => $value->getDate()->format('Y-m-d H:i'),
                 'end' => $value->getDate()->format('Y-m-d') . " 23:59",
                 'className' => "fc-event-default",
-                "date" => $value->getDate()->format('m/d/Y'),
+                "fecha" => $value->getDate()->format('m/d/Y'),
                 "stationNumber" => $value->getStationNumber(),
                 "measuredBy" => $value->getMeasuredBy(),
                 "totalConcUsed" => $value->getTotalConcUsed(),
@@ -439,44 +439,5 @@ class DataTrackingService extends Base
         }
 
         return round($total_conc_used - $total_conc_item, 2);
-    }
-
-    /**
-     * TotalDataTrackings: Total de items
-     * @param string $sSearch Para buscar
-     * @author Marcel
-     */
-    public function TotalDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin)
-    {
-        $total = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->TotalDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin);
-
-        return $total;
-    }
-
-    /**
-     * ListarAcciones: Lista los permisos de un usuario de la BD
-     *
-     * @author Marcel
-     */
-    public function ListarAcciones($id)
-    {
-        $usuario = $this->getUser();
-        $permiso = $this->BuscarPermiso($usuario->getUsuarioId(), 10);
-
-        $acciones = "";
-
-        if (count($permiso) > 0) {
-            if ($permiso[0]['editar']) {
-                $acciones .= '<a href="javascript:;" class="edit m-portlet__nav-link btn m-btn m-btn--hover-success m-btn--icon m-btn--icon-only m-btn--pill" title="Edit record" data-id="' . $id . '"> <i class="la la-edit"></i> </a> ';
-            } else {
-                $acciones .= '<a href="javascript:;" class="edit m-portlet__nav-link btn m-btn m-btn--hover-success m-btn--icon m-btn--icon-only m-btn--pill" title="View record" data-id="' . $id . '"> <i class="la la-eye"></i> </a> ';
-            }
-            if ($permiso[0]['eliminar']) {
-                $acciones .= ' <a href="javascript:;" class="delete m-portlet__nav-link btn m-btn m-btn--hover-danger m-btn--icon m-btn--icon-only m-btn--pill" title="Delete record" data-id="' . $id . '"><i class="la la-trash"></i></a>';
-            }
-        }
-
-        return $acciones;
     }
 }
