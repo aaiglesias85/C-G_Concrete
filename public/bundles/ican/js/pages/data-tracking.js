@@ -69,7 +69,7 @@ var DataTracking = function () {
 
                         element.data('title', event.title);
 
-                        content = `
+                        content = ` Pay Item Measured </br>
                                     <b>${event.extendedProps.fecha}</b></br>
                                     ${descripcion}</br>
                                     <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
@@ -143,6 +143,26 @@ var DataTracking = function () {
             calendar.on('dateClick', function (info) {
                 //console.log(info);
                 //console.log('clicked on ' + info.dateStr);
+
+                // validar que haya seleccionado un proyecto
+                var project_id = $('#project').val();
+                if (project_id == '') {
+
+                    toastr.error('Select the project in the top section', "");
+
+                    var $element = $('#select-project .select2');
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", "This field is required")
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+
+                    return;
+                }
 
                 resetForms();
 
@@ -265,6 +285,16 @@ var DataTracking = function () {
 
         $('#btn-eliminar-data-tracking').removeClass('m--hide').addClass('m--hide');
         $('#form-group-totals').removeClass('m--hide').addClass('m--hide');
+
+        // add datos de proyecto
+        $('#proyect-number').html('');
+        $('#proyect-name').html('');
+        if ($('#project').val() != '') {
+            var project = $("#project option:selected").text().split('-');
+            $('#proyect-number').html(project[0]);
+            $('#proyect-name').html(project[1]);
+        }
+
     };
 
     //Validacion
@@ -326,7 +356,7 @@ var DataTracking = function () {
             var project_id = $('#project').val();
             if (project_id == '') {
 
-                toastr.error('Select the project in the side panel', "");
+                toastr.error('Select the project in the top section', "");
 
                 var $element = $('#select-project .select2');
                 $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
@@ -467,7 +497,10 @@ var DataTracking = function () {
                 success: function (response) {
                     mApp.unblock('#modal-data-tracking .modal-content');
                     if (response.success) {
-                        //Datos project
+
+                        // datos project
+                        $('#proyect-number').html(response.data_tracking.project_number);
+                        $('#proyect-name').html(response.data_tracking.project_name);
 
                         $('#data-tracking-date').val(response.data_tracking.date);
 
@@ -1317,7 +1350,7 @@ var DataTracking = function () {
                         initSelectProject();
 
                         var projects = response.projects;
-                        if(projects.length > 0){
+                        if (projects.length > 0) {
                             for (var i = 0; i < projects.length; i++) {
                                 $('#project').append(new Option(`${projects[i].number} - ${projects[i].name}`, projects[i].project_id, false, false));
                             }
@@ -1331,7 +1364,7 @@ var DataTracking = function () {
 
                             // close modal
                             $('#modal-filter-project').modal('hide');
-                        }else{
+                        } else {
                             toastr.error('No projects found', "Error !!!");
                         }
 

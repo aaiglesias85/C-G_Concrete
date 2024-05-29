@@ -71,6 +71,9 @@ class DataTrackingService extends Base
 
             $project_id = $entity->getProject()->getProjectId();
             $arreglo_resultado['project_id'] = $project_id;
+            $arreglo_resultado['project_number'] = $entity->getProject()->getProjectNumber();
+            $arreglo_resultado['project_name'] = $entity->getProject()->getName();
+
             $arreglo_resultado['date'] = $entity->getDate()->format('m/d/Y');
             $arreglo_resultado['inspector_id'] = $entity->getInspector() != null ? $entity->getInspector()->getInspectorId() : '';
             $arreglo_resultado['station_number'] = $entity->getStationNumber();
@@ -102,7 +105,7 @@ class DataTrackingService extends Base
             $lost_concrete = $this->CalcularLostConcrete($entity);
             $arreglo_resultado['lost_concrete'] = $lost_concrete;
 
-            $total_concrete_yiel =  $this->CalcularTotalConcreteYiel($data_tracking_id);
+            $total_concrete_yiel = $this->CalcularTotalConcreteYiel($data_tracking_id);
             $arreglo_resultado['total_concrete_yiel'] = $total_concrete_yiel;
 
             $total_quantity_today = $this->getDoctrine()->getRepository(DataTrackingItem::class)
@@ -113,7 +116,7 @@ class DataTrackingService extends Base
                 ->TotalDaily($data_tracking_id);
             $arreglo_resultado['total_daily_today'] = $total_daily_today;
 
-            $total_concrete =  $total_conc_used * $conc_price;
+            $total_concrete = $total_conc_used * $conc_price;
             $arreglo_resultado['total_concrete'] = $total_concrete;
 
             $profit = $total_concrete - $total_conc_used - $total_daily_today;
@@ -427,7 +430,7 @@ class DataTrackingService extends Base
 
             $lost_concrete = $this->CalcularLostConcrete($value);
             // totales
-            $total_concrete_yiel =  $this->CalcularTotalConcreteYiel($data_tracking_id);
+            $total_concrete_yiel = $this->CalcularTotalConcreteYiel($data_tracking_id);
 
             $total_quantity_today = $this->getDoctrine()->getRepository(DataTrackingItem::class)
                 ->TotalQuantity($data_tracking_id);
@@ -437,12 +440,12 @@ class DataTrackingService extends Base
 
             $total_conc_used = $value->getTotalConcUsed();
             $conc_price = $value->getConcPrice();
-            $total_concrete =  $total_conc_used * $conc_price;
+            $total_concrete = $total_conc_used * $conc_price;
             $profit = $total_concrete - $total_conc_used - $total_daily_today;
 
             $arreglo_resultado[] = [
                 "data_tracking_id" => $data_tracking_id,
-                'title' => $value->getProject()->getProjectNumber() . " - Pay Item Measured",
+                'title' => $value->getProject()->getProjectNumber() . " - " . $value->getProject()->getName(),
                 'start' => $value->getDate()->format('Y-m-d H:i'),
                 'end' => $value->getDate()->format('Y-m-d') . " 23:59",
                 'className' => "fc-event-default",
