@@ -961,6 +961,15 @@ var Projects = function () {
                 }
             },
             {
+                field: "total",
+                title: "Total",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.total, 2, '.', ',')}</span>`;
+                }
+            },
+            {
                 field: "posicion",
                 width: 120,
                 title: "Actions",
@@ -1038,6 +1047,15 @@ var Projects = function () {
             .on('m-datatable--on-uncheck', function (e, args) {
                 //eventsWriter('Checkbox inactive: ' + args.toString());
             });
+
+        // totals
+        $('#total_count_items').val(items.length);
+
+        var total = 0;
+        items.forEach(item => {
+            total += item.quantity * item.price;
+        });
+        $('#total_total_items').val(MyApp.formatearNumero(total, 2, '.', ','));
     };
     var actualizarTableListaItems = function () {
         if (oTableItems) {
@@ -1123,6 +1141,7 @@ var Projects = function () {
 
                 var quantity = $('#item-quantity').val();
                 var price = $('#item-price').val();
+                var total = quantity * price;
 
                 var yield_calculation = $('#yield-calculation').val();
                 var equation_id = $('#equation').val();
@@ -1139,8 +1158,9 @@ var Projects = function () {
                         equation_id: equation_id,
                         yield_calculation: yield_calculation,
                         yield_calculation_name: yield_calculation_name,
-                        price: price,
                         quantity: quantity,
+                        price: price,
+                        total: total,
                         posicion: items.length
                     });
 
@@ -1154,8 +1174,9 @@ var Projects = function () {
                         items[posicion].yield_calculation = yield_calculation;
                         items[posicion].yield_calculation_name = yield_calculation_name;
                         items[posicion].equation_id = equation_id;
-                        items[posicion].price = price;
                         items[posicion].quantity = quantity;
+                        items[posicion].price = price;
+                        items[posicion].total = total;
                     }
                 }
 

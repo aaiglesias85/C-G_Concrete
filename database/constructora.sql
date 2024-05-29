@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 21-05-2024 a las 02:48:31
+-- Tiempo de generación: 28-05-2024 a las 19:39:59
 -- Versión del servidor: 11.2.2-MariaDB
 -- Versión de PHP: 8.1.12
 
@@ -82,13 +82,22 @@ CREATE TABLE `data_tracking` (
   `notes` text DEFAULT NULL,
   `other_materials` text DEFAULT NULL,
   `total_conc_used` float(8,2) DEFAULT NULL,
+  `conc_price` float(8,2) DEFAULT NULL,
   `total_labor` float(8,2) DEFAULT NULL,
+  `labor_price` float(8,2) DEFAULT NULL,
   `total_stamps` float(8,2) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL,
   `inspector_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `data_tracking`
+--
+
+INSERT INTO `data_tracking` (`id`, `date`, `station_number`, `measured_by`, `conc_vendor`, `crew_lead`, `notes`, `other_materials`, `total_conc_used`, `conc_price`, `total_labor`, `labor_price`, `total_stamps`, `created_at`, `updated_at`, `project_id`, `inspector_id`) VALUES
+(2, '2024-05-22', '98653865', 'Marcel', 'ROM', 'dsfsdfds', 'fdgfd fdg ', 'fdgdf gdfgdfg', 5000.00, 1500.00, 4.00, NULL, 4.00, '2024-05-22 14:15:58', '2024-05-28 19:35:59', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -103,6 +112,15 @@ CREATE TABLE `data_tracking_item` (
   `data_tracking_id` int(11) DEFAULT NULL,
   `project_item_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `data_tracking_item`
+--
+
+INSERT INTO `data_tracking_item` (`id`, `quantity`, `price`, `data_tracking_id`, `project_item_id`) VALUES
+(5, 150.00, 16.50, 2, 1),
+(6, 50.00, 63.00, 2, 2),
+(7, 250.00, 25.00, 2, 8);
 
 -- --------------------------------------------------------
 
@@ -454,7 +472,14 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (134, 'Add', 'Unit', 'The unit is added: ZX', '::1', '2024-05-18 16:55:58', 1),
 (135, 'Delete', 'Unit', 'The unit is deleted: ZX', '::1', '2024-05-18 16:56:25', 1),
 (136, 'Add', 'Unit', 'The unit is added: ZY', '::1', '2024-05-18 18:46:54', 1),
-(137, 'Delete', 'Unit', 'The unit is deleted: ZY', '::1', '2024-05-18 18:47:10', 1);
+(137, 'Delete', 'Unit', 'The unit is deleted: ZY', '::1', '2024-05-18 18:47:10', 1),
+(138, 'Add', 'Data Tracking', 'The data tracking is add, Project: 0009003 - Houston Texas, Date: 05/21/2024', '::1', '2024-05-21 18:33:02', 1),
+(139, 'Delete', 'Data Tracking', 'The item of the data tracking is deleted, Item: CONC CURB & GUTTEER 8INX30IN TP7, Project: 0009003 - Houston Texas, Date: 05/21/2024', '::1', '2024-05-21 18:35:45', 1),
+(140, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 05/21/2024', '::1', '2024-05-21 18:35:55', 1),
+(141, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 05/21/2024', '::1', '2024-05-21 19:32:51', 1),
+(142, 'Delete', 'Data Tracking', 'The data tracking is deleted, Project: 0009003 - Houston Texas, Date: 05/21/2024', '::1', '2024-05-21 19:32:59', 1),
+(143, 'Add', 'Data Tracking', 'The data tracking is add, Project: 0009003 - Houston Texas, Date: 05/22/2024', '::1', '2024-05-22 14:15:59', 1),
+(144, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 05/22/2024', '::1', '2024-05-28 19:35:59', 1);
 
 -- --------------------------------------------------------
 
@@ -875,13 +900,13 @@ ALTER TABLE `company_contact`
 -- AUTO_INCREMENT de la tabla `data_tracking`
 --
 ALTER TABLE `data_tracking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `data_tracking_item`
 --
 ALTER TABLE `data_tracking_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `equation`
@@ -923,7 +948,7 @@ ALTER TABLE `item`
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=138;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=145;
 
 --
 -- AUTO_INCREMENT de la tabla `notification`

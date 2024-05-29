@@ -80,9 +80,23 @@ class DataTracking
     /**
      * @var float
      *
+     * @ORM\Column(name="conc_price", type="float", nullable=false)
+     */
+    private $concPrice;
+
+    /**
+     * @var float
+     *
      * @ORM\Column(name="total_labor", type="float", nullable=false)
      */
     private $totalLabor;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="labor_price", type="float", nullable=false)
+     */
+    private $laborPrice;
 
     /**
      * @var float
@@ -280,5 +294,25 @@ class DataTracking
     public function setTotalStamps($total_stamps)
     {
         $this->totalStamps = $total_stamps;
+    }
+
+    public function getConcPrice()
+    {
+        return $this->concPrice;
+    }
+
+    public function setConcPrice($concPrice)
+    {
+        $this->concPrice = $concPrice;
+    }
+
+    public function getLaborPrice()
+    {
+        return $this->laborPrice;
+    }
+
+    public function setLaborPrice($laborPrice)
+    {
+        $this->laborPrice = $laborPrice;
     }
 }

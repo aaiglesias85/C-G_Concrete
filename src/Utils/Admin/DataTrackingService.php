@@ -76,11 +76,18 @@ class DataTrackingService extends Base
             $arreglo_resultado['station_number'] = $entity->getStationNumber();
             $arreglo_resultado['measured_by'] = $entity->getMeasuredBy();
             $arreglo_resultado['conc_vendor'] = $entity->getConcVendor();
+
+            $total_conc_used = $entity->getTotalConcUsed();
+            $arreglo_resultado['total_conc_used'] = $total_conc_used;
+
+            $conc_price = $entity->getConcPrice();
+            $arreglo_resultado['conc_price'] = $conc_price;
+
             $arreglo_resultado['crew_lead'] = $entity->getCrewLead();
             $arreglo_resultado['notes'] = $entity->getNotes();
             $arreglo_resultado['other_materials'] = $entity->getOtherMaterials();
-            $arreglo_resultado['total_conc_used'] = $entity->getTotalConcUsed();
             $arreglo_resultado['total_labor'] = $entity->getTotalLabor();
+            $arreglo_resultado['labor_price'] = $entity->getLaborPrice();
             $arreglo_resultado['total_stamps'] = $entity->getTotalStamps();
 
             // items
@@ -89,6 +96,28 @@ class DataTrackingService extends Base
 
             // project items
             $arreglo_resultado['project_items'] = $projectService->ListarItemsDeProject($project_id);
+
+
+            // totales
+            $lost_concrete = $this->CalcularLostConcrete($entity);
+            $arreglo_resultado['lost_concrete'] = $lost_concrete;
+
+            $total_concrete_yiel =  $this->CalcularTotalConcreteYiel($data_tracking_id);
+            $arreglo_resultado['total_concrete_yiel'] = $total_concrete_yiel;
+
+            $total_quantity_today = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                ->TotalQuantity($data_tracking_id);
+            $arreglo_resultado['total_quantity_today'] = $total_quantity_today;
+
+            $total_daily_today = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                ->TotalDaily($data_tracking_id);
+            $arreglo_resultado['total_daily_today'] = $total_daily_today;
+
+            $total_concrete =  $total_conc_used * $conc_price;
+            $arreglo_resultado['total_concrete'] = $total_concrete;
+
+            $profit = $total_concrete - $total_conc_used - $total_daily_today;
+            $arreglo_resultado['profit'] = $profit;
 
             $resultado['success'] = true;
             $resultado['data_tracking'] = $arreglo_resultado;
@@ -110,13 +139,23 @@ class DataTrackingService extends Base
             ->ListarItems($data_tracking_id);
         foreach ($lista as $key => $value) {
 
+            $yield_calculation_name = $this->DevolverYieldCalculationDeItemProject($value->getProjectItem());
+
+            $quantity = $value->getQuantity();
+            $price = $value->getPrice();
+            $total = $quantity * $price;
+
             $items[] = [
                 'data_tracking_item_id' => $value->getId(),
                 "item_id" => $value->getProjectItem()->getId(),
                 "item" => $value->getProjectItem()->getItem()->getDescription(),
                 "unit" => $value->getProjectItem()->getItem()->getUnit()->getDescription(),
-                "quantity" => $value->getQuantity(),
-                "price" => $value->getPrice(),
+                "quantity" => $quantity,
+                "price" => $price,
+                "total" => $total,
+                "yield_calculation" => $value->getProjectItem()->getYieldCalculation(),
+                "yield_calculation_name" => $yield_calculation_name,
+                "equation_id" => $value->getProjectItem()->getEquation() != null ? $value->getProjectItem()->getEquation()->getEquationId() : '',
                 "posicion" => $key
             ];
         }
@@ -232,8 +271,8 @@ class DataTrackingService extends Base
      * @return array
      */
     public function SalvarDataTracking($data_tracking_id, $project_id, $date, $inspector_id,
-                                       $station_number, $measured_by, $conc_vendor, $crew_lead, $notes, $other_materials,
-                                       $total_conc_used, $total_labor, $total_stamps, $items)
+                                       $station_number, $measured_by, $conc_vendor, $conc_price, $crew_lead, $notes, $other_materials,
+                                       $total_conc_used, $total_labor, $labor_price, $total_stamps, $items)
     {
 
         $em = $this->getDoctrine()->getManager();
@@ -277,11 +316,13 @@ class DataTrackingService extends Base
         $entity->setStationNumber($station_number);
         $entity->setMeasuredBy($measured_by);
         $entity->setConcVendor($conc_vendor);
+        $entity->setConcPrice($conc_price);
         $entity->setCrewLead($crew_lead);
         $entity->setNotes($notes);
         $entity->setOtherMaterials($other_materials);
         $entity->setTotalConcUsed($total_conc_used);
         $entity->setTotalLabor($total_labor);
+        $entity->setLaborPrice($labor_price);
         $entity->setTotalStamps($total_stamps);
 
         if ($is_new) {
@@ -385,6 +426,19 @@ class DataTrackingService extends Base
             $data_tracking_id = $value->getId();
 
             $lost_concrete = $this->CalcularLostConcrete($value);
+            // totales
+            $total_concrete_yiel =  $this->CalcularTotalConcreteYiel($data_tracking_id);
+
+            $total_quantity_today = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                ->TotalQuantity($data_tracking_id);
+
+            $total_daily_today = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                ->TotalDaily($data_tracking_id);
+
+            $total_conc_used = $value->getTotalConcUsed();
+            $conc_price = $value->getConcPrice();
+            $total_concrete =  $total_conc_used * $conc_price;
+            $profit = $total_concrete - $total_conc_used - $total_daily_today;
 
             $arreglo_resultado[] = [
                 "data_tracking_id" => $data_tracking_id,
@@ -395,20 +449,55 @@ class DataTrackingService extends Base
                 "fecha" => $value->getDate()->format('m/d/Y'),
                 "stationNumber" => $value->getStationNumber(),
                 "measuredBy" => $value->getMeasuredBy(),
-                "totalConcUsed" => $value->getTotalConcUsed(),
+                "totalConcUsed" => $total_conc_used,
                 "lostConcrete" => $lost_concrete,
                 "concVendor" => $value->getConcVendor(),
+                "concPrice" => $value->getConcPrice(),
                 "inspector" => $value->getInspector() != null ? $value->getInspector()->getName() : '',
                 "inspectorNumber" => $value->getInspector() != null ? $value->getInspector()->getPhone() : '',
                 "crewLead" => $value->getCrewLead(),
                 "notes" => $value->getNotes(),
                 "totalLabor" => $value->getTotalLabor(),
+                "laborPrice" => $value->getLaborPrice(),
                 "totalStamps" => $value->getTotalStamps(),
-                "otherMaterials" => $value->getOtherMaterials()
+                "otherMaterials" => $value->getOtherMaterials(),
+                // totales
+                "total_concrete_yiel" => $total_concrete_yiel,
+                'total_quantity_today' => $total_quantity_today,
+                'total_daily_today' => $total_daily_today,
+                'total_concrete' => $total_concrete,
+                'profit' => $profit
             ];
         }
 
         return $arreglo_resultado;
+    }
+
+    /**
+     * CalcularTotalConcreteYiel
+     * @param $data_tracking_id
+     * @return float
+     */
+    private function CalcularTotalConcreteYiel($data_tracking_id)
+    {
+        $total_conc_yiel = 0;
+
+        $data_tracking_items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+            ->ListarItems($data_tracking_id);
+        foreach ($data_tracking_items as $data_tracking_item) {
+
+            // aplicar el yield
+            $quantity_yield = 0;
+            if ($data_tracking_item->getProjectItem()->getYieldCalculation() == "equation" && $data_tracking_item->getProjectItem()->getEquation() != null) {
+                $quantity = $data_tracking_item->getQuantity();
+                $quantity_yield = $this->evaluateExpression($data_tracking_item->getProjectItem()->getEquation()->getEquation(), $quantity);
+            }
+
+            $total_conc_yiel += $quantity_yield;
+
+        }
+
+        return $total_conc_yiel;
     }
 
     /**

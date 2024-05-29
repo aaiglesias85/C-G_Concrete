@@ -54,4 +54,73 @@ class DataTrackingItemRepository extends EntityRepository
         return $consulta->getQuery()->getResult();
     }
 
+
+    /**
+     * TotalQuantity: Total de quantity items de la BD
+     * @param string $data_tracking_id
+     *
+     * @return float
+     */
+    public function TotalQuantity($data_tracking_id)
+    {
+        $em = $this->getEntityManager();
+        $consulta = 'SELECT SUM(d_t_i.quantity) FROM App\Entity\DataTrackingItem d_t_i ';
+        $join = ' LEFT JOIN d_t_i.dataTracking d_t ';
+        $where = '';
+
+        if ($data_tracking_id != '') {
+            $esta_query = explode("WHERE", $where);
+            if (count($esta_query) == 1)
+                $where .= 'WHERE (d_t.id = :data_tracking_id) ';
+            else
+                $where .= 'AND (d_t.id = :data_tracking_id) ';
+        }
+
+        $consulta .= $join;
+        $consulta .= $where;
+        $query = $em->createQuery($consulta);
+        //Adicionar parametros
+        //$sSearch
+        $esta_query_data_tracking_id = substr_count($consulta, ':data_tracking_id');
+        if ($esta_query_data_tracking_id == 1) {
+            $query->setParameter('data_tracking_id', $data_tracking_id);
+        }
+
+        return $query->getSingleScalarResult();
+    }
+
+    /**
+     * TotalDaily: Total de quantity * price items de la BD
+     * @param string $data_tracking_id
+     *
+     * @return float
+     */
+    public function TotalDaily($data_tracking_id)
+    {
+        $em = $this->getEntityManager();
+        $consulta = 'SELECT SUM(d_t_i.quantity * d_t_i.price) FROM App\Entity\DataTrackingItem d_t_i ';
+        $join = ' LEFT JOIN d_t_i.dataTracking d_t ';
+        $where = '';
+
+        if ($data_tracking_id != '') {
+            $esta_query = explode("WHERE", $where);
+            if (count($esta_query) == 1)
+                $where .= 'WHERE (d_t.id = :data_tracking_id) ';
+            else
+                $where .= 'AND (d_t.id = :data_tracking_id) ';
+        }
+
+        $consulta .= $join;
+        $consulta .= $where;
+        $query = $em->createQuery($consulta);
+        //Adicionar parametros
+        //$sSearch
+        $esta_query_data_tracking_id = substr_count($consulta, ':data_tracking_id');
+        if ($esta_query_data_tracking_id == 1) {
+            $query->setParameter('data_tracking_id', $data_tracking_id);
+        }
+
+        return $query->getSingleScalarResult();
+    }
+
 }

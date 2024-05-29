@@ -296,9 +296,10 @@ class ProjectController extends AbstractController
         $search = $request->get('search');
         $from = $request->get('from');
         $to = $request->get('to');
+        $status = $request->get('status');
 
         try {
-            $projects = $this->projectService->ListarOrdenados($search, $company_id, $inspector_id, $from, $to);
+            $projects = $this->projectService->ListarOrdenados($search, $company_id, $inspector_id, $from, $to, $status);
 
             $resultadoJson['success'] = true;
             $resultadoJson['projects'] = $projects;

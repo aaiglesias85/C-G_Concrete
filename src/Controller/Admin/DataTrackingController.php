@@ -33,8 +33,8 @@ class DataTrackingController extends AbstractController
             if ($permiso[0]['ver']) {
 
                 // projects
-                $projects = $this->trackingService->getDoctrine()->getRepository(Project::class)
-                    ->ListarOrdenados();
+                /*$projects = $this->trackingService->getDoctrine()->getRepository(Project::class)
+                    ->ListarOrdenados();*/
 
                 // inspectors
                 $inspectors = $this->projectService->getDoctrine()->getRepository(Inspector::class)
@@ -42,7 +42,7 @@ class DataTrackingController extends AbstractController
 
                 return $this->render('admin/data-tracking/index.html.twig', array(
                     'permiso' => $permiso[0],
-                    'projects' => $projects,
+                    // 'projects' => $projects,
                     'inspectors' => $inspectors
                 ));
             }
@@ -95,11 +95,13 @@ class DataTrackingController extends AbstractController
         $station_number = $request->get('station_number');
         $measured_by = $request->get('measured_by');
         $conc_vendor = $request->get('conc_vendor');
+        $conc_price = $request->get('conc_price');
         $crew_lead = $request->get('crew_lead');
         $notes = $request->get('notes');
         $other_materials = $request->get('other_materials');
         $total_conc_used = $request->get('total_conc_used');
         $total_labor = $request->get('total_labor');
+        $labor_price = $request->get('labor_price');
         $total_stamps = $request->get('total_stamps');
 
         // items
@@ -109,8 +111,8 @@ class DataTrackingController extends AbstractController
         try {
 
             $resultado = $this->trackingService->SalvarDataTracking($data_tracking_id, $project_id, $date, $inspector_id,
-                $station_number, $measured_by, $conc_vendor, $crew_lead, $notes, $other_materials,
-                $total_conc_used, $total_labor, $total_stamps, $items);
+                $station_number, $measured_by, $conc_vendor, $conc_price, $crew_lead, $notes, $other_materials,
+                $total_conc_used, $total_labor, $labor_price, $total_stamps, $items);
 
             if ($resultado['success']) {
 

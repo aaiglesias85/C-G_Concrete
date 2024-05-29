@@ -37,7 +37,7 @@ var DataTracking = function () {
             aspectRatio: 3,  // see: https://fullcalendar.io/docs/aspectRatio
 
             nowIndicator: true,
-            now: TODAY + 'T09:25:00', // just for demo
+            now: todayDate.format('YYYY-MM-DD') + 'T09:25:00', // just for demo
 
             views: {
                 dayGridMonth: {buttonText: 'Month'},
@@ -73,7 +73,12 @@ var DataTracking = function () {
                                     <b>${event.extendedProps.fecha}</b></br>
                                     ${descripcion}</br>
                                     <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
-                                    <b>Lost Concrete: ${event.extendedProps.lostConcrete}</b>
+                                    <b>Concrete Different: ${event.extendedProps.lostConcrete}</b></br>                               
+                                    <b>Total Concrete Yiel: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
+                                    <b>Quantity Today: ${event.extendedProps.total_quantity_today}</b></br>
+                                    <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
+                                    <b>Total Concrete: ${MyApp.formatearNumero(event.extendedProps.total_concrete, 2, '.', ',')}</b></br>
+                                    <b>Profit: ${MyApp.formatearNumero(event.extendedProps.profit, 2, '.', ',')}</b>
                             `;
 
                         element.data('content', content);
@@ -91,7 +96,12 @@ var DataTracking = function () {
                                     <b>${event.extendedProps.fecha}</b></br>
                                     ${descripcion}</br>
                                     <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
-                                    <b>Lost Concrete: ${event.extendedProps.lostConcrete}</b>
+                                    <b>Concrete Different: ${event.extendedProps.lostConcrete}</b></br>                                    
+                                    <b>Total Concrete Yiel: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
+                                    <b>Quantity Today: ${event.extendedProps.total_quantity_today}</b></br>
+                                    <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
+                                    <b>Total Concrete: ${MyApp.formatearNumero(event.extendedProps.total_concrete, 2, '.', ',')}</b></br>
+                                    <b>Profit: ${MyApp.formatearNumero(event.extendedProps.profit, 2, '.', ',')}</b>
                             `;
 
                         element.data('content', content);
@@ -108,7 +118,12 @@ var DataTracking = function () {
                                     <b>${event.extendedProps.fecha}</b></br>
                                     ${descripcion}</br>
                                     <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
-                                    <b>Lost Concrete: ${event.extendedProps.lostConcrete}</b>
+                                    <b>Concrete Different: ${event.extendedProps.lostConcrete}</b></br>                                   
+                                    <b>Total Concrete Yiel: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
+                                    <b>Quantity Today: ${event.extendedProps.total_quantity_today}</b></br>
+                                    <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
+                                    <b>Total Concrete: ${MyApp.formatearNumero(event.extendedProps.total_concrete, 2, '.', ',')}</b></br>
+                                    <b>Profit: ${MyApp.formatearNumero(event.extendedProps.profit, 2, '.', ',')}</b>
                             `;
 
                         element.data('content', content);
@@ -157,6 +172,19 @@ var DataTracking = function () {
 
         $(document).off('click', "#btn-filtrar");
         $(document).on('click', "#btn-filtrar", function (e) {
+            btnClickFiltrar();
+        });
+
+        $(document).off('click', "#btn-reset-filters-data-tracking");
+        $(document).on('click', "#btn-reset-filters-data-tracking", function (e) {
+            // reset
+            $('#project').val('');
+            $('#project').trigger('change');
+
+            $('#lista-data-tracking .m_form_search').val('');
+            $('#fechaInicial').val('');
+            $('#fechaFin').val('');
+
             btnClickFiltrar();
         });
 
@@ -236,7 +264,7 @@ var DataTracking = function () {
         resetWizard();
 
         $('#btn-eliminar-data-tracking').removeClass('m--hide').addClass('m--hide');
-
+        $('#form-group-totals').removeClass('m--hide').addClass('m--hide');
     };
 
     //Validacion
@@ -332,13 +360,15 @@ var DataTracking = function () {
 
             var data_tracking_id = $('#data_tracking_id').val();
             var project_id = $('#project').val();
-            if ($('#data-tracking-form').valid() && ( data_tracking_id != '' || (data_tracking_id == '' && project_id != ''))) {
+            if ($('#data-tracking-form').valid() && (data_tracking_id != '' || (data_tracking_id == '' && project_id != ''))) {
 
                 var date = $('#data-tracking-date').val();
                 var inspector_id = $('#inspector').val();
                 var station_number = $('#station_number').val();
                 var measured_by = $('#measured_by').val();
                 var conc_vendor = $('#conc_vendor').val();
+                var conc_price = $('#conc_price').val();
+                var labor_price = $('#labor_price').val();
                 var crew_lead = $('#crew_lead').val();
                 var notes = $('#notes').val();
                 var other_materials = $('#other_materials').val();
@@ -360,6 +390,8 @@ var DataTracking = function () {
                         'station_number': station_number,
                         'measured_by': measured_by,
                         'conc_vendor': conc_vendor,
+                        'conc_price': conc_price,
+                        'labor_price': labor_price,
                         'crew_lead': crew_lead,
                         'notes': notes,
                         'other_materials': other_materials,
@@ -444,12 +476,35 @@ var DataTracking = function () {
 
                         $('#station_number').val(response.data_tracking.station_number);
                         $('#measured_by').val(response.data_tracking.measured_by);
-                        $('#conc_vendor').val(response.data_tracking.conc_vendor);
+
                         $('#crew_lead').val(response.data_tracking.crew_lead);
                         $('#notes').val(response.data_tracking.notes);
                         $('#other_materials').val(response.data_tracking.other_materials);
+
+                        $('#total_conc_used').off('change', calcularTotalConcrete);
+                        $('#conc_price').off('change', calcularTotalConcrete);
+
                         $('#total_conc_used').val(response.data_tracking.total_conc_used);
+                        $('#conc_vendor').val(response.data_tracking.conc_vendor);
+                        $('#conc_price').val(response.data_tracking.conc_price);
+
+                        calcularTotalConcrete();
+
+                        $('#total_conc_used').on('change', calcularTotalConcrete);
+                        $('#conc_price').on('change', calcularTotalConcrete);
+
+
+                        $('#total_labor').off('change', calcularTotalLaborPrice);
+                        $('#labor_price').off('change', calcularTotalLaborPrice);
+
                         $('#total_labor').val(response.data_tracking.total_labor);
+                        $('#labor_price').val(response.data_tracking.labor_price);
+
+                        calcularTotalLaborPrice();
+
+                        $('#total_labor').on('change', calcularTotalLaborPrice);
+                        $('#labor_price').on('change', calcularTotalLaborPrice);
+
                         $('#total_stamps').val(response.data_tracking.total_stamps);
 
                         // items
@@ -459,6 +514,13 @@ var DataTracking = function () {
                         // project items
                         items = response.data_tracking.project_items;
                         actualizarSelectProjectItems();
+
+                        // totals
+                        $('#form-group-totals').removeClass('m--hide');
+                        $('#total_concrete_yiel').val(response.data_tracking.total_concrete_yiel);
+                        $('#total_quantity_today').val(response.data_tracking.total_quantity_today);
+                        $('#total_daily_today').val(response.data_tracking.total_daily_today);
+                        $('#profit').val(response.data_tracking.profit);
 
                     } else {
                         toastr.error(response.error, "");
@@ -473,7 +535,7 @@ var DataTracking = function () {
 
         }
 
-        function actualizarSelectProjectItems(){
+        function actualizarSelectProjectItems() {
             // reset
             $('.select-item-data-tracking option').each(function (e) {
                 if ($(this).val() != "")
@@ -550,6 +612,8 @@ var DataTracking = function () {
 
         $("[data-switch=true]").bootstrapSwitch();
 
+        initSelectProject();
+
         // change
         $('#project').change(changeProject);
 
@@ -559,6 +623,51 @@ var DataTracking = function () {
 
         $(document).off('switchChange.bootstrapSwitch', '#item-type');
         $(document).on('switchChange.bootstrapSwitch', '#item-type', changeItemType);
+
+        $('#total_conc_used').change(calcularTotalConcrete);
+        $('#conc_price').change(calcularTotalConcrete);
+
+        $('#total_labor').change(calcularTotalLaborPrice);
+        $('#labor_price').change(calcularTotalLaborPrice);
+    }
+
+    var initSelectProject = function () {
+        $("#project").select2({
+            templateResult: function (data) {
+                // We only really care if there is an element to pull classes from
+                if (!data.element) {
+                    return data.text;
+                }
+
+                var $element = $(data.element);
+
+                var $wrapper = $("<span></span>");
+                if (data.text == 'Add Projects') {
+                    $wrapper = $("<a class='btn btn-link' href='javascript:;'></a>");
+                }
+                $wrapper.text(data.text);
+
+                return $wrapper;
+            }
+        });
+    }
+
+    var calcularTotalConcrete = function () {
+        var cantidad = $('#total_conc_used').val();
+        var price = $('#conc_price').val();
+        if (cantidad != '' && price != '') {
+            var total = parseFloat(cantidad) * parseFloat(price);
+            $('#total_concrete').val(total);
+        }
+    }
+
+    var calcularTotalLaborPrice = function () {
+        var cantidad = $('#total_labor').val();
+        var price = $('#labor_price').val();
+        if (cantidad != '' && price != '') {
+            var total = parseFloat(cantidad) * parseFloat(price);
+            $('#total_labor_price').val(total);
+        }
     }
 
     var changeItemType = function (event, state) {
@@ -621,8 +730,18 @@ var DataTracking = function () {
         }
     }
 
-    var changeProject = function () {
+    var changeProject = function (e) {
         var project_id = $('#project').val();
+
+        // evitar la opcion de add
+        if (project_id == 'add') {
+            $('#project').val('');
+            $('#project').trigger('change');
+
+            $('#modal-filter-project').modal('show');
+
+            return;
+        }
 
         // reset
         $('.select-item-data-tracking option').each(function (e) {
@@ -688,7 +807,7 @@ var DataTracking = function () {
 
         $('#modal-inspector').on('hidden.bs.modal', function () {
             var inspector = ModalInspector.getInspector();
-            if(inspector != null){
+            if (inspector != null) {
                 $('#inspector').append(new Option(inspector.name, inspector.inspector_id, false, false));
                 $('#inspector').select2();
 
@@ -713,7 +832,7 @@ var DataTracking = function () {
 
         $('#modal-item').on('hidden.bs.modal', function () {
             var item = ModalItemProject.getItem();
-            if(item != null){
+            if (item != null) {
                 //add items to select
                 items.push(item);
                 $('.select-item-data-tracking').append(new Option(item.item, item.project_item_id, false, false));
@@ -805,12 +924,34 @@ var DataTracking = function () {
                 width: 100,
             },
             {
+                field: "yield_calculation_name",
+                title: "Yield Calculation",
+            },
+            {
                 field: "quantity",
                 title: "Quantity",
                 width: 120,
                 textAlign: 'center',
                 template: function (row) {
                     return `<span>${MyApp.formatearNumero(row.quantity, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "price",
+                title: "Price",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.price, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "total",
+                title: "Total",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.total, 2, '.', ',')}</span>`;
                 }
             },
             {
@@ -960,10 +1101,17 @@ var DataTracking = function () {
             if ($('#data-tracking-item-form').valid() && item_id != '') {
 
                 var item = items.find(function (val) {
-                   return  val.project_item_id == item_id;
+                    return val.project_item_id == item_id;
                 });
 
                 var quantity = $('#data-tracking-quantity').val();
+
+                var price = item.price;
+                var total = quantity * price;
+
+                var yield_calculation = item.yield_calculation;
+                var equation_id = item.equation_id;
+                var yield_calculation_name = item.yield_calculation_name;
 
                 if (nEditingRowItem == null) {
 
@@ -972,8 +1120,12 @@ var DataTracking = function () {
                         item_id: item_id,
                         item: item.item,
                         unit: item.unit,
-                        price: item.price,
+                        equation_id: equation_id,
+                        yield_calculation: yield_calculation,
+                        yield_calculation_name: yield_calculation_name,
                         quantity: quantity,
+                        price: price,
+                        total: total,
                         posicion: items.length
                     });
 
@@ -983,8 +1135,12 @@ var DataTracking = function () {
                         items_data_tracking[posicion].item_id = item_id;
                         items_data_tracking[posicion].item = item.item;
                         items_data_tracking[posicion].unit = item.unit;
-                        items_data_tracking[posicion].price = item.price;
+                        items_data_tracking[posicion].yield_calculation = yield_calculation;
+                        items_data_tracking[posicion].yield_calculation_name = yield_calculation_name;
+                        items_data_tracking[posicion].equation_id = equation_id;
                         items_data_tracking[posicion].quantity = quantity;
+                        items_data_tracking[posicion].price = price;
+                        items_data_tracking[posicion].total = total;
                     }
                 }
 
@@ -1118,6 +1274,93 @@ var DataTracking = function () {
         nEditingRowItem = null;
     };
 
+    var initAccionFiltrarProjects = function () {
+
+        $(document).off('click', "#btn-filtrar-projects");
+        $(document).on('click', "#btn-filtrar-projects", function (e) {
+            btnClickFiltrarProjects();
+        });
+
+        $(document).off('click', "#btn-reset-filtros-projects");
+        $(document).on('click', "#btn-reset-filtros-projects", function (e) {
+            resetFormFilter();
+        });
+
+        function btnClickFiltrarProjects() {
+
+            var fechaInicial = $('#filtro-project-from').val();
+            var fechaFin = $('#filtro-project-to').val();
+            var search = $('#filtro-project-search').val();
+            var status = $('#filtro-project-status').val();
+
+            MyApp.block('#modal-filter-project .modal-content');
+
+            $.ajax({
+                type: "POST",
+                url: "project/listarOrdenados",
+                dataType: "json",
+                data: {
+                    'status': status,
+                    'search': search,
+                    'from': fechaInicial,
+                    'to': fechaFin
+                },
+                success: function (response) {
+                    mApp.unblock('#modal-filter-project .modal-content');
+                    if (response.success) {
+
+                        // reset
+                        $('#project option').each(function (e) {
+                            if ($(this).val() != "" && $(this).val() != "add")
+                                $(this).remove();
+                        });
+                        initSelectProject();
+
+                        var projects = response.projects;
+                        if(projects.length > 0){
+                            for (var i = 0; i < projects.length; i++) {
+                                $('#project').append(new Option(`${projects[i].number} - ${projects[i].name}`, projects[i].project_id, false, false));
+                            }
+                            initSelectProject();
+
+                            // select si solo hay uno
+                            if (projects.length == 1) {
+                                $('#project').val(projects[0].project_id);
+                                $('#project').trigger('change');
+                            }
+
+                            // close modal
+                            $('#modal-filter-project').modal('hide');
+                        }else{
+                            toastr.error('No projects found', "Error !!!");
+                        }
+
+
+                    } else {
+                        toastr.error(response.error, "Error !!!");
+                    }
+                },
+                failure: function (response) {
+                    mApp.unblock('#modal-filter-project .modal-content');
+
+                    toastr.error(response.error, "Error !!!");
+                }
+            });
+
+        }
+
+        function resetFormFilter() {
+            $('#form-filter-projects input').each(function (e) {
+                $element = $(this);
+                $element.val('');
+            });
+
+            $('#filtro-project-status').val('');
+            $('#filtro-project-status').trigger('change');
+        };
+
+    };
+
     return {
         //main function to initiate the module
         init: function () {
@@ -1131,6 +1374,7 @@ var DataTracking = function () {
             initAccionEditar();
             initAccionEliminar();
             initAccionFiltrar();
+            initAccionFiltrarProjects();
 
             //modal inspectors
             initAccionesInspector();

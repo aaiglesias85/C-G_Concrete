@@ -51,7 +51,7 @@ class ProjectRepository extends EntityRepository
             $from = \DateTime::createFromFormat("m/d/Y", $from);
             $from = $from->format("Y-m-d");
 
-            $consulta->andWhere('p.startDate >= :fecha_inicial')
+            $consulta->andWhere('p.createdAt >= :fecha_inicial')
                 ->setParameter('fecha_inicial', $from);
         }
         if ($to != "") {
@@ -59,7 +59,7 @@ class ProjectRepository extends EntityRepository
             $to = \DateTime::createFromFormat("m/d/Y", $to);
             $to = $to->format("Y-m-d");
 
-            $consulta->andWhere('p.endDate <= :fecha_final')
+            $consulta->andWhere('p.createdAt <= :fecha_final')
                 ->setParameter('fecha_final', $to);
         }
 

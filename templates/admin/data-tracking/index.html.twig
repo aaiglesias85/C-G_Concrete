@@ -58,6 +58,12 @@
             <div class="m-portlet__head-tools">
                 <ul class="m-portlet__nav">
                     <li class="m-portlet__nav-item">
+                        <a href="javascript:;" id="btn-reset-filters-data-tracking"
+                           class="m-portlet__nav-link btn btn-danger">
+                            Reset filters
+                        </a>
+                    </li>
+                    <li class="m-portlet__nav-item">
                         <a href="javascript:;" m-portlet-tool="fullscreen"
                            class="m-portlet__nav-link m-portlet__nav-link--icon">
                             <i class="la la-expand"></i>
@@ -88,10 +94,14 @@
                             <div class="col-md-2" id="select-project">
                                 <select class="form-control m-select2 event-change" id="project">
                                     <option value="">Project</option>
+                                    <option value="add">Add Projects</option>
+
+                                    {#
                                     {% for item in projects %}
-                                        <option value="{{ item.projectId }}">{{ item.projectNumber }}
-                                            - {{ item.name }}</option>
+                                        <option value="{{ item.projectId }}">{{ item.projectNumber }} - {{ item.name }}</option>
                                     {% endfor %}
+                                    #}
+
                                 </select>
                             </div>
 
@@ -152,6 +162,96 @@
     </div>
 
 </div>
+
+<!-- modal filter project -->
+<div class="modal fade" id="modal-filter-project" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Search Projects
+                    </h5>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+
+                </div>
+                <div class="modal-body">
+                    <form class="m-form" id="form-filter-projects" action="#" enctype="multipart/form-data" method="post">
+
+                        <div class="form-group m-form__group">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>
+                                        From
+                                    </label>
+                                    <div class='input-group date'>
+                                        <input type='text' class="form-control m-input date-picker"
+                                               placeholder="From" autocomplete="off"
+                                               id="filtro-project-from"/>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">
+                                                <i class="la la-calendar glyphicon-th"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        To
+                                    </label>
+                                    <div class='input-group date'>
+                                        <input type='text' class="form-control m-input date-picker"
+                                               placeholder="To" autocomplete="off"
+                                               id="filtro-project-to"/>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text">
+                                                <i class="la la-calendar glyphicon-th"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group m-form__group">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>
+                                        Status
+                                    </label>
+                                    <select class="form-control m-select2 event-change" id="filtro-project-status">
+                                        <option value="">All</option>
+                                        <option value="working">Working</option>
+                                        <option value="notworking">Not Working</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        Search
+                                    </label>
+                                    <div class="m-input-icon m-input-icon--left">
+                                        <input type="text" class="form-control m-input" id="filtro-project-search"
+                                               placeholder="Search...">
+                                        <span class="m-input-icon__icon m-input-icon__icon--left">
+									<span><i class="la la-search"></i></span>
+								</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="btn-filtrar-projects">Search</button>
+                    <button type="button" class="btn btn-info" id="btn-reset-filtros-projects">Reset</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <div class="modal fade" id="modal-data-tracking" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog modal-lg" role="document">
@@ -252,19 +352,42 @@
                             </div>
                             <div class="form-group m-form__group ic-form-group">
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label>
                                             <span class="ic-step-number">3</span>
-                                            Conc Vendor
+                                            Total Conc Used (CY)
                                             <span class="ic-small italic">(optional)</span>
+                                        </label>
+                                        <input type="text" class="form-control form-control-number"
+                                               id="total_conc_used" name="total_conc_used">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>
+                                            Conc Vendor
                                         </label>
                                         <input type="text" class="form-control" id="conc_vendor" name="conc_vendor">
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label>
-                                            Crew Lead
+                                            Conc price (#)
                                         </label>
-                                        <input type="text" class="form-control" id="crew_lead" name="crew_lead">
+                                        <div class="input-group m-input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">$</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-number" id="conc_price" name="conc_price">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>
+                                            Total Concrete
+                                        </label>
+                                        <div class="input-group m-input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">$</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-number" id="total_concrete" name="total_concrete" disabled>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -274,18 +397,46 @@
                                     <div class="col-md-4">
                                         <label>
                                             <span class="ic-step-number">4</span>
-                                            Total Concrete Used (CY)
-                                            <span class="ic-small italic">(optional)</span>
-                                        </label>
-                                        <input type="text" class="form-control form-control-number"
-                                               id="total_conc_used" name="total_conc_used">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label>
                                             Total Labor
+                                            <span class="ic-small italic">(optional)</span>
                                         </label>
                                         <input type="text" class="form-control form-control-number" id="total_labor"
                                                name="total_labor">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>
+                                            Labor price (#)
+                                        </label>
+                                        <div class="input-group m-input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">$</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-number" id="labor_price" name="labor_price">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>
+                                            Total Labor Price (#)
+                                        </label>
+                                        <div class="input-group m-input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">$</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-number" id="total_labor_price" name="total_labor_price" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group m-form__group ic-form-group">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label>
+                                            <span class="ic-step-number">5</span>
+                                            Crew Lead
+                                            <span class="ic-small italic">(optional)</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="crew_lead" name="crew_lead">
                                     </div>
                                     <div class="col-md-4">
                                         <label>
@@ -301,7 +452,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <label>
-                                            <span class="ic-step-number">5</span>
+                                            <span class="ic-step-number">6</span>
                                             Notes
                                             <span class="ic-small italic">(optional)</span>
                                         </label>
@@ -313,6 +464,46 @@
                                         </label>
                                         <textarea class="form-control" id="other_materials" name="other_materials"
                                                   rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="form-group-totals" class="form-group m-form__group ic-form-group m--hide">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label>
+                                            <span class="ic-step-number">7</span>
+                                            Total Concrete Yiel
+                                        </label>
+                                        <input type="text" class="form-control form-control-number" id="total_concrete_yiel" name="total_concrete_yiel" disabled>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>
+                                            Quantity today
+                                        </label>
+                                        <input type="text" class="form-control" id="total_quantity_today" name="total_quantity_today" disabled>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>
+                                            Daily total
+                                        </label>
+                                        <div class="input-group m-input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">$</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-number" id="total_daily_today" name="total_daily_today" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>
+                                           Profit
+                                        </label>
+                                        <div class="input-group m-input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">$</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-number" id="profit" name="profit" disabled>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -338,8 +529,9 @@
                                                     </div>
                                                 {% endif %}
 
-                                                <div class="col-md-6"></div>
-                                                <div class="col-md-4">
+                                                <div class="col-lg-7"></div>
+
+                                                <div class="col-md-3">
                                                     <div class="m-input-icon m-input-icon--left">
                                                         <input type="text"
                                                                class="form-control m-input m_form_search"
@@ -377,6 +569,8 @@
         </div>
     </div>
 </div>
+
+
 
 <!-- items -->
 <div class="modal fade" id="modal-data-tracking-item" role="dialog" aria-labelledby="myModalLabel">

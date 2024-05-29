@@ -36,7 +36,7 @@ class ProjectService extends Base
         $em = $this->getDoctrine()->getManager();
 
         $project_entity = $this->getDoctrine()->getRepository(Project::class)->find($project_id);
-        if($project_entity != null){
+        if ($project_entity != null) {
             $project_item_entity = null;
 
             if (is_numeric($project_item_id)) {
@@ -98,7 +98,7 @@ class ProjectService extends Base
                 "equation_id" => $project_item_entity->getEquation() != null ? $project_item_entity->getEquation()->getEquationId() : ''
             ];
 
-        }else{
+        } else {
             $resultado['success'] = false;
             $resultado['error'] = 'The project not exist';
         }
@@ -356,21 +356,54 @@ class ProjectService extends Base
      * @param $inspector_id
      * @return array
      */
-    public function ListarOrdenados($search, $company_id, $inspector_id, $from, $to)
+    public function ListarOrdenados($search, $company_id, $inspector_id, $from, $to, $status = '')
     {
         $projects = [];
 
         $lista = $this->getDoctrine()->getRepository(Project::class)
             ->ListarOrdenados($search, $company_id, $inspector_id, $from, $to);
         foreach ($lista as $value) {
-            $projects[] = [
-                'project_id' => $value->getProjectId(),
-                'number' => $value->getProjectNumber(),
-                'name' => $value->getName()
-            ];
+            $project_id = $value->getProjectId();
+
+            $is_valid_status = $this->FiltrarProjectPorStatus($project_id, $status);
+            if ($is_valid_status) {
+                $projects[] = [
+                    'project_id' => $project_id,
+                    'number' => $value->getProjectNumber(),
+                    'name' => $value->getName()
+                ];
+            }
+
         }
 
         return $projects;
+    }
+
+    /**
+     * FiltrarProjectPorStatus
+     * @param $status
+     * @return boolean
+     */
+    private function FiltrarProjectPorStatus($project_id, $status){
+        $is_valid = true;
+
+        if($status != ''){
+
+            $is_valid = false;
+
+            $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
+                ->ListarDataTracking($project_id);
+
+            if($status == 'working' && !empty($data_tracking)){
+                $is_valid = true;
+            }
+            if($status == 'notworking' && empty($data_tracking)){
+                $is_valid = true;
+            }
+        }
+
+
+        return  $is_valid;
     }
 
     /**
@@ -471,17 +504,21 @@ class ProjectService extends Base
             ->ListarItemsDeProject($project_id);
         foreach ($lista as $key => $value) {
 
-            $price = $value->getPrice();
 
             $yield_calculation_name = $this->DevolverYieldCalculationDeItemProject($value);
+
+            $quantity = $value->getQuantity();
+            $price = $value->getPrice();
+            $total = $quantity * $price;
 
             $items[] = [
                 'project_item_id' => $value->getId(),
                 "item_id" => $value->getItem()->getItemId(),
                 "item" => $value->getItem()->getDescription(),
                 "unit" => $value->getItem()->getUnit()->getDescription(),
-                "quantity" => $value->getQuantity(),
+                "quantity" => $quantity,
                 "price" => $price,
+                "total" => $total,
                 "yield_calculation" => $value->getYieldCalculation(),
                 "yield_calculation_name" => $yield_calculation_name,
                 "equation_id" => $value->getEquation() != null ? $value->getEquation()->getEquationId() : '',
@@ -529,7 +566,7 @@ class ProjectService extends Base
 
                 $items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
                     ->ListarItems($data->getId());
-                foreach ($items as $item){
+                foreach ($items as $item) {
                     $em->remove($item);
                 }
 
@@ -604,7 +641,7 @@ class ProjectService extends Base
 
                                 $items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
                                     ->ListarItems($data->getId());
-                                foreach ($items as $item){
+                                foreach ($items as $item) {
                                     $em->remove($item);
                                 }
 
