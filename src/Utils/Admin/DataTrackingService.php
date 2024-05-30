@@ -466,7 +466,7 @@ class DataTrackingService extends Base
                 "otherMaterials" => $value->getOtherMaterials(),
                 // totales
                 "total_concrete_yiel" => $total_concrete_yiel,
-                'total_quantity_today' => $total_quantity_today,
+                'total_quantity_today' => $total_quantity_today != null ? $total_quantity_today : 0,
                 'total_daily_today' => $total_daily_today,
                 'total_concrete' => $total_concrete,
                 'profit' => $profit
