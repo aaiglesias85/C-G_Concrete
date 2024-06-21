@@ -3,6 +3,8 @@
 namespace App\Utils\Admin;
 
 use App\Entity\Company;
+use App\Entity\DataTracking;
+use App\Entity\DataTrackingItem;
 use App\Entity\Invoice;
 use App\Entity\InvoiceItem;
 use App\Entity\Item;
@@ -11,6 +13,18 @@ use App\Utils\Base;
 
 class DefaultService extends Base
 {
+
+    /*
+     * FiltrarDashboard
+     */
+    public function FiltrarDashboard($project_id, $fecha_inicial, $fecha_fin)
+    {
+        $chart_profit = $this->DevolverDataChartProfit($project_id, $fecha_inicial, $fecha_fin);
+
+        return [
+            'chart_profit' => $chart_profit
+        ];
+    }
 
     /**
      * ListarProjectsParaDashboard: lista los projects ordenados por el due date
@@ -135,43 +149,54 @@ class DefaultService extends Base
     }
 
     /**
-     * DevolverDataChart2: devuelve la data para el grafico
+     * DevolverDataChartProfit: devuelve la data para el grafico
      * @return array
      */
-    public function DevolverDataChart2()
+    public function DevolverDataChartProfit($project_id = '', $fecha_inicial = '', $fecha_fin = '')
     {
-        // total de invoices
-        $total = $this->getDoctrine()->getRepository(InvoiceItem::class)->TotalInvoice("", "", '');
+        // profit total
+        $total_concrete = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->TotalConcrete('', $fecha_inicial, $fecha_fin);
+
+        $total_labor = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->TotalLabor('', $fecha_inicial, $fecha_fin);
+
+        $total_daily = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+            ->TotalDaily('', '', $fecha_inicial, $fecha_fin);
+
+        $total = $total_concrete + $total_labor - $total_daily;
+
 
         // projects
         $data = [];
-        $projects = $this->getDoctrine()->getRepository(Project::class)
-            ->ListarOrdenados();
-        foreach ($projects as $project) {
-            $project_id = $project->getProjectId();
 
-            $amount = $this->getDoctrine()->getRepository(InvoiceItem::class)
-                ->TotalInvoice("", "", $project_id);
-            if ($amount > 0) {
+        // daily
+        $amount_daily = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+            ->TotalDaily('', $project_id, $fecha_inicial, $fecha_fin);
+        $porciento_daily = $total > 0 ? round($amount_daily / $total * 100) : 0;
 
-                // porciento
-                $porciento = round($amount / $total * 100);
+        $data[] = [
+            'name' => 'Invoiced',
+            'amount' => $amount_daily,
+            'porciento' => $porciento_daily
+        ];
 
-                $data[] = [
-                    'project_id' => $project_id,
-                    'number' => $project->getProjectNumber(),
-                    'name' => $project->getName(),
-                    'company' => $project->getCompany()->getName(),
-                    'amount' => $amount,
-                    'porciento' => $porciento
-                ];
-            }
-        }
+        // profit
+        $profit_concrete = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->TotalConcrete($project_id, $fecha_inicial, $fecha_fin);
 
-        // ordenar
-        $data = $this->ordenarArrayDesc($data, 'amount');
-        // sacar los primeros 3
-        $data = array_slice($data, 0, 3);
+        $profit_labor = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->TotalLabor($project_id, $fecha_inicial, $fecha_fin);
+
+        $amount_profit = $profit_concrete + $profit_labor - $amount_daily;
+
+        $porciento_profit = $total > 0 ? round($amount_profit / $total * 100) : 0;
+
+        $data[] = [
+            'name' => 'Profit',
+            'amount' => $amount_profit,
+            'porciento' => $porciento_profit
+        ];
 
         return [
             'total' => $total,

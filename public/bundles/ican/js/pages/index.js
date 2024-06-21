@@ -5,7 +5,7 @@ var Index = function () {
     var initChat1 = function () {
 
         var data = [];
-        for(let item of chart1_data.data){
+        for (let item of chart1_data.data) {
             data.push({
                 label: item.name,
                 value: item.porciento
@@ -28,10 +28,10 @@ var Index = function () {
         for (let [i, item] of chart2_data.data.entries()) {
 
             var color = mApp.getColor("accent");
-            if(i == 1){
+            if (i == 1) {
                 color = mApp.getColor("warning");
             }
-            if(i == 2){
+            if (i == 2) {
                 color = mApp.getColor("brand");
             }
 
@@ -72,6 +72,39 @@ var Index = function () {
             }
         })
     }
+    var updateChartProfit = function () {
+
+        // legends
+        $('#chart_profit_legends').html('');
+        var html_legend = '';
+
+        for (let [i, item] of chart2_data.data.entries()) {
+
+            var color = 'm--bg-accent';
+            if (i == 1) {
+                color = 'm--bg-warning';
+            }
+
+            html_legend+=`
+            <div class="m-widget14__legend">
+                <span class="m-widget14__legend-bullet ${color}"></span>
+                <span class="m-widget14__legend-text">$${MyApp.formatearNumero(item.amount, 2, '.', ',')} ${ item.name }</span>
+            </div>
+            `;
+        }
+        $('#chart_profit_legends').html(html_legend);
+
+        // destroy chart
+        destroyChart(chart2, '#m_chart_profit_share');
+
+        // add total
+        $('#m_chart_profit_share').html('<div class="m-widget14__stat" style="font-size: 1rem;" id="chart_profit_total"></div>');
+        $('#chart_profit_total').html(MyApp.formatearNumero(chart2_data.total, 2, '.', ','));
+
+        // init chart
+        initChat2();
+
+    }
 
     // chart 3
     var chart3 = null;
@@ -109,7 +142,7 @@ var Index = function () {
                     yPadding: 10,
                     caretPadding: 10,
                     callbacks: {
-                        label: function(tooltipItem, data) {
+                        label: function (tooltipItem, data) {
                             var value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
                             return '$' + MyApp.formatearNumero(value, 2, '.', ','); // Formatea el valor numérico
                         }
@@ -133,13 +166,88 @@ var Index = function () {
         });
     }
 
+    var destroyChart = function (chart, selector) {
+        // Limpiar los eventos del chart
+        chart.off('draw');
+
+        // Vaciar el contenedor del chart
+        $(selector).html('');
+    }
+
+    var initWidgets = function () {
+        $('.m-select2').select2();
+    }
+
+    var initAccionFiltrar = function () {
+
+        $(document).off('click', "#btn-filtrar");
+        $(document).on('click', "#btn-filtrar", function (e) {
+            btnClickFiltrar();
+        });
+    };
+    var btnClickFiltrar = function () {
+
+        var project_id = $('#project').val();
+        var fechaInicial = $('#fechaInicial').val();
+        var fechaFin = $('#fechaFin').val();
+
+        MyApp.block('.m-content');
+
+        $.ajax({
+            type: "POST",
+            url: "dashboard/listarStats",
+            dataType: "json",
+            data: {
+                'project_id': project_id,
+                'fechaInicial': fechaInicial,
+                'fechaFin': fechaFin
+            },
+            success: function (response) {
+                mApp.unblock('.m-content');
+                if (response.success) {
+
+                    // actualizar nombre de proyecto
+                    updateProjectName();
+
+                    // profit
+                    chart2_data = response.stats.chart_profit;
+                    updateChartProfit();
+
+                } else {
+                    toastr.error(response.error, "Error !!!");
+                }
+            },
+            failure: function (response) {
+                mApp.unblock('.m-content');
+
+                toastr.error(response.error, "Error !!!");
+            }
+        });
+
+    }
+
+    var updateProjectName = function () {
+        // reset
+        $('.profit_chart_project_name').html('');
+
+        var project_id = $('#project').val();
+        var project = project_id != '' ? $("#project option:selected").text() : '';
+
+        $('.profit_chart_project_name').html(project);
+    }
+
     //== Public Functions
     return {
         // public functions
         init: function () {
+
+            initWidgets();
+
             initChat1();
             initChat2();
             initChart3();
+
+            initAccionFiltrar();
         }
     };
 }();

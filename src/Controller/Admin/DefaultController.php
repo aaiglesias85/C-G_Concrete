@@ -37,7 +37,7 @@ class DefaultController extends AbstractController
                 // chart 1
                 $chart1 = $this->defaultService->DevolverDataChart1();
                 // chart 2
-                $chart2 = $this->defaultService->DevolverDataChart2();
+                $chart2 = $this->defaultService->DevolverDataChartProfit();
                 // chart 3
                 $chart3 = $this->defaultService->DevolverDataChart3();
                 // items
@@ -57,6 +57,34 @@ class DefaultController extends AbstractController
             }
         } else {
             return $this->redirectToRoute('denegado');
+        }
+    }
+
+    /**
+     * listarStats Acción para filtrar el dashboard
+     *
+     */
+    public function listarStats(Request $request)
+    {
+        $project_id = $request->get('project_id');
+        $fecha_inicial = $request->get('fechaInicial');
+        $fecha_fin = $request->get('fechaFin');
+
+        try {
+
+
+            $stats = $this->defaultService->FiltrarDashboard($project_id, $fecha_inicial, $fecha_fin);
+
+            $resultadoJson['success'] = true;
+            $resultadoJson['stats'] = $stats;
+
+            return $this->json($resultadoJson);
+
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
         }
     }
 
