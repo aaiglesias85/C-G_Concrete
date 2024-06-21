@@ -74,7 +74,7 @@ var DataTracking = function () {
                                     ${descripcion}</br>
                                     <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
                                     <b>Concrete Different: ${event.extendedProps.lostConcrete}</b></br>                               
-                                    <b>Total Concrete Yiel: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
+                                    <b>Total Concrete Yield: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
                                     <b>Quantity Today: ${event.extendedProps.total_quantity_today}</b></br>
                                     <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
                                     <b>Total Concrete: ${MyApp.formatearNumero(event.extendedProps.total_concrete, 2, '.', ',')}</b></br>
@@ -97,7 +97,7 @@ var DataTracking = function () {
                                     ${descripcion}</br>
                                     <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
                                     <b>Concrete Different: ${event.extendedProps.lostConcrete}</b></br>                                    
-                                    <b>Total Concrete Yiel: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
+                                    <b>Total Concrete Yield: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
                                     <b>Quantity Today: ${event.extendedProps.total_quantity_today}</b></br>
                                     <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
                                     <b>Total Concrete: ${MyApp.formatearNumero(event.extendedProps.total_concrete, 2, '.', ',')}</b></br>
@@ -119,7 +119,7 @@ var DataTracking = function () {
                                     ${descripcion}</br>
                                     <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
                                     <b>Concrete Different: ${event.extendedProps.lostConcrete}</b></br>                                   
-                                    <b>Total Concrete Yiel: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
+                                    <b>Total Concrete Yield: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
                                     <b>Quantity Today: ${event.extendedProps.total_quantity_today}</b></br>
                                     <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
                                     <b>Total Concrete: ${MyApp.formatearNumero(event.extendedProps.total_concrete, 2, '.', ',')}</b></br>
