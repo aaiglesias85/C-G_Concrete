@@ -32,12 +32,12 @@ var Items = function () {
                 title: "Unit",
                 width: 120,
             },
-            {
+            /*{
                 field: "price",
                 title: "Price",
                 width: 150,
                 textAlign: 'center',
-            },
+            },*/
             {
                 field: "yieldCalculation",
                 title: "Yield Calculation",
@@ -87,7 +87,7 @@ var Items = function () {
             layout: {
                 theme: 'default', // datatable theme
                 class: '', // custom wrapper class
-                scroll: false, // enable/disable datatable scroll both horizontal and vertical when needed.
+                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
                 //height: 550, // datatable's body's fixed height
                 footer: false // display/hide footer
             },
@@ -251,7 +251,7 @@ var Items = function () {
                 var item_id = $('#item_id').val();
 
                 var descripcion = $('#descripcion').val();
-                var price = $('#price').val();
+                // var price = $('#price').val();
                 var status = ($('#estadoactivo').prop('checked')) ? 1 : 0;
                 var yield_calculation = $('#yield-calculation').val();
                 var equation_id = $('#equation').val();
@@ -265,7 +265,7 @@ var Items = function () {
                     data: {
                         'item_id': item_id,
                         'description': descripcion,
-                        'price': price,
+                        // 'price': price,
                         'unit_id': unit_id,
                         'status': status,
                         'yield_calculation': yield_calculation,
@@ -402,7 +402,7 @@ var Items = function () {
                         $('#form-item-title').html(formTitle);
 
                         $('#descripcion').val(response.item.descripcion);
-                        $('#price').val(response.item.price);
+                        // $('#price').val(response.item.price);
 
                         $('#unit').val(response.item.unit_id);
                         $('#unit').trigger('change');

@@ -775,7 +775,7 @@ class Base
     public function evaluateExpression($expression, $xValue)
     {
         // Reemplazar 'x' con el valor proporcionado en la expresión
-        $expression = str_replace('x', (string)$xValue, $expression);
+        $expression = str_ireplace('x', (string)$xValue, $expression);
 
         // Limpiar la expresión para asegurar que solo contiene números, operadores permitidos y paréntesis
         $expression = preg_replace('/[^0-9+\-*\/(). ]/', '', $expression);

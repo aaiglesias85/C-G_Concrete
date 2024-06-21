@@ -89,8 +89,13 @@ class DataTrackingService extends Base
             $arreglo_resultado['crew_lead'] = $entity->getCrewLead();
             $arreglo_resultado['notes'] = $entity->getNotes();
             $arreglo_resultado['other_materials'] = $entity->getOtherMaterials();
-            $arreglo_resultado['total_labor'] = $entity->getTotalLabor();
-            $arreglo_resultado['labor_price'] = $entity->getLaborPrice();
+
+            $total_labor = $entity->getTotalLabor();
+            $arreglo_resultado['total_labor'] = $total_labor;
+
+            $labor_price = $entity->getLaborPrice();
+            $arreglo_resultado['labor_price'] = $labor_price;
+
             $arreglo_resultado['total_stamps'] = $entity->getTotalStamps();
 
             // items
@@ -119,7 +124,10 @@ class DataTrackingService extends Base
             $total_concrete = $total_conc_used * $conc_price;
             $arreglo_resultado['total_concrete'] = $total_concrete;
 
-            $profit = $total_concrete - $total_conc_used - $total_daily_today;
+            $total_labor_price =  $total_labor * $labor_price;
+            $arreglo_resultado['total_labor_price'] = $total_labor_price;
+
+            $profit = $total_concrete + $total_labor_price - $total_daily_today;
             $arreglo_resultado['profit'] = $profit;
 
             $resultado['success'] = true;
@@ -279,6 +287,17 @@ class DataTrackingService extends Base
     {
 
         $em = $this->getDoctrine()->getManager();
+
+        // validar que no exista el datatracking
+        $data_trackings = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->ListarDataTracking($project_id, $date, $date);
+        if( (!empty($data_trackings) && $data_tracking_id == '') || (!empty($data_trackings) && $data_trackings[0]->getId() != $data_tracking_id) ){
+            $resultado['success'] = false;
+            $resultado['error'] = "A record already exists for the selected project and date";
+
+            return $resultado;
+        }
+
 
         // validar project
         $project_entity = null;
@@ -441,7 +460,12 @@ class DataTrackingService extends Base
             $total_conc_used = $value->getTotalConcUsed();
             $conc_price = $value->getConcPrice();
             $total_concrete = $total_conc_used * $conc_price;
-            $profit = $total_concrete - $total_conc_used - $total_daily_today;
+
+            $total_labor = $value->getTotalLabor();
+            $labor_price = $value->getLaborPrice();
+            $total_labor_price =  $total_labor * $labor_price;
+
+            $profit = $total_concrete + $total_labor_price - $total_daily_today;
 
             $arreglo_resultado[] = [
                 "data_tracking_id" => $data_tracking_id,
@@ -460,8 +484,9 @@ class DataTrackingService extends Base
                 "inspectorNumber" => $value->getInspector() != null ? $value->getInspector()->getPhone() : '',
                 "crewLead" => $value->getCrewLead(),
                 "notes" => $value->getNotes(),
-                "totalLabor" => $value->getTotalLabor(),
-                "laborPrice" => $value->getLaborPrice(),
+                "totalLabor" => $total_labor,
+                "laborPrice" => $labor_price,
+                "totalLaborPrice" => $total_labor_price,
                 "totalStamps" => $value->getTotalStamps(),
                 "otherMaterials" => $value->getOtherMaterials(),
                 // totales

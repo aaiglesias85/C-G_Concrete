@@ -114,7 +114,7 @@ class ItemController extends AbstractController
 
         $unit_id = $request->get('unit_id');
         $description = $request->get('description');
-        $price = $request->get('price');
+        // $price = $request->get('price');
         $status = $request->get('status');
         $yield_calculation = $request->get('yield_calculation');
         $equation_id = $request->get('equation_id');
@@ -122,9 +122,9 @@ class ItemController extends AbstractController
         try {
 
             if ($item_id == "") {
-                $resultado = $this->itemService->SalvarItem($unit_id, $description, $price, $status, $yield_calculation, $equation_id);
+                $resultado = $this->itemService->SalvarItem($unit_id, $description, $status, $yield_calculation, $equation_id);
             } else {
-                $resultado = $this->itemService->ActualizarItem($item_id, $unit_id, $description, $price, $status, $yield_calculation, $equation_id);
+                $resultado = $this->itemService->ActualizarItem($item_id, $unit_id, $description, $status, $yield_calculation, $equation_id);
             }
 
             if ($resultado['success']) {

@@ -385,7 +385,7 @@ var MyApp = function () {
     var evaluateExpression = function (expression, variableValue) {
         try {
             // Sustituye 'x' por el valor de la variable, asumiendo que 'x' es la variable
-            expression = expression.replace(/x/g, variableValue);
+            expression = expression.replace(/x/gi, variableValue);
 
             // Verifica que la expresión solo contenga números, operadores permitidos y paréntesis
             if (/^[0-9+\-*\/\s\(\)]+$/.test(expression)) {

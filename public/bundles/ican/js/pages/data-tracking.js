@@ -76,8 +76,9 @@ var DataTracking = function () {
                                     <b>Concrete Different: ${event.extendedProps.lostConcrete}</b></br>                               
                                     <b>Total Concrete Yield: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
                                     <b>Quantity Today: ${event.extendedProps.total_quantity_today}</b></br>
-                                    <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
                                     <b>Total Concrete: ${MyApp.formatearNumero(event.extendedProps.total_concrete, 2, '.', ',')}</b></br>
+                                    <b>Total Labor: ${MyApp.formatearNumero(event.extendedProps.totalLaborPrice, 2, '.', ',')}</b></br>
+                                    <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
                                     <b>Profit: ${MyApp.formatearNumero(event.extendedProps.profit, 2, '.', ',')}</b>
                             `;
 
@@ -99,8 +100,9 @@ var DataTracking = function () {
                                     <b>Concrete Different: ${event.extendedProps.lostConcrete}</b></br>                                    
                                     <b>Total Concrete Yield: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
                                     <b>Quantity Today: ${event.extendedProps.total_quantity_today}</b></br>
-                                    <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
                                     <b>Total Concrete: ${MyApp.formatearNumero(event.extendedProps.total_concrete, 2, '.', ',')}</b></br>
+                                    <b>Total Labor: ${MyApp.formatearNumero(event.extendedProps.totalLaborPrice, 2, '.', ',')}</b></br>
+                                    <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
                                     <b>Profit: ${MyApp.formatearNumero(event.extendedProps.profit, 2, '.', ',')}</b>
                             `;
 
@@ -121,8 +123,9 @@ var DataTracking = function () {
                                     <b>Concrete Different: ${event.extendedProps.lostConcrete}</b></br>                                   
                                     <b>Total Concrete Yield: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
                                     <b>Quantity Today: ${event.extendedProps.total_quantity_today}</b></br>
-                                    <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
                                     <b>Total Concrete: ${MyApp.formatearNumero(event.extendedProps.total_concrete, 2, '.', ',')}</b></br>
+                                    <b>Total Labor: ${MyApp.formatearNumero(event.extendedProps.totalLaborPrice, 2, '.', ',')}</b></br>
+                                    <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
                                     <b>Profit: ${MyApp.formatearNumero(event.extendedProps.profit, 2, '.', ',')}</b>
                             `;
 
@@ -691,6 +694,9 @@ var DataTracking = function () {
         if (cantidad != '' && price != '') {
             var total = parseFloat(cantidad) * parseFloat(price);
             $('#total_concrete').val(total);
+
+            // profit
+            calcularProfit();
         }
     }
 
@@ -700,6 +706,21 @@ var DataTracking = function () {
         if (cantidad != '' && price != '') {
             var total = parseFloat(cantidad) * parseFloat(price);
             $('#total_labor_price').val(total);
+
+            // profit
+            calcularProfit();
+        }
+    }
+
+    var calcularProfit = function () {
+        var data_tracking_id = $('#data_tracking_id').val();
+        if (data_tracking_id != '') {
+            var total_concrete = $('#total_concrete').val();
+            var total_labor = $('#total_labor_price').val();
+            var total_daily_today = $('#total_daily_today').val();
+
+            var profit = parseFloat(total_concrete) + parseFloat(total_labor) - parseFloat(total_daily_today);
+            $('#profit').val(profit);
         }
     }
 
@@ -980,11 +1001,11 @@ var DataTracking = function () {
             },
             {
                 field: "total",
-                title: "Total",
+                title: "$ Total",
                 width: 100,
                 textAlign: 'center',
                 template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.total, 2, '.', ',')}</span>`;
+                    return `<span>$${MyApp.formatearNumero(row.total, 2, '.', ',')}</span>`;
                 }
             },
             {
@@ -1017,7 +1038,7 @@ var DataTracking = function () {
             layout: {
                 theme: 'default', // datatable theme
                 class: '', // custom wrapper class
-                scroll: false, // enable/disable datatable scroll both horizontal and vertical when needed.
+                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
                 //height: 550, // datatable's body's fixed height
                 footer: false // display/hide footer
             },

@@ -64,7 +64,6 @@ var ModalItemProject = function () {
         var item_id = $('#item').val();
 
         // reset
-        $('#item-price').val('');
 
         $('#yield-calculation').val('');
         $('#yield-calculation').trigger('change');
@@ -73,8 +72,6 @@ var ModalItemProject = function () {
         $('#equation').trigger('change');
 
         if (item_id != '') {
-            var price = $('#item option[value="' + item_id + '"]').data("price");
-            $('#item-price').val(price);
 
             var yield = $('#item option[value="' + item_id + '"]').data("yield");
             $('#yield-calculation').val(yield);

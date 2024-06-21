@@ -664,11 +664,11 @@
                                     <select class="form-control m-select2" id="item">
                                         <option value="">Select</option>
                                         {% for item in items %}
-                                            <option value="{{ item.itemId }}" data-price="{{ item.price }}"
+                                            <option value="{{ item.itemId }}"
                                                     data-unit="{{ item.unit.description }}"
                                                     data-yield="{{ item.yieldCalculation }}"
                                                     data-equation="{% if item.equation != null %}{{ item.equation.equationId }}{% endif %}">
-                                                {{ item.description }} ${{ item.price | number_format(2, ',', '.') }}
+                                                {{ item.description }}
                                             </option>
                                         {% endfor %}
                                     </select>
@@ -705,7 +705,8 @@
                                     <select class="form-control m-select2 event-change" id="equation" name="equation">
                                         <option value="">Select</option>
                                         {% for item in equations %}
-                                            <option value="{{ item.equationId }}"> {{ item.description }} {{ item.equation }}
+                                            <option value="{{ item.equationId }}" data-equation="{{ item.equation }}">
+                                                {{ item.description }} {{ item.equation }}
                                             </option>
                                         {% endfor %}
                                     </select>

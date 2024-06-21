@@ -31,7 +31,7 @@ class ItemService extends Base
         if ($entity != null) {
 
             $arreglo_resultado['descripcion'] = $entity->getDescription();
-            $arreglo_resultado['price'] = $entity->getPrice();
+            // $arreglo_resultado['price'] = $entity->getPrice();
             $arreglo_resultado['status'] = $entity->getStatus();
             $arreglo_resultado['unit_id'] = $entity->getUnit()->getUnitId();
             $arreglo_resultado['yield_calculation'] = $entity->getYieldCalculation();
@@ -175,7 +175,7 @@ class ItemService extends Base
      * @param int $item_id Id
      * @author Marcel
      */
-    public function ActualizarItem($item_id, $unit_id, $description, $price, $status, $yield_calculation, $equation_id)
+    public function ActualizarItem($item_id, $unit_id, $description, $status, $yield_calculation, $equation_id)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -193,7 +193,7 @@ class ItemService extends Base
             }
 
             $entity->setDescription($description);
-            $entity->setPrice($price);
+            // $entity->setPrice($price);
             $entity->setStatus($status);
             $entity->setYieldCalculation($yield_calculation);
 
@@ -229,7 +229,7 @@ class ItemService extends Base
      * @param string $description Nombre
      * @author Marcel
      */
-    public function SalvarItem($unit_id, $description, $price, $status, $yield_calculation, $equation_id)
+    public function SalvarItem($unit_id, $description, $status, $yield_calculation, $equation_id)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -245,7 +245,7 @@ class ItemService extends Base
         $entity = new Item();
 
         $entity->setDescription($description);
-        $entity->setPrice($price);
+        // $entity->setPrice($price);
         $entity->setStatus($status);
         $entity->setYieldCalculation($yield_calculation);
 
@@ -303,7 +303,7 @@ class ItemService extends Base
             $arreglo_resultado[$cont] = array(
                 "id" => $item_id,
                 "description" => $value->getDescription(),
-                "price" => number_format($value->getPrice(), 2, '.', ','),
+                // "price" => number_format($value->getPrice(), 2, '.', ','),
                 "status" => $value->getStatus() ? 1 : 0,
                 "unit" => $value->getUnit()->getDescription(),
                 "yieldCalculation" => $yield_calculation,

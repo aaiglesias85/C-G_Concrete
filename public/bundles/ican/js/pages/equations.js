@@ -76,7 +76,7 @@ var Equations = function () {
             layout: {
                 theme: 'default', // datatable theme
                 class: '', // custom wrapper class
-                scroll: false, // enable/disable datatable scroll both horizontal and vertical when needed.
+                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
                 //height: 550, // datatable's body's fixed height
                 footer: false // display/hide footer
             },
@@ -224,7 +224,7 @@ var Equations = function () {
 
             var equation = $('#equation').val();
 
-            if ($('#equation-form').valid() && /^[0-9+\-*\/\s\(\)x]+$/.test(equation)) {
+            if ($('#equation-form').valid() && /^[0-9+\-*\/\s\(\)xX]+$/.test(equation)) {
 
                 var equation_id = $('#equation_id').val();
 

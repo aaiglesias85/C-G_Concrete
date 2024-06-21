@@ -107,7 +107,7 @@ var Projects = function () {
             layout: {
                 theme: 'default', // datatable theme
                 class: '', // custom wrapper class
-                scroll: false, // enable/disable datatable scroll both horizontal and vertical when needed.
+                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
                 //height: 550, // datatable's body's fixed height
                 footer: false // display/hide footer
             },
@@ -685,10 +685,6 @@ var Projects = function () {
         $('#item').change(changeItem);
         $('#yield-calculation').change(changeYield);
 
-        $('#item-data-tracking').change(changeItemDataTracking);
-        $('#data-tracking-quantity').change(calcularTotalItemDataTracking);
-        $('#data-tracking-price').change(calcularTotalItemDataTracking);
-
         $(document).off('switchChange.bootstrapSwitch', '#item-type');
         $(document).on('switchChange.bootstrapSwitch', '#item-type', changeItemType);
 
@@ -732,7 +728,6 @@ var Projects = function () {
         var item_id = $('#item').val();
 
         // reset
-        $('#item-price').val('');
 
         $('#yield-calculation').val('');
         $('#yield-calculation').trigger('change');
@@ -741,8 +736,6 @@ var Projects = function () {
         $('#equation').trigger('change');
 
         if (item_id != '') {
-            var price = $('#item option[value="' + item_id + '"]').data("price");
-            $('#item-price').val(price);
 
             var yield = $('#item option[value="' + item_id + '"]').data("yield");
             $('#yield-calculation').val(yield);
@@ -751,30 +744,6 @@ var Projects = function () {
             var equation = $('#item option[value="' + item_id + '"]').data("equation");
             $('#equation').val(equation);
             $('#equation').trigger('change');
-        }
-    }
-
-    var changeItemDataTracking = function () {
-        var item_id = $('#item-data-tracking').val();
-
-        // reset
-        $('#data-tracking-quantity').val('');
-        $('#data-tracking-price').val('');
-        $('#data-tracking-total').val('');
-
-        if (item_id != '') {
-            var price = $('#item option[value="' + item_id + '"]').data("price");
-            $('#data-tracking-price').val(price);
-
-            calcularTotalItemDataTracking();
-        }
-    }
-    var calcularTotalItemDataTracking = function () {
-        var cantidad = $('#data-tracking-quantity').val();
-        var price = $('#data-tracking-price').val();
-        if (cantidad != '' && price != '') {
-            var total = parseFloat(cantidad) * parseFloat(price);
-            $('#data-tracking-total').val(total);
         }
     }
 
@@ -999,7 +968,7 @@ var Projects = function () {
             layout: {
                 theme: 'default', // datatable theme
                 class: '', // custom wrapper class
-                scroll: false, // enable/disable datatable scroll both horizontal and vertical when needed.
+                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
                 //height: 550, // datatable's body's fixed height
                 footer: false // display/hide footer
             },
@@ -1260,6 +1229,10 @@ var Projects = function () {
                 $('#equation').val(items[posicion].equation_id);
                 $('#equation').trigger('change');
 
+                if(items[posicion].equation_id != ''){
+                    $('#select-equation').removeClass('m--hide');
+                }
+
                 $('#yield-calculation').on('change', changeYield);
 
                 $(document).off('switchChange.bootstrapSwitch', '#item-type', changeItemType);
@@ -1493,7 +1466,7 @@ var Projects = function () {
             layout: {
                 theme: 'default', // datatable theme
                 class: '', // custom wrapper class
-                scroll: false, // enable/disable datatable scroll both horizontal and vertical when needed.
+                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
                 //height: 550, // datatable's body's fixed height
                 footer: false // display/hide footer
             },

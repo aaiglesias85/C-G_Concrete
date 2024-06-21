@@ -72,7 +72,7 @@ var Units = function () {
             layout: {
                 theme: 'default', // datatable theme
                 class: '', // custom wrapper class
-                scroll: false, // enable/disable datatable scroll both horizontal and vertical when needed.
+                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
                 //height: 550, // datatable's body's fixed height
                 footer: false // display/hide footer
             },

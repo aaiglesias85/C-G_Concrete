@@ -150,20 +150,12 @@
 
                         <div class="form-group m-form__group ic-form-group">
                             <div class="row">
-                                <div class="col-md-3">
+                                <div class="col-md-4" id="select-unit">
                                     <label>
                                         <span class="ic-step-number">2</span>
-                                        Price
+                                        Unit
                                         <span class="ic-small italic">(required)</span>
                                     </label>
-                                    <div class="input-group m-input-group">
-                                        <div class="input-group-prepend"><span class="input-group-text">$</span>
-                                        </div>
-                                        <input type="text" class="form-control event-change form-control-number" id="price" name="price">
-                                    </div>
-                                </div>
-                                <div class="col-md-4" id="select-unit">
-                                    <label>Unit</label>
 
                                     <div class="row">
                                         <div class="col-md-10">
@@ -183,6 +175,20 @@
                                         </div>
                                     </div>
                                 </div>
+                                {#
+                                <div class="col-md-3">
+                                    <label>
+
+                                        Price
+
+                                    </label>
+                                    <div class="input-group m-input-group">
+                                        <div class="input-group-prepend"><span class="input-group-text">$</span>
+                                        </div>
+                                        <input type="text" class="form-control event-change form-control-number" id="price" name="price">
+                                    </div>
+                                </div>
+                                #}
                             </div>
                         </div>
 
