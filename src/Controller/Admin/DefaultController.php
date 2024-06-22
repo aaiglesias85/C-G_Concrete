@@ -35,7 +35,7 @@ class DefaultController extends AbstractController
                 // stats
                 $stats = $this->defaultService->ListarStats();
                 // chart 1
-                $chart1 = $this->defaultService->DevolverDataChart1();
+                $chart1 = $this->defaultService->DevolverDataChartCosts();
                 // chart 2
                 $chart2 = $this->defaultService->DevolverDataChartProfit();
                 // chart 3

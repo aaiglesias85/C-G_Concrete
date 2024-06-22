@@ -1,22 +1,90 @@
 var Index = function () {
 
     // chart 1
-    var chart_1 = null;
+    var chart1 = null;
     var initChat1 = function () {
 
-        var data = [];
-        for (let item of chart1_data.data) {
-            data.push({
-                label: item.name,
-                value: item.porciento
-            });
+        var series = [];
+        var labels = [];
+        for (let [i, item] of chart1_data.data.entries()) {
+
+            var color = mApp.getColor("accent");
+            if (i == 1) {
+                color = mApp.getColor("warning");
+            }
+            if (i == 2) {
+                color = mApp.getColor("brand");
+            }
+
+            series.push({value: item.porciento, className: "custom", meta: {color: color}});
+            labels.push(item.name)
         }
 
-        chart_1 = Morris.Donut({
-            element: "m_chart_revenue_change",
-            data: data,
-            colors: [mApp.getColor("accent"), mApp.getColor("danger"), mApp.getColor("brand")]
-        });
+        chart1 = new Chartist.Pie("#m_chart_cost",
+            {
+                series: series,
+                labels: labels
+            },
+            {
+                donut: true,
+                donutWidth: 17,
+                showLabel: false
+            }
+        );
+        chart1.on("draw", function (e) {
+            if ("slice" === e.type) {
+                var t = e.element._node.getTotalLength();
+                e.element.attr({"stroke-dasharray": t + "px " + t + "px"});
+                var a = {
+                    "stroke-dashoffset": {
+                        id: "anim" + e.index,
+                        dur: 1e3,
+                        from: -t + "px",
+                        to: "0px",
+                        easing: Chartist.Svg.Easing.easeOutQuint,
+                        fill: "freeze",
+                        stroke: e.meta.color
+                    }
+                };
+                0 !== e.index && (a["stroke-dashoffset"].begin = "anim" + (e.index - 1) + ".end"), e.element.attr({
+                    "stroke-dashoffset": -t + "px",
+                    stroke: e.meta.color
+                }), e.element.animate(a, !1)
+            }
+        })
+    }
+    var updateChartCosts = function () {
+
+        // legends
+        $('#chart_cost_legends').html('');
+        var html_legend = '';
+
+        for (let [i, item] of chart1_data.data.entries()) {
+
+            var color = 'm--bg-accent';
+            if (i == 1) {
+                color = 'm--bg-warning';
+            }
+
+            html_legend += `
+            <div class="m-widget14__legend">
+                <span class="m-widget14__legend-bullet ${color}"></span>
+                <span class="m-widget14__legend-text">$${MyApp.formatearNumero(item.porciento, 0, '.', ',')} ${item.name}</span>
+            </div>
+            `;
+        }
+        $('#chart_cost_legends').html(html_legend);
+
+        // destroy chart
+        destroyChart(chart1, '#m_chart_cost');
+
+        // add total
+        $('#m_chart_cost').html('<div class="m-widget14__stat" style="font-size: 1rem;" id="chart_cost_total"></div>');
+        $('#chart_cost_total').html(MyApp.formatearNumero(chart1_data.total, 2, '.', ','));
+
+        // init chart
+        initChat1();
+
     }
 
     // chart 2
@@ -85,10 +153,10 @@ var Index = function () {
                 color = 'm--bg-warning';
             }
 
-            html_legend+=`
+            html_legend += `
             <div class="m-widget14__legend">
                 <span class="m-widget14__legend-bullet ${color}"></span>
-                <span class="m-widget14__legend-text">$${MyApp.formatearNumero(item.amount, 2, '.', ',')} ${ item.name }</span>
+                <span class="m-widget14__legend-text">$${MyApp.formatearNumero(item.amount, 2, '.', ',')} ${item.name}</span>
             </div>
             `;
         }
@@ -209,9 +277,16 @@ var Index = function () {
                     // actualizar nombre de proyecto
                     updateProjectName();
 
+                    // costs
+                    chart1_data = response.stats.chart_costs;
+                    updateChartCosts();
+
                     // profit
                     chart2_data = response.stats.chart_profit;
                     updateChartProfit();
+
+                    // items
+                    updateItems(response.stats.items);
 
                 } else {
                     toastr.error(response.error, "Error !!!");
@@ -224,6 +299,56 @@ var Index = function () {
             }
         });
 
+    }
+
+    var updateItems = function (items) {
+        // reset
+        $('#items-body').html('');
+
+        var html = '';
+        for (let [i, item] of items.entries()) {
+            html += `
+            <div class="m-widget5__item">
+                <div class="m-widget5__content">
+                    <div class="m-widget5__section">
+                        <h4 class="m-widget5__title">
+                            ${item.name}
+                        </h4>
+                        <span class="m-widget5__desc">
+                        ${item.unit}
+                        </span>
+                    </div>
+                </div>
+                <div class="m-widget5__content">
+                    <div class="m-widget5__stats1 mr-5">
+                        <span class="m-widget5__sales">${item.quantity}</span>
+                    </div>
+                    <div class="m-widget5__stats2">
+                        <span class="m-widget5__sales m--font-success m--font-bold"> 
+                            ${MyApp.formatearNumero(item.amount, 2, '.', ',')}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        if (items.length == 0) {
+            html = `
+            <div class="m-widget5__item">
+                <div class="m-widget5__content">
+                    <div class="m-widget5__section">
+                        <h4 class="m-widget5__title">
+                            There are no items
+                        </h4>
+                    </div>
+                </div>
+                <div class="m-widget5__content"></div>
+            </div>
+            `;
+        }
+
+        $('#items-body').html(html);
     }
 
     var updateProjectName = function () {

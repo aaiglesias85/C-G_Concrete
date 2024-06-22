@@ -9,6 +9,7 @@ use App\Entity\Invoice;
 use App\Entity\InvoiceItem;
 use App\Entity\Item;
 use App\Entity\Project;
+use App\Entity\ProjectItem;
 use App\Utils\Base;
 
 class DefaultService extends Base
@@ -19,10 +20,15 @@ class DefaultService extends Base
      */
     public function FiltrarDashboard($project_id, $fecha_inicial, $fecha_fin)
     {
+        $chart_costs = $this->DevolverDataChartCosts($project_id, $fecha_inicial, $fecha_fin);
         $chart_profit = $this->DevolverDataChartProfit($project_id, $fecha_inicial, $fecha_fin);
 
+        $items = $this->ListarItemsConMontos($project_id, $fecha_inicial, $fecha_fin);
+
         return [
-            'chart_profit' => $chart_profit
+            'chart_costs' => $chart_costs,
+            'chart_profit' => $chart_profit,
+            'items' => $items,
         ];
     }
 
@@ -74,22 +80,27 @@ class DefaultService extends Base
      * ListarItemsConMontos: lista los items ordenados por el monto
      * @return array
      */
-    public function ListarItemsConMontos()
+    public function ListarItemsConMontos($project_id = '', $fecha_inicial = '', $fecha_fin = '')
     {
         $arreglo_resultado = [];
 
-        $items = $this->getDoctrine()->getRepository(Item::class)
-            ->ListarOrdenados();
-        foreach ($items as $item) {
-            $item_id = $item->getItemId();
+        $project_items = $this->getDoctrine()->getRepository(ProjectItem::class)
+            ->ListarItemsDeProject($project_id);
+        foreach ($project_items as $project_item) {
+            $project_item_id = $project_item->getId();
 
-            $amount = $this->getDoctrine()->getRepository(InvoiceItem::class)
-                ->TotalInvoice("", "", '', '', '', $item_id);
-            if ($amount > 0) {
+            $quantity = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                ->TotalQuantity('', $project_item_id, $fecha_inicial, $fecha_fin);
+
+            $amount = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                ->TotalDaily('', $project_item_id, '', $fecha_inicial, $fecha_fin);
+
+            if ($quantity > 0) {
                 $arreglo_resultado[] = [
-                    'item_id' => $item_id,
-                    'name' => $item->getDescription(),
-                    'unit' => $item->getUnit()->getDescription(),
+                    'item_id' => $project_item_id,
+                    'name' => $project_item->getItem()->getDescription(),
+                    'unit' => $project_item->getItem()->getUnit()->getDescription(),
+                    'quantity' => $quantity,
                     'amount' => $amount
                 ];
             }
@@ -97,8 +108,12 @@ class DefaultService extends Base
 
         // ordenar
         $arreglo_resultado = $this->ordenarArrayDesc($arreglo_resultado, 'amount');
+
         // sacar los primeros 3
-        $arreglo_resultado = array_slice($arreglo_resultado, 0, 3);
+        if($project_id == '') {
+            $arreglo_resultado = array_slice($arreglo_resultado, 0, 6);
+        }
+
 
         return $arreglo_resultado;
     }
@@ -162,7 +177,7 @@ class DefaultService extends Base
             ->TotalLabor('', $fecha_inicial, $fecha_fin);
 
         $total_daily = $this->getDoctrine()->getRepository(DataTrackingItem::class)
-            ->TotalDaily('', '', $fecha_inicial, $fecha_fin);
+            ->TotalDaily('', '', '', $fecha_inicial, $fecha_fin);
 
         $total = $total_concrete + $total_labor - $total_daily;
 
@@ -172,7 +187,7 @@ class DefaultService extends Base
 
         // daily
         $amount_daily = $this->getDoctrine()->getRepository(DataTrackingItem::class)
-            ->TotalDaily('', $project_id, $fecha_inicial, $fecha_fin);
+            ->TotalDaily('', '', $project_id, $fecha_inicial, $fecha_fin);
         $porciento_daily = $total > 0 ? round($amount_daily / $total * 100) : 0;
 
         $data[] = [
@@ -205,44 +220,44 @@ class DefaultService extends Base
     }
 
     /**
-     * DevolverDataChart1: devuelve la data para el grafico
+     * DevolverDataChartCosts: devuelve la data para el grafico
      * @return array
      */
-    public function DevolverDataChart1()
+    public function DevolverDataChartCosts($project_id = '', $fecha_inicial = '', $fecha_fin = '')
     {
-        // total de proyectos
-        $total_proyectos = $this->getDoctrine()->getRepository(Project::class)->TotalProjects('');
+        // total
+        $total_concrete = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->TotalConcrete($project_id, $fecha_inicial, $fecha_fin);
 
-        // companies
+        $total_labor = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->TotalLabor($project_id, $fecha_inicial, $fecha_fin);
+
+        $total = $total_concrete + $total_labor;
+
+
+        // projects
         $data = [];
-        $companies = $this->getDoctrine()->getRepository(Company::class)
-            ->ListarOrdenados();
-        foreach ($companies as $company) {
-            $company_id = $company->getCompanyId();
-            // cantidad de proyectos
-            $total = $this->getDoctrine()->getRepository(Project::class)->TotalProjects('', $company_id);
 
-            if ($total > 0) {
-                // porciento
-                $porciento = round($total / $total_proyectos * 100);
+        // concrete
+        $porciento_concrete = $total > 0 ? round($total_concrete / $total * 100) : 0;
 
-                $data[] = [
-                    'company_id' => $company_id,
-                    'name' => $company->getName(),
-                    'total' => $total,
-                    'porciento' => $porciento
-                ];
-            }
+        $data[] = [
+            'name' => 'Concrete',
+            'amount' => $total_concrete,
+            'porciento' => $porciento_concrete
+        ];
 
-        }
+        // labor
+        $porciento_labor = $total > 0 ? round($total_labor / $total * 100) : 0;
 
-        // ordenar
-        $data = $this->ordenarArrayDesc($data, 'total');
-        // sacar los primeros 3
-        $data = array_slice($data, 0, 3);
+        $data[] = [
+            'name' => 'Labor',
+            'amount' => $total_labor,
+            'porciento' => $porciento_labor
+        ];
 
         return [
-            'total' => $total_proyectos,
+            'total' => $total,
             'data' => $data
         ];
     }
