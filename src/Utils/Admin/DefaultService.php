@@ -52,6 +52,7 @@ class DefaultService extends Base
         }
 
         return $arreglo_resultado;
+        
     }
 
     /**
