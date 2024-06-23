@@ -244,6 +244,13 @@ var Index = function () {
 
     var initWidgets = function () {
         $('.m-select2').select2();
+
+        // change
+        $('#project').change(changeProject);
+    }
+
+    var changeProject = function (e) {
+        btnClickFiltrar();
     }
 
     var initAccionFiltrar = function () {

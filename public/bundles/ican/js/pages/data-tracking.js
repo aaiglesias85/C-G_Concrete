@@ -805,40 +805,44 @@ var DataTracking = function () {
         $('.select-item-data-tracking').select2();
 
         if (project_id != '') {
+            btnClickFiltrar();
+            listarItemsDeProject(project_id);
+        }
+    }
 
-            MyApp.block('#modal-data-tracking .modal-content');
+    var listarItemsDeProject = function (project_id) {
+        MyApp.block('#modal-data-tracking .modal-content');
 
-            $.ajax({
-                type: "POST",
-                url: "project/listarItems",
-                dataType: "json",
-                data: {
-                    'project_id': project_id
-                },
-                success: function (response) {
-                    mApp.unblock('#modal-data-tracking .modal-content');
-                    if (response.success) {
+        $.ajax({
+            type: "POST",
+            url: "project/listarItems",
+            dataType: "json",
+            data: {
+                'project_id': project_id
+            },
+            success: function (response) {
+                mApp.unblock('#modal-data-tracking .modal-content');
+                if (response.success) {
 
-                        //Llenar select
-                        items = response.items;
-                        console.log(items);
+                    //Llenar select
+                    items = response.items;
+                    console.log(items);
 
-                        for (var i = 0; i < items.length; i++) {
-                            $('.select-item-data-tracking').append(new Option(items[i].item, items[i].project_item_id, false, false));
-                        }
-                        $('.select-item-data-tracking').select2();
-
-                    } else {
-                        toastr.error(response.error, "");
+                    for (var i = 0; i < items.length; i++) {
+                        $('.select-item-data-tracking').append(new Option(items[i].item, items[i].project_item_id, false, false));
                     }
-                },
-                failure: function (response) {
-                    mApp.unblock('#modal-data-tracking .modal-content');
+                    $('.select-item-data-tracking').select2();
 
+                } else {
                     toastr.error(response.error, "");
                 }
-            });
-        }
+            },
+            failure: function (response) {
+                mApp.unblock('#modal-data-tracking .modal-content');
+
+                toastr.error(response.error, "");
+            }
+        });
     }
 
     var initPortlets = function () {

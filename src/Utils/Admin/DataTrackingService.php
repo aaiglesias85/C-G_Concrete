@@ -124,7 +124,7 @@ class DataTrackingService extends Base
             $total_concrete = $total_conc_used * $conc_price;
             $arreglo_resultado['total_concrete'] = $total_concrete;
 
-            $total_labor_price =  $total_labor * $labor_price;
+            $total_labor_price = $total_labor * $labor_price;
             $arreglo_resultado['total_labor_price'] = $total_labor_price;
 
             $profit = $total_daily_today - ($total_concrete + $total_labor_price);
@@ -289,9 +289,8 @@ class DataTrackingService extends Base
         $em = $this->getDoctrine()->getManager();
 
         // validar que no exista el datatracking
-        $data_trackings = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->ListarDataTracking($project_id, $date, $date);
-        if( (!empty($data_trackings) && $data_tracking_id == '') || (!empty($data_trackings) && $data_trackings[0]->getId() != $data_tracking_id) ){
+        $existe_data_tracking = $this->ValidarSiExisteDataTracking($data_tracking_id, $project_id, $date);
+        if ($existe_data_tracking) {
             $resultado['success'] = false;
             $resultado['error'] = "A record already exists for the selected project and date";
 
@@ -386,6 +385,35 @@ class DataTrackingService extends Base
     }
 
     /**
+     * ValidarSiExisteDataTracking
+     * @param $data_tracking_id
+     * @param $project_id
+     * @return boolean
+     */
+    public function ValidarSiExisteDataTracking($data_tracking_id, $project_id, $date)
+    {
+        $existe = false;
+
+        if($project_id == '' && $data_tracking_id != ''){
+            $entity = $this->getDoctrine()->getRepository(DataTracking::class)
+                ->find($data_tracking_id);
+            /** @var DataTracking $entity */
+            $project_id = $entity->getProject()->getProjectId();
+        }
+
+        $data_trackings = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->ListarDataTracking($project_id, $date, $date);
+
+        if ($data_tracking_id == '' && !empty($data_trackings)) {
+            $existe = true;
+        }else if (!empty($data_trackings) && $data_trackings[0]->getId() != $data_tracking_id){
+            $existe = true;
+        }
+
+        return $existe;
+    }
+
+    /**
      * SalvarItems
      * @param array $items
      * @param DataTracking $entity
@@ -463,7 +491,7 @@ class DataTrackingService extends Base
 
             $total_labor = $value->getTotalLabor();
             $labor_price = $value->getLaborPrice();
-            $total_labor_price =  $total_labor * $labor_price;
+            $total_labor_price = $total_labor * $labor_price;
 
             $profit = $total_daily_today - ($total_concrete + $total_labor_price);
 
