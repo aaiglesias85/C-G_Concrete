@@ -719,7 +719,7 @@ var DataTracking = function () {
             var total_labor = $('#total_labor_price').val();
             var total_daily_today = $('#total_daily_today').val();
 
-            var profit = parseFloat(total_concrete) + parseFloat(total_labor) - parseFloat(total_daily_today);
+            var profit = parseFloat(total_daily_today) - ( parseFloat(total_concrete) + parseFloat(total_labor) );
             $('#profit').val(profit);
         }
     }

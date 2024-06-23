@@ -127,7 +127,7 @@ class DataTrackingService extends Base
             $total_labor_price =  $total_labor * $labor_price;
             $arreglo_resultado['total_labor_price'] = $total_labor_price;
 
-            $profit = $total_concrete + $total_labor_price - $total_daily_today;
+            $profit = $total_daily_today - ($total_concrete + $total_labor_price);
             $arreglo_resultado['profit'] = $profit;
 
             $resultado['success'] = true;
@@ -465,7 +465,7 @@ class DataTrackingService extends Base
             $labor_price = $value->getLaborPrice();
             $total_labor_price =  $total_labor * $labor_price;
 
-            $profit = $total_concrete + $total_labor_price - $total_daily_today;
+            $profit = $total_daily_today - ($total_concrete + $total_labor_price);
 
             $arreglo_resultado[] = [
                 "data_tracking_id" => $data_tracking_id,

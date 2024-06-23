@@ -179,7 +179,7 @@ class DefaultService extends Base
         $total_daily = $this->getDoctrine()->getRepository(DataTrackingItem::class)
             ->TotalDaily('', '', '', $fecha_inicial, $fecha_fin);
 
-        $total = $total_concrete + $total_labor - $total_daily;
+        $total = $total_daily - ($total_concrete + $total_labor);
 
 
         // projects
@@ -203,7 +203,7 @@ class DefaultService extends Base
         $profit_labor = $this->getDoctrine()->getRepository(DataTracking::class)
             ->TotalLabor($project_id, $fecha_inicial, $fecha_fin);
 
-        $amount_profit = $profit_concrete + $profit_labor - $amount_daily;
+        $amount_profit = $amount_daily - ($profit_concrete + $profit_labor);
 
         $porciento_profit = $total > 0 ? round($amount_profit / $total * 100) : 0;
 
