@@ -32,18 +32,25 @@ class DefaultController extends AbstractController
         if (count($permiso) > 0) {
             if ($permiso[0]['ver']) {
 
+                // projects
+                $projects = $this->defaultService->ListarProjectsParaDashboard();
+                $project_id = '';
+                $project_name = '';
+                if (!empty($projects)) {
+                    $project_id = $projects[0]['project_id'];
+                    $project_name = "{$projects[0]['number']} {$projects[0]['name']}" ;
+                }
+
                 // stats
                 $stats = $this->defaultService->ListarStats();
                 // chart 1
-                $chart1 = $this->defaultService->DevolverDataChartCosts();
+                $chart1 = $this->defaultService->DevolverDataChartCosts($project_id);
                 // chart 2
-                $chart2 = $this->defaultService->DevolverDataChartProfit();
+                $chart2 = $this->defaultService->DevolverDataChartProfit($project_id);
                 // chart 3
                 $chart3 = $this->defaultService->DevolverDataChart3();
                 // items
-                $items = $this->defaultService->ListarItemsConMontos();
-                // projects
-                $projects = $this->defaultService->ListarProjectsParaDashboard();
+                $items = $this->defaultService->ListarItemsConMontos($project_id);
 
                 return $this->render('admin/default/index.html.twig', array(
                     'usuario' => $usuario,
@@ -52,7 +59,9 @@ class DefaultController extends AbstractController
                     'chart2' => $chart2,
                     'chart3' => $chart3,
                     'items' => $items,
-                    'projects' => $projects
+                    'projects' => $projects,
+                    'project_id' => $project_id,
+                    'project_name' => $project_name,
                 ));
             }
         } else {

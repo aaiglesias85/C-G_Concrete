@@ -69,7 +69,7 @@ var Index = function () {
             html_legend += `
             <div class="m-widget14__legend">
                 <span class="m-widget14__legend-bullet ${color}"></span>
-                <span class="m-widget14__legend-text">$${MyApp.formatearNumero(item.porciento, 0, '.', ',')} ${item.name}</span>
+                <span class="m-widget14__legend-text">%${MyApp.formatearNumero(item.porciento, 0, '.', ',')} ${item.name}</span>
             </div>
             `;
         }

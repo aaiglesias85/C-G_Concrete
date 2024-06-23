@@ -41,18 +41,26 @@ class DefaultService extends Base
         $arreglo_resultado = [];
 
         $lista = $this->getDoctrine()->getRepository(Project::class)
-            ->ListarProjectsParaDashboard('', '');
+            ->ListarProjectsParaDashboard();
         foreach ($lista as $value) {
-            $arreglo_resultado[] = [
-                'project_id' => $value->getProjectId(),
-                'number' => $value->getProjectNumber(),
-                'name' => $value->getName(),
-                'dueDate' => $value->getDueDate() != '' ? $value->getDueDate()->format('m/d/Y') : ''
-            ];
+            $project_id = $value->getProjectId();
+
+            $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
+                ->ListarDataTracking($project_id);
+
+            if (!empty($data_tracking)) {
+                $arreglo_resultado[] = [
+                    'project_id' => $value->getProjectId(),
+                    'number' => $value->getProjectNumber(),
+                    'name' => $value->getName(),
+                    'dueDate' => $value->getDueDate() != '' ? $value->getDueDate()->format('m/d/Y') : ''
+                ];
+            }
+
         }
 
         return $arreglo_resultado;
-        
+
     }
 
     /**
@@ -111,7 +119,7 @@ class DefaultService extends Base
         $arreglo_resultado = $this->ordenarArrayDesc($arreglo_resultado, 'amount');
 
         // sacar los primeros 3
-        if($project_id == '') {
+        if ($project_id == '') {
             $arreglo_resultado = array_slice($arreglo_resultado, 0, 6);
         }
 

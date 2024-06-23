@@ -7,6 +7,13 @@
         .m--bg-brand-donut {
             background-color: #716aca !important;
         }
+        .m-widget14__legend-text, .m-widget14__stat{
+            font-weight: bold !important;
+            color: #9699a2 !important;
+        }
+        .m-widget5__sales{
+            font-weight: bold !important;
+        }
     </style>
 {% endblock %}
 
@@ -50,7 +57,7 @@
                         <select class="form-control m-select2 event-change" id="project">
                             <option value="">Project</option>
                             {% for item in projects %}
-                                <option value="{{ item.project_id }}">{{ item.number }} - {{ item.name }}</option>
+                                <option value="{{ item.project_id }}" {% if item.project_id == project_id %} selected {% endif %}>{{ item.number }} - {{ item.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -148,7 +155,7 @@
                                 <h3 class="m-widget14__title">
                                     Cost Breakdown
                                 </h3>
-                                <span class="m-widget14__desc profit_chart_project_name"></span>
+                                <span class="m-widget14__desc profit_chart_project_name">{{ project_name }}</span>
                             </div>
                             <div class="row  align-items-center">
                                 <div class="col">
@@ -186,6 +193,7 @@
                                     Invoice/Profit Share
                                 </h3>
                                 <span class="m-widget14__desc profit_chart_project_name">
+                                    {{ project_name }}
                                 </span>
                             </div>
                             <div class="row  align-items-center">
@@ -219,102 +227,77 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-xl-6">
-
-                <!--begin:: Widgets/Sales Stats-->
-                <div class="m-portlet m-portlet--bordered-semi m-portlet--full-height ">
-                    <div class="m-portlet__head">
-                        <div class="m-portlet__head-caption">
-                            <div class="m-portlet__head-title">
-                                <h3 class="m-portlet__head-text">
+        <div class="m-portlet">
+            <div class="m-portlet__body  m-portlet__body--no-padding">
+                <div class="row m-row--no-padding m-row--col-separator-xl">
+                    <div class="col-xl-6">
+                        <div class="m-widget14">
+                            <div class="m-widget14__header">
+                                <h3 class="m-widget14__title">
                                     Sales Stats
                                 </h3>
-                                <span class="m-widget14__desc profit_chart_project_name">
-                                </span>
+                                <span class="m-widget14__desc profit_chart_project_name">{{ project_name }}</span>
                             </div>
-                        </div>
-                    </div>
-                    <div class="m-portlet__body">
-
-                        <!--begin::Widget 6-->
-                        <div class="m-widget15">
-                            <div class="m-widget15__chart" style="height:180px;">
-                                <canvas id="m_chart_sales_stats"></canvas>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 1.5rem;">
-                            <a href="{{ url('invoice') }}"
-                               class="btn m-btn--pill btn-secondary m-btn m-btn--hover-brand m-btn--custom">View
-                                invoices</a>
-                        </div>
-
-                        <!--end::Widget 6-->
-                    </div>
-                </div>
-
-                <!--end:: Widgets/Sales Stats-->
-            </div>
-            <div class="col-xl-6">
-
-                <!--begin:: Widgets/Top Products-->
-                <div class="m-portlet m-portlet--full-height m-portlet--fit ">
-                    <div class="m-portlet__head">
-                        <div class="m-portlet__head-caption">
-                            <div class="m-portlet__head-title">
-                                <h3 class="m-portlet__head-text">
-                                    Pay Items Totals
-                                </h3>
-                                <span class="m-widget14__desc profit_chart_project_name">
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="m-portlet__body">
-
-                        <!--begin::Widget5-->
-                        <div class="m-widget5">
-                            <div class="m-scrollable" data-scrollable="true" data-height="400" data-mobile-height="300">
-                                <div id="items-body">
-                                    {% for item in items %}
-                                        <div class="m-widget5__item">
-                                            <div class="m-widget5__content">
-                                                <div class="m-widget5__section">
-                                                    <h4 class="m-widget5__title">
-                                                        {{ item.name }}
-                                                    </h4>
-                                                    <span class="m-widget5__desc">
-                                                    {{ item.unit }}
-										        </span>
-                                                </div>
-                                            </div>
-                                            <div class="m-widget5__content">
-                                                <div class="m-widget5__stats1 mr-5">
-                                                    <span class="m-widget5__sales">{{ item.quantity }}</span>
-                                                </div>
-                                                <div class="m-widget5__stats2">
-                                                    <span class="m-widget5__sales m--font-success m--font-bold"> ${{ item.amount | number_format(2,'.', ',') }}</span>
-                                                </div>
-                                            </div>
+                            <div class="row  align-items-center">
+                                <div class="col">
+                                    <div class="m-widget15">
+                                        <div class="m-widget15__chart" style="height:180px;">
+                                            <canvas id="m_chart_sales_stats"></canvas>
                                         </div>
-                                    {% endfor %}
+                                    </div>
+
+                                    <div style="margin-top: 1.5rem;">
+                                        <a href="{{ url('invoice') }}"
+                                           class="btn m-btn--pill btn-secondary m-btn m-btn--hover-brand m-btn--custom">View
+                                            invoices</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        {#
-                        <div style="margin-top: 1.5rem;">
-                            <a href="{{ url('data_tracking') }}"
-                               class="btn m-btn--pill btn-secondary m-btn m-btn--hover-brand m-btn--custom">View all</a>
+                    </div>
+                    <div class="col-xl-6">
+                        <div class="m-widget14">
+                            <div class="m-widget14__header">
+                                <h3 class="m-widget14__title">
+                                    Pay Items Totals
+                                </h3>
+                                <span class="m-widget14__desc profit_chart_project_name">{{ project_name }}</span>
+                            </div>
+                            <div class="row  align-items-center">
+                                <div class="col">
+                                    <div class="m-widget5">
+                                        <div class="m-scrollable" data-scrollable="true" data-height="400" data-mobile-height="300">
+                                            <div id="items-body">
+                                                {% for item in items %}
+                                                    <div class="m-widget5__item">
+                                                        <div class="m-widget5__content">
+                                                            <div class="m-widget5__section">
+                                                                <h4 class="m-widget5__title">
+                                                                    {{ item.name }}
+                                                                </h4>
+                                                                <span class="m-widget5__desc">
+                                                    {{ item.unit }}
+										        </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="m-widget5__content">
+                                                            <div class="m-widget5__stats1 mr-5">
+                                                                <span class="m-widget5__sales">{{ item.quantity }}</span>
+                                                            </div>
+                                                            <div class="m-widget5__stats2">
+                                                                <span class="m-widget5__sales m--font-success m--font-bold"> ${{ item.amount | number_format(2,'.', ',') }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        #}
-
-                        <!--end::Widget 5-->
                     </div>
                 </div>
-
-                <!--end:: Widgets/Top Products-->
             </div>
         </div>
 
