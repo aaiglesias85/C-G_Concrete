@@ -36,12 +36,12 @@ class DefaultService extends Base
      * ListarProjectsParaDashboard: lista los projects ordenados por el due date
      * @return array
      */
-    public function ListarProjectsParaDashboard()
+    public function ListarProjectsParaDashboard($sort = 'DESC', $limit = '')
     {
         $arreglo_resultado = [];
 
         $lista = $this->getDoctrine()->getRepository(Project::class)
-            ->ListarProjectsParaDashboard();
+            ->ListarProjectsParaDashboard('', '', $sort, $limit);
         foreach ($lista as $value) {
             $project_id = $value->getProjectId();
 

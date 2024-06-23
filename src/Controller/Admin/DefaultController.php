@@ -32,13 +32,17 @@ class DefaultController extends AbstractController
         if (count($permiso) > 0) {
             if ($permiso[0]['ver']) {
 
-                // projects
-                $projects = $this->defaultService->ListarProjectsParaDashboard();
+                //last 6 projects
+                $projects = $this->defaultService->ListarProjectsParaDashboard('DESC', 6);
+
+
+                // filter projects
+                $filter_projects = $this->defaultService->ListarProjectsParaDashboard();
                 $project_id = '';
                 $project_name = '';
                 if (!empty($projects)) {
-                    $project_id = $projects[0]['project_id'];
-                    $project_name = "{$projects[0]['number']} {$projects[0]['name']}" ;
+                    $project_id = $filter_projects[0]['project_id'];
+                    $project_name = "{$filter_projects[0]['number']} {$filter_projects[0]['name']}" ;
                 }
 
                 // stats
@@ -60,6 +64,7 @@ class DefaultController extends AbstractController
                     'chart3' => $chart3,
                     'items' => $items,
                     'projects' => $projects,
+                    'filter_projects' => $filter_projects,
                     'project_id' => $project_id,
                     'project_name' => $project_name,
                 ));

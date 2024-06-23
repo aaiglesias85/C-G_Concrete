@@ -56,7 +56,7 @@
                     <div class="col-12 col-sm-3 col-md-3 mb-2 mb-sm-0">
                         <select class="form-control m-select2 event-change" id="project">
                             <!--<option value="">Working Projects</option>-->
-                            {% for item in projects %}
+                            {% for item in filter_projects %}
                                 <option value="{{ item.project_id }}" {% if item.project_id == project_id %} selected {% endif %}>{{ item.number }} - {{ item.name }}</option>
                             {% endfor %}
                         </select>
@@ -109,7 +109,7 @@
                                 <div class="row m-row--no-padding align-items-center">
                                     <div class="col">
                                         <h3 class="m-widget1__title">Projects</h3>
-                                        <span class="m-widget1__desc">Active projects</span><br>
+                                        <span class="m-widget1__desc">Working projects</span><br>
                                         <span class="m-widget1__desc">Inactive projects</span>
                                     </div>
                                     <div class="col m--align-right">

@@ -359,7 +359,9 @@ class ProjectRepository extends EntityRepository
 
         $consulta->orderBy('p.dueDate', $sort);
 
-        $consulta->setMaxResults($limit);
+        if($limit !== ''){
+            $consulta->setMaxResults($limit);
+        }
 
         return $consulta->getQuery()->getResult();
     }
