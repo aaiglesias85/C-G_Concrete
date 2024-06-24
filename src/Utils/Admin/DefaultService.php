@@ -36,7 +36,7 @@ class DefaultService extends Base
      * ListarProjectsParaDashboard: lista los projects ordenados por el due date
      * @return array
      */
-    public function ListarProjectsParaDashboard($sort = 'DESC', $limit = '')
+    public function ListarProjectsParaDashboard($sort = 'ASC', $limit = '')
     {
         $arreglo_resultado = [];
 
