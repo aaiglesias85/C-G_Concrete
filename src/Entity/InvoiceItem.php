@@ -24,6 +24,13 @@ class InvoiceItem
     /**
      * @var float
      *
+     * @ORM\Column(name="quantity_from_previous", type="float", nullable=false)
+     */
+    private $quantityFromPrevious;
+
+    /**
+     * @var float
+     *
      * @ORM\Column(name="quantity", type="float", nullable=false)
      */
     private $quantity;
@@ -45,16 +52,15 @@ class InvoiceItem
      */
     private $invoice;
 
-
     /**
-     * @var Item
+     * @var ProjectItem
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Item")
+     * @ORM\ManyToOne(targetEntity="App\Entity\ProjectItem")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="item_id", referencedColumnName="item_id")
+     *   @ORM\JoinColumn(name="project_item_id", referencedColumnName="id")
      * })
      */
-    private $item;
+    private $projectItem;
 
     /**
      * Get id
@@ -110,16 +116,26 @@ class InvoiceItem
     }
 
     /**
-     * @return Item
+     * @return ProjectItem
      */
-    public function getItem()
+    public function getProjectItem()
     {
-        return $this->item;
+        return $this->projectItem;
     }
 
-    public function setItem($item)
+    public function setProjectItem($projectItem)
     {
-        $this->item = $item;
+        $this->projectItem = $projectItem;
+    }
+
+    public function getQuantityFromPrevious()
+    {
+        return $this->quantityFromPrevious;
+    }
+
+    public function setQuantityFromPrevious($quantityFromPrevious)
+    {
+        $this->quantityFromPrevious = $quantityFromPrevious;
     }
 
 }

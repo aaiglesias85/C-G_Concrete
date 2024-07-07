@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: 127.0.0.1
--- Tiempo de generación: 28-05-2024 a las 19:39:59
--- Versión del servidor: 11.2.2-MariaDB
--- Versión de PHP: 8.1.12
+-- Servidor: localhost
+-- Tiempo de generación: 07-07-2024 a las 20:32:11
+-- Versión del servidor: 5.7.44
+-- Versión de PHP: 8.1.29
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -35,7 +35,7 @@ CREATE TABLE `company` (
   `contact_email` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `company`
@@ -57,7 +57,7 @@ CREATE TABLE `company_contact` (
   `email` varchar(255) DEFAULT NULL,
   `phone` varchar(50) DEFAULT NULL,
   `company_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `company_contact`
@@ -79,8 +79,8 @@ CREATE TABLE `data_tracking` (
   `measured_by` varchar(255) DEFAULT NULL,
   `conc_vendor` varchar(255) DEFAULT NULL,
   `crew_lead` varchar(255) DEFAULT NULL,
-  `notes` text DEFAULT NULL,
-  `other_materials` text DEFAULT NULL,
+  `notes` text,
+  `other_materials` text,
   `total_conc_used` float(8,2) DEFAULT NULL,
   `conc_price` float(8,2) DEFAULT NULL,
   `total_labor` float(8,2) DEFAULT NULL,
@@ -90,14 +90,16 @@ CREATE TABLE `data_tracking` (
   `updated_at` datetime DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL,
   `inspector_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `data_tracking`
 --
 
 INSERT INTO `data_tracking` (`id`, `date`, `station_number`, `measured_by`, `conc_vendor`, `crew_lead`, `notes`, `other_materials`, `total_conc_used`, `conc_price`, `total_labor`, `labor_price`, `total_stamps`, `created_at`, `updated_at`, `project_id`, `inspector_id`) VALUES
-(2, '2024-05-22', '98653865', 'Marcel', 'ROM', 'dsfsdfds', 'fdgfd fdg ', 'fdgdf gdfgdfg', 5000.00, 1500.00, 4.00, NULL, 4.00, '2024-05-22 14:15:58', '2024-05-28 19:35:59', 3, 1);
+(2, '2024-05-22', '98653865', 'Marcel', 'ROM', 'dsfsdfds', 'fdgfd fdg ', 'fdgdf gdfgdfg', 3.00, 1500.00, 4.00, 500.00, 4.00, '2024-05-22 14:15:58', '2024-06-23 16:57:05', 3, 1),
+(3, '2024-06-11', '45453', 'Marcel', 'CMP', '', '', '', 20.00, 150.00, 4.00, 50.00, 0.00, '2024-06-23 21:07:27', '2024-06-23 21:14:41', 2, NULL),
+(4, '2024-06-11', '435435', 'Marcel', 'CMP', '', '', '', 20.00, 100.00, 5.00, 50.00, 0.00, '2024-06-23 21:16:44', '2024-06-23 21:24:33', 3, NULL);
 
 -- --------------------------------------------------------
 
@@ -111,7 +113,7 @@ CREATE TABLE `data_tracking_item` (
   `price` float(8,2) DEFAULT NULL,
   `data_tracking_id` int(11) DEFAULT NULL,
   `project_item_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `data_tracking_item`
@@ -120,7 +122,12 @@ CREATE TABLE `data_tracking_item` (
 INSERT INTO `data_tracking_item` (`id`, `quantity`, `price`, `data_tracking_id`, `project_item_id`) VALUES
 (5, 150.00, 16.50, 2, 1),
 (6, 50.00, 63.00, 2, 2),
-(7, 250.00, 25.00, 2, 8);
+(7, 250.00, 25.00, 2, 8),
+(8, 40.00, 160.00, 3, 11),
+(9, 50.00, 200.00, 3, 12),
+(10, 30.00, 300.00, 3, 13),
+(11, 50.00, 16.50, 4, 1),
+(12, 30.00, 63.00, 4, 2);
 
 -- --------------------------------------------------------
 
@@ -133,16 +140,16 @@ CREATE TABLE `equation` (
   `description` varchar(255) DEFAULT NULL,
   `equation` varchar(255) DEFAULT NULL,
   `status` tinyint(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `equation`
 --
 
 INSERT INTO `equation` (`equation_id`, `description`, `equation`, `status`) VALUES
-(1, 'SW, 4 IN, SY', '(x*4)/36', 1),
-(2, 'SW, 4 IN, SF', '(x*4)/324', 1),
-(3, 'SW 6 IN, SF', '(x*6)/25', 1);
+(1, 'SW, 4 IN, SY', '(X*4)/36', 1),
+(2, 'SW, 4 IN, SF', '(X*4)/324', 1),
+(3, 'SW 6 IN, SF', '(X*6)/25', 1);
 
 -- --------------------------------------------------------
 
@@ -154,7 +161,7 @@ CREATE TABLE `function` (
   `function_id` int(11) NOT NULL,
   `url` varchar(50) DEFAULT NULL,
   `description` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `function`
@@ -189,7 +196,7 @@ CREATE TABLE `inspector` (
   `status` tinyint(1) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `inspector`
@@ -211,23 +218,18 @@ CREATE TABLE `invoice` (
   `number` varchar(50) DEFAULT NULL,
   `start_date` date DEFAULT NULL,
   `end_date` date DEFAULT NULL,
-  `notes` text DEFAULT NULL,
+  `notes` text,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `invoice`
 --
 
 INSERT INTO `invoice` (`invoice_id`, `number`, `start_date`, `end_date`, `notes`, `created_at`, `updated_at`, `project_id`) VALUES
-(3, '1', '2024-04-01', '2024-04-30', 'dsds fsdfsdf', '2024-04-23 04:21:25', '2024-04-23 19:01:16', 1),
-(4, '2', '2024-03-01', '2024-03-31', 'dsf sdfdsf sdfsdfsdf', '2024-04-23 19:36:18', NULL, 1),
-(5, '3', '2024-02-01', '2024-02-29', 'dfdf sdfsdf sdf sdf sdf sdf', '2024-04-23 19:40:22', NULL, 1),
-(6, '4', '2024-01-01', '2024-01-31', 'fd dfg df gdfg dfg fdgdfg df gdfg dfg', '2024-04-23 19:40:44', NULL, 1),
-(7, '5', '2024-04-01', '2024-04-30', 'fgg dg fdgdf g', '2024-04-24 04:21:24', '2024-04-24 16:59:59', 2),
-(8, '6', '2024-04-01', '2024-04-30', 'Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.', '2024-04-24 04:24:52', '2024-05-08 23:49:36', 3);
+(1, '1', '2024-06-01', '2024-06-30', '', '2024-07-07 19:19:29', NULL, 2);
 
 -- --------------------------------------------------------
 
@@ -237,40 +239,21 @@ INSERT INTO `invoice` (`invoice_id`, `number`, `start_date`, `end_date`, `notes`
 
 CREATE TABLE `invoice_item` (
   `id` int(11) NOT NULL,
+  `quantity_from_previous` float(8,2) DEFAULT NULL,
   `quantity` float(8,2) DEFAULT NULL,
   `price` float(8,2) DEFAULT NULL,
   `invoice_id` int(11) DEFAULT NULL,
-  `item_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `project_item_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `invoice_item`
 --
 
-INSERT INTO `invoice_item` (`id`, `quantity`, `price`, `invoice_id`, `item_id`) VALUES
-(12, 5.00, 1500.00, 3, 19),
-(13, 6.00, 29.00, 3, 1),
-(14, 3.00, 700.00, 3, 8),
-(15, 5.00, 29.00, 3, 1),
-(16, 5.00, 2100.00, 3, 16),
-(17, 50.00, 70.00, 4, 2),
-(18, 5.00, 700.00, 4, 8),
-(19, 159.00, 47.18, 4, 17),
-(20, 130.00, 16.50, 4, 6),
-(21, 25.00, 16.50, 5, 6),
-(22, 12.00, 700.00, 5, 8),
-(23, 2.00, 2100.00, 5, 16),
-(24, 15.00, 150.00, 5, 20),
-(25, 25.00, 16.50, 6, 7),
-(26, 20.00, 30.00, 6, 14),
-(27, 10.00, 70.00, 6, 12),
-(28, 22.00, 150.00, 6, 20),
-(29, 50.00, 100.00, 7, 13),
-(30, 15.00, 16.50, 7, 6),
-(31, 100.00, 16.50, 8, 6),
-(32, 20.00, 58.00, 8, 4),
-(33, 1000.00, 58.00, 8, 4),
-(34, 100.00, 150.00, 7, 20);
+INSERT INTO `invoice_item` (`id`, `quantity_from_previous`, `quantity`, `price`, `invoice_id`, `project_item_id`) VALUES
+(1, NULL, 40.00, 160.00, 1, 11),
+(2, NULL, 50.00, 200.00, 1, 12),
+(3, NULL, 30.00, 300.00, 1, 13);
 
 -- --------------------------------------------------------
 
@@ -288,7 +271,7 @@ CREATE TABLE `item` (
   `updated_at` datetime DEFAULT NULL,
   `unit_id` int(11) DEFAULT NULL,
   `equation_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `item`
@@ -314,7 +297,7 @@ INSERT INTO `item` (`item_id`, `description`, `price`, `yield_calculation`, `sta
 (17, 'PLAIN CONC DITCH PAVING', 47.18, 'equation', 1, '2024-04-12 20:26:54', '2024-05-12 19:18:15', 1, 2),
 (18, 'EXTRA CONCRETE', 208.00, 'equation', 1, '2024-04-12 20:27:17', '2024-05-12 19:18:05', 3, 1),
 (19, 'EXTRA LABOR', 1500.00, 'same', 1, '2024-04-12 20:27:37', '2024-05-12 19:17:54', 6, NULL),
-(20, 'Cubic Yards of Concrete', 150.00, 'none', 1, '2024-04-12 20:28:15', '2024-05-12 19:17:47', 3, NULL);
+(20, 'Cubic Yards of Concrete', 150.00, 'none', 1, '2024-04-12 20:28:15', '2024-06-21 18:34:07', 3, NULL);
 
 -- --------------------------------------------------------
 
@@ -326,11 +309,11 @@ CREATE TABLE `log` (
   `log_id` int(11) NOT NULL,
   `operation` varchar(255) DEFAULT NULL,
   `category` varchar(255) DEFAULT NULL,
-  `description` text DEFAULT NULL,
+  `description` text,
   `ip` varchar(50) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `log`
@@ -479,7 +462,25 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (141, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 05/21/2024', '::1', '2024-05-21 19:32:51', 1),
 (142, 'Delete', 'Data Tracking', 'The data tracking is deleted, Project: 0009003 - Houston Texas, Date: 05/21/2024', '::1', '2024-05-21 19:32:59', 1),
 (143, 'Add', 'Data Tracking', 'The data tracking is add, Project: 0009003 - Houston Texas, Date: 05/22/2024', '::1', '2024-05-22 14:15:59', 1),
-(144, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 05/22/2024', '::1', '2024-05-28 19:35:59', 1);
+(144, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 05/22/2024', '::1', '2024-05-28 19:35:59', 1),
+(145, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 05/22/2024', '::1', '2024-06-21 17:37:22', 1),
+(146, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 05/22/2024', '::1', '2024-06-21 18:01:18', 1),
+(147, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 05/22/2024', '::1', '2024-06-21 18:01:32', 1),
+(148, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-06-21 18:16:03', 1),
+(149, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-06-21 18:21:59', 1),
+(150, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-06-21 18:22:19', 1),
+(151, 'Update', 'Equation', 'The equation is modified: SW 6 IN, SF', '::1', '2024-06-21 18:27:33', 1),
+(152, 'Update', 'Equation', 'The equation is modified: SW, 4 IN, SF', '::1', '2024-06-21 18:27:45', 1),
+(153, 'Update', 'Equation', 'The equation is modified: SW, 4 IN, SY', '::1', '2024-06-21 18:27:52', 1),
+(154, 'Update', 'Item', 'The item is modified: Cubic Yards of Concrete', '::1', '2024-06-21 18:34:03', 1),
+(155, 'Update', 'Item', 'The item is modified: Cubic Yards of Concrete', '::1', '2024-06-21 18:34:07', 1),
+(156, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 05/22/2024', '::1', '2024-06-23 16:57:05', 1),
+(157, 'Update', 'Project', 'The project is modified: FL MIAMI', '::1', '2024-06-23 21:06:22', 1),
+(158, 'Add', 'Data Tracking', 'The data tracking is add, Project: 0009002 - FL MIAMI, Date: 06/11/2024', '::1', '2024-06-23 21:07:27', 1),
+(159, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009002 - FL MIAMI, Date: 06/11/2024', '::1', '2024-06-23 21:14:41', 1),
+(160, 'Add', 'Data Tracking', 'The data tracking is add, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-06-23 21:16:44', 1),
+(161, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-06-23 21:24:33', 1),
+(162, 'Add', 'Invoice', 'The invoice #1 is added', '::1', '2024-07-07 19:19:29', 1);
 
 -- --------------------------------------------------------
 
@@ -493,7 +494,7 @@ CREATE TABLE `notification` (
   `readed` tinyint(1) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `notification`
@@ -531,7 +532,7 @@ CREATE TABLE `project` (
   `updated_at` datetime DEFAULT NULL,
   `company_id` int(11) DEFAULT NULL,
   `inspector_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `project`
@@ -539,8 +540,8 @@ CREATE TABLE `project` (
 
 INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `owner`, `subcontract`, `federal_funding`, `county`, `resurfacing`, `invoice_contact`, `certified_payrolls`, `start_date`, `end_date`, `due_date`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `company_id`, `inspector_id`) VALUES
 (1, '0009001', 'FL COUNTY', 'FL COUNTY', '', '', 0, '', 0, '', 0, NULL, NULL, '2024-05-31', 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-05-14 15:52:54', 1, 1),
-(2, '0009002', 'FL MIAMI', 'FL MIAMI', '', '', 0, '', 0, '', 0, NULL, NULL, '2024-05-28', 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-05-14 15:52:43', 1, 1),
-(3, '0009003', 'Houston Texas', 'Houston Texas', 'Marcel', '896532', 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 1, '86532', '89653', '2024-04-24 04:24:02', '2024-05-17 18:31:58', 3, 1);
+(2, '0009002', 'FL MIAMI', 'FL MIAMI', '', '', 0, '', 0, '', 0, NULL, NULL, '2024-05-28', 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-06-23 21:06:22', 1, 1),
+(3, '0009003', 'Houston Texas', 'Houston Texas', 'Marcel', '896532', 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 1, '86532', '89653', '2024-04-24 04:24:02', '2024-06-21 18:22:19', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -556,20 +557,23 @@ CREATE TABLE `project_item` (
   `project_id` int(11) DEFAULT NULL,
   `item_id` int(11) DEFAULT NULL,
   `equation_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `project_item`
 --
 
 INSERT INTO `project_item` (`id`, `quantity`, `price`, `yield_calculation`, `project_id`, `item_id`, `equation_id`) VALUES
-(1, 1500.00, 16.50, 'none', 3, 6, NULL),
+(1, 1500.00, 16.50, 'equation', 3, 6, 1),
 (2, 2000.00, 63.00, 'same', 3, 15, NULL),
 (4, 1600.00, 150.00, 'equation', 3, 20, 2),
 (5, NULL, 253.00, 'none', 1, 10, NULL),
 (8, 2500.00, 25.00, 'equation', 3, 3, 1),
-(9, 2500.00, 16.50, 'none', 3, 7, NULL),
-(10, 5000.00, 70.00, 'equation', 3, 12, 1);
+(9, 2500.00, 16.50, 'equation', 3, 7, 2),
+(10, 5000.00, 70.00, 'equation', 3, 12, 1),
+(11, 50.00, 160.00, 'none', 2, 12, NULL),
+(12, 60.00, 200.00, '', 2, 6, NULL),
+(13, 50.00, 300.00, '', 2, 7, NULL);
 
 -- --------------------------------------------------------
 
@@ -579,10 +583,10 @@ INSERT INTO `project_item` (`id`, `quantity`, `price`, `yield_calculation`, `pro
 
 CREATE TABLE `project_notes` (
   `id` int(11) NOT NULL,
-  `notes` text DEFAULT NULL,
+  `notes` text,
   `date` date DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `project_notes`
@@ -600,7 +604,7 @@ INSERT INTO `project_notes` (`id`, `notes`, `date`, `project_id`) VALUES
 CREATE TABLE `rol` (
   `rol_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `rol`
@@ -624,7 +628,7 @@ CREATE TABLE `rol_permission` (
   `delete_permission` tinyint(1) DEFAULT NULL,
   `rol_id` int(11) DEFAULT NULL,
   `function_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `rol_permission`
@@ -658,7 +662,7 @@ CREATE TABLE `unit` (
   `unit_id` int(11) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   `status` tinyint(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `unit`
@@ -689,7 +693,7 @@ CREATE TABLE `user` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `rol_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `user`
@@ -712,7 +716,7 @@ CREATE TABLE `user_permission` (
   `delete_permission` tinyint(1) DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL,
   `function_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Volcado de datos para la tabla `user_permission`
@@ -797,7 +801,7 @@ ALTER TABLE `invoice`
 ALTER TABLE `invoice_item`
   ADD PRIMARY KEY (`id`) USING BTREE,
   ADD KEY `Ref6969` (`invoice_id`),
-  ADD KEY `Ref6770` (`item_id`);
+  ADD KEY `project_item_id` (`project_item_id`);
 
 --
 -- Indices de la tabla `item`
@@ -888,25 +892,25 @@ ALTER TABLE `user_permission`
 -- AUTO_INCREMENT de la tabla `company`
 --
 ALTER TABLE `company`
-  MODIFY `company_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `company_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `company_contact`
 --
 ALTER TABLE `company_contact`
-  MODIFY `contact_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `contact_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `data_tracking`
 --
 ALTER TABLE `data_tracking`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `data_tracking_item`
 --
 ALTER TABLE `data_tracking_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `equation`
@@ -930,25 +934,25 @@ ALTER TABLE `inspector`
 -- AUTO_INCREMENT de la tabla `invoice`
 --
 ALTER TABLE `invoice`
-  MODIFY `invoice_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `invoice_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `invoice_item`
 --
 ALTER TABLE `invoice_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `item`
 --
 ALTER TABLE `item`
-  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=145;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=163;
 
 --
 -- AUTO_INCREMENT de la tabla `notification`
@@ -966,7 +970,7 @@ ALTER TABLE `project`
 -- AUTO_INCREMENT de la tabla `project_item`
 --
 ALTER TABLE `project_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `project_notes`
@@ -990,7 +994,7 @@ ALTER TABLE `rol_permission`
 -- AUTO_INCREMENT de la tabla `unit`
 --
 ALTER TABLE `unit`
-  MODIFY `unit_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `unit_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `user`
@@ -1039,7 +1043,7 @@ ALTER TABLE `invoice`
 --
 ALTER TABLE `invoice_item`
   ADD CONSTRAINT `Refinvoice69` FOREIGN KEY (`invoice_id`) REFERENCES `invoice` (`invoice_id`),
-  ADD CONSTRAINT `Refitem70` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`);
+  ADD CONSTRAINT `Refprojectitem26` FOREIGN KEY (`project_item_id`) REFERENCES `project_item` (`id`);
 
 --
 -- Filtros para la tabla `item`

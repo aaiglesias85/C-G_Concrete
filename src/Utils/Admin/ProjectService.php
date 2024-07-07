@@ -7,6 +7,7 @@ use App\Entity\DataTrackingItem;
 use App\Entity\Equation;
 use App\Entity\Inspector;
 use App\Entity\Invoice;
+use App\Entity\InvoiceItem;
 use App\Entity\Item;
 use App\Entity\Project;
 use App\Entity\DataTracking;
@@ -120,12 +121,11 @@ class ProjectService extends Base
         /**@var ProjectItem $entity */
         if ($entity != null) {
 
-            // data tracking
-            $data_tracking = $this->getDoctrine()->getRepository(DataTrackingItem::class)
-                ->ListarDataTrackingsDeItem($project_item_id);
-            if (count($data_tracking) > 0) {
+            // verificar si se puede eliminar
+            $se_puede_eliminar = $this->SePuedeEliminarItem($project_item_id);
+            if ($se_puede_eliminar != '') {
                 $resultado['success'] = false;
-                $resultado['error'] = "The item could not be deleted, because it is related to a data tracking";
+                $resultado['error'] = $se_puede_eliminar;
                 return $resultado;
             }
 
@@ -147,6 +147,33 @@ class ProjectService extends Base
         }
 
         return $resultado;
+    }
+
+    /**
+     * SePuedeEliminarItem
+     * @param $item_id
+     * @return string
+     */
+    private function SePuedeEliminarItem($project_item_id)
+    {
+        $texto_error = '';
+
+        // data tracking
+        $data_tracking = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+            ->ListarDataTrackingsDeItem($project_item_id);
+        if (count($data_tracking) > 0) {
+            $texto_error = "The item could not be deleted, because it is related to a data tracking";
+        }
+
+        // invoices
+        $invoices = $this->getDoctrine()->getRepository(InvoiceItem::class)
+            ->ListarInvoicesDeItem($project_item_id);
+        if (count($invoices) > 0) {
+            $texto_error = "The item could not be deleted, because it is related to a invoice";
+        }
+
+        return $texto_error;
+
     }
 
     /**
@@ -407,35 +434,51 @@ class ProjectService extends Base
     }
 
     /**
-     * ListarDataTrackingParaInvoice
+     * ListarItemsParaInvoice
      * @param $project_id
      * @param $fecha_inicial
      * @param $fecha_fin
      * @return array
      */
-    public function ListarDataTrackingParaInvoice($project_id, $fecha_inicial, $fecha_fin)
+    public function ListarItemsParaInvoice($project_id, $fecha_inicial, $fecha_fin)
     {
         $items = [];
 
-        $project_items = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->ListarDataTracking($project_id, $fecha_inicial, $fecha_fin);
+        // listar items de project
+        $project_items = $this->getDoctrine()->getRepository(ProjectItem::class)
+            ->ListarItemsDeProject($project_id);
         foreach ($project_items as $value) {
+            $project_item_id = $value->getId();
 
-            $data_tracking_id = $value->getId();
-
-            $quantity = $value->getQuantity();
+            $contract_qty = $value->getQuantity();
             $price = $value->getPrice();
-            $total = $quantity * $price;
+            $contract_amount = $contract_qty * $price;
+
+            $quantity_from_previous = $this->getDoctrine()->getRepository(InvoiceItem::class)
+                ->TotalPreviousQuantity($project_item_id);
+
+            $quantity = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                ->TotalQuantity("", $project_item_id, $fecha_inicial, $fecha_fin);
+
+            $quantity_completed = $quantity + $quantity_from_previous;
+
+            $amount = $quantity * $price;
+
+            $total_amount = $quantity_completed  * $price;
 
             $items[] = [
-                "id" => $data_tracking_id,
+                "project_item_id" => $project_item_id,
                 "item_id" => $value->getItem()->getItemId(),
                 "item" => $value->getItem()->getDescription(),
                 "unit" => $value->getItem()->getUnit()->getDescription(),
-                "quantity" => $quantity,
+                "contract_qty" => $contract_qty,
                 "price" => $price,
-                "total" => $total,
-                "date" => $value->getDate()->format('m/d/Y'),
+                "contract_amount" => $contract_amount,
+                "quantity_from_previous" => $quantity_from_previous,
+                "quantity" => $quantity,
+                "quantity_completed" => $quantity_completed,
+                "amount" => $amount,
+                "total_amount" => $total_amount
             ];
         }
 

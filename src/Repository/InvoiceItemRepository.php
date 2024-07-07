@@ -36,21 +36,55 @@ class InvoiceItemRepository extends EntityRepository
      *
      * @return InvoiceItem[]
      */
-    public function ListarInvoicesDeItem($item_id)
+    public function ListarInvoicesDeItem($project_item_id)
     {
         $consulta = $this->createQueryBuilder('i_i')
-            ->leftJoin('i_i.item', 'i');
+            ->leftJoin('d_t.projectItem', 'p_i');
 
-        if ($item_id != '') {
-            $consulta->andWhere('i.itemId = :item_id')
-                ->setParameter('item_id', $item_id);
+        if ($project_item_id != '') {
+            $consulta->andWhere('p_i.id = :project_item_id')
+                ->setParameter('project_item_id', $project_item_id);
         }
-
 
         $consulta->orderBy('i_i.id', "ASC");
 
 
         return $consulta->getQuery()->getResult();
+    }
+
+    /**
+     * TotalPreviousQuantity: Total de quantity items de la BD
+     * @param string $project_item_id
+     *
+     * @return float
+     */
+    public function TotalPreviousQuantity($project_item_id = '')
+    {
+        $em = $this->getEntityManager();
+        $consulta = 'SELECT SUM(i_i.quantity) FROM App\Entity\InvoiceItem i_i ';
+        $join = ' LEFT JOIN i_i.projectItem p_i ';
+        $where = '';
+
+        if ($project_item_id != '') {
+            $esta_query = explode("WHERE", $where);
+            if (count($esta_query) == 1)
+                $where .= 'WHERE (p_i.id = :project_item_id) ';
+            else
+                $where .= 'AND (p_i.id = :project_item_id) ';
+        }
+
+        $consulta .= $join;
+        $consulta .= $where;
+        $query = $em->createQuery($consulta);
+        //Adicionar parametros
+        //$sSearch
+
+        $esta_query_project_item_id = substr_count($consulta, ':project_item_id');
+        if ($esta_query_project_item_id == 1) {
+            $query->setParameter('project_item_id', $project_item_id);
+        }
+
+        return $query->getSingleScalarResult();
     }
 
 
@@ -64,7 +98,7 @@ class InvoiceItemRepository extends EntityRepository
     {
         $em = $this->getEntityManager();
         $consulta = 'SELECT SUM(i_i.quantity * i_i.price) FROM App\Entity\InvoiceItem i_i ';
-        $join = ' LEFT JOIN i_i.item it LEFT JOIN i_i.invoice i LEFT JOIN i.project p LEFT JOIN p.company c ';
+        $join = ' LEFT JOIN i_i.projectItem p_i LEFT JOIN i_i.invoice i LEFT JOIN p_i.project p LEFT JOIN p.company c ';
         $where = '';
 
         if ($item_id != '') {

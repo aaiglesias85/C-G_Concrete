@@ -7,11 +7,14 @@ use App\Entity\Project;
 use App\Entity\Invoice;
 use App\Entity\InvoiceItem;
 
+use App\Entity\ProjectItem;
 use App\Utils\Base;
 use PhpOffice\PhpSpreadsheet\Cell\AdvancedValueBinder;
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\Xls\Style\CellAlignment;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class InvoiceService extends Base
@@ -67,7 +70,7 @@ class InvoiceService extends Base
 
         // inspector
         $inspector_entity = $invoice_entity->getProject()->getInspector();
-        if($inspector_entity != null){
+        if ($inspector_entity != null) {
             $objWorksheet->setCellValue("D11", $inspector_entity->getName());
             $objWorksheet->setCellValue("D13", $inspector_entity->getPhone());
             $objWorksheet->setCellValue("D15", $inspector_entity->getEmail());
@@ -85,43 +88,92 @@ class InvoiceService extends Base
         $objWorksheet->setCellValue("B20", $invoice_entity->getNotes());
 
         // items
-        $total = 0;
-        $fila = 24;
+        $total_contract_amount = 0;
+        $total_amount = 0;
+        $total_amount_completed = 0;
+
+        $fila = 25;
         $items = $this->getDoctrine()->getRepository(InvoiceItem::class)
             ->ListarItems($invoice_id);
-        foreach ($items as $key => $item){
+        foreach ($items as $key => $value) {
 
-            $quantity = $item->getQuantity();
-            $price = $item->getPrice();
-            $subtotal = $quantity * $price;
-            $total += $subtotal;
+            $contract_qty = $value->getProjectItem()->getQuantity();
+            $price = $value->getPrice();
+
+            $contract_amount = $contract_qty * $price;
+            $total_contract_amount += $contract_amount;
+
+            $quantity_from_previous = $value->getQuantityFromPrevious();
+
+            $quantity = $value->getQuantity();
+
+            $quantity_completed = $quantity + $quantity_from_previous;
+
+            $amount = $quantity * $price;
+            $total_amount += $amount;
+
+            $amount_completed = $quantity_completed * $price;
+            $total_amount_completed += $amount_completed;
 
             $objWorksheet
                 ->setCellValue('A' . $fila, ($key + 1))
-                ->setCellValue('B' . $fila, $item->getItem()->getDescription())
-                ->setCellValue('E' . $fila, $item->getItem()->getUnit()->getDescription())
-                ->setCellValue('F' . $fila, $quantity)
+                ->setCellValue('B' . $fila, $value->getProjectItem()->getItem()->getDescription())
+                ->setCellValue('E' . $fila, $value->getProjectItem()->getItem()->getUnit()->getDescription())
+                ->setCellValue('F' . $fila, $contract_qty)
                 ->setCellValue('G' . $fila, $price)
-                ->setCellValue('H' . $fila, $subtotal);
+                ->setCellValue('H' . $fila, $contract_amount)
+                ->setCellValue('I' . $fila, $quantity_from_previous)
+                ->setCellValue('J' . $fila, $quantity)
+                ->setCellValue('K' . $fila, $quantity_completed)
+                ->setCellValue('L' . $fila, $amount)
+                ->setCellValue('M' . $fila, $amount_completed);
 
             $objWorksheet->getStyle('A' . $fila . ':A' . $fila)->applyFromArray($styleArray);
             $objWorksheet->getStyle('B' . $fila . ':D' . $fila)->applyFromArray($styleArray);
             $objWorksheet->getStyle('E' . $fila . ':E' . $fila)->applyFromArray($styleArray);
             $objWorksheet->getStyle('F' . $fila . ':F' . $fila)->applyFromArray($styleArray);
             $objWorksheet->getStyle('G' . $fila . ':G' . $fila)->applyFromArray($styleArray);
-            $objWorksheet->getStyle('H' . $fila . ':I' . $fila)->applyFromArray($styleArray);
+            $objWorksheet->getStyle('H' . $fila . ':H' . $fila)->applyFromArray($styleArray);
+            $objWorksheet->getStyle('I' . $fila . ':I' . $fila)->applyFromArray($styleArray);
+            $objWorksheet->getStyle('J' . $fila . ':J' . $fila)->applyFromArray($styleArray);
+            $objWorksheet->getStyle('K' . $fila . ':K' . $fila)->applyFromArray($styleArray);
+            $objWorksheet->getStyle('L' . $fila . ':L' . $fila)->applyFromArray($styleArray);
+            $objWorksheet->getStyle('M' . $fila . ':M' . $fila)->applyFromArray($styleArray);
 
             $fila++;
 
         }
 
-        // total
+        // total contract amount
         $objWorksheet->setCellValue("G$fila", "TOTAL");
-        $objWorksheet->getStyle('G' . $fila . ':G' . $fila)->applyFromArray($styleArray);
         $objWorksheet->getStyle("G$fila")->getFont()->setBold(true);
+        $objWorksheet->setCellValue("H$fila", $total_contract_amount);
+        $objWorksheet->getStyle("H$fila")->getFont()->setBold(true);
 
-        $objWorksheet->setCellValue("H$fila", $total);
-        $objWorksheet->getStyle('H' . $fila . ':I' . $fila)->applyFromArray($styleArray);
+        // total amount
+        $objWorksheet->mergeCells("J$fila:K$fila");
+        $objWorksheet->setCellValue("J$fila", "Total Completed");
+        $objWorksheet->getStyle("J$fila")->getFont()->setBold(true);
+        $objWorksheet->getStyle("J$fila")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $objWorksheet->setCellValue("L$fila", $total_amount);
+        $objWorksheet->getStyle("L$fila")->getFont()->setBold(true);
+
+        // total amount completed
+        $objWorksheet->setCellValue("M$fila", $total_amount_completed);
+        $objWorksheet->getStyle("M$fila")->getFont()->setBold(true);
+
+        // bordes a fila
+        $objWorksheet->getStyle('A' . $fila . ':A' . $fila)->applyFromArray($styleArray);
+        $objWorksheet->getStyle('B' . $fila . ':D' . $fila)->applyFromArray($styleArray);
+        $objWorksheet->getStyle('E' . $fila . ':E' . $fila)->applyFromArray($styleArray);
+        $objWorksheet->getStyle('F' . $fila . ':F' . $fila)->applyFromArray($styleArray);
+        $objWorksheet->getStyle('G' . $fila . ':G' . $fila)->applyFromArray($styleArray);
+        $objWorksheet->getStyle('H' . $fila . ':H' . $fila)->applyFromArray($styleArray);
+        $objWorksheet->getStyle('I' . $fila . ':I' . $fila)->applyFromArray($styleArray);
+        $objWorksheet->getStyle('J' . $fila . ':J' . $fila)->applyFromArray($styleArray);
+        $objWorksheet->getStyle('K' . $fila . ':K' . $fila)->applyFromArray($styleArray);
+        $objWorksheet->getStyle('L' . $fila . ':L' . $fila)->applyFromArray($styleArray);
+        $objWorksheet->getStyle('M' . $fila . ':M' . $fila)->applyFromArray($styleArray);
 
         //Salvar excel
         $fichero = "invoice-$number.xlsx";
@@ -227,18 +279,34 @@ class InvoiceService extends Base
             ->ListarItems($invoice_id);
         foreach ($lista as $key => $value) {
 
-            $quantity = $value->getQuantity();
+            $contract_qty = $value->getProjectItem()->getQuantity();
             $price = $value->getPrice();
-            $total = $quantity * $price;
+            $contract_amount = $contract_qty * $price;
+
+            $quantity_from_previous = $value->getQuantityFromPrevious();
+
+            $quantity = $value->getQuantity();
+
+            $quantity_completed = $quantity + $quantity_from_previous;
+
+            $amount = $quantity * $price;
+
+            $total_amount = $quantity_completed * $price;
 
             $items[] = [
-                'invoice_item_id' => $value->getId(),
-                "item_id" => $value->getItem()->getItemId(),
-                "item" => $value->getItem()->getDescription(),
-                "unit" => $value->getItem()->getUnit()->getDescription(),
-                "quantity" => $quantity,
+                "invoice_item_id" => $value->getId(),
+                "project_item_id" => $value->getProjectItem()->getId(),
+                "item_id" => $value->getProjectItem()->getItem()->getItemId(),
+                "item" => $value->getProjectItem()->getItem()->getDescription(),
+                "unit" => $value->getProjectItem()->getItem()->getUnit()->getDescription(),
+                "contract_qty" => $contract_qty,
                 "price" => $price,
-                "total" => $total,
+                "contract_amount" => $contract_amount,
+                "quantity_from_previous" => $quantity_from_previous,
+                "quantity" => $quantity,
+                "quantity_completed" => $quantity_completed,
+                "amount" => $amount,
+                "total_amount" => $total_amount,
                 "posicion" => $key
             ];
         }
@@ -420,7 +488,7 @@ class InvoiceService extends Base
 
             // exportar
             $url = '';
-            if($exportar == 1){
+            if ($exportar == 1) {
                 $url = $this->ExportarExcel($invoice_id);
             }
             $resultado['url'] = $url;
@@ -482,7 +550,7 @@ class InvoiceService extends Base
 
         // exportar
         $url = '';
-        if($exportar == 1){
+        if ($exportar == 1) {
             $invoice_id = $entity->getInvoiceId();
             $url = $this->ExportarExcel($invoice_id);
         }
@@ -517,12 +585,13 @@ class InvoiceService extends Base
                 $is_new_item = true;
             }
 
+            $invoice_item_entity->setQuantityFromPrevious($value->quantity_from_previous);
             $invoice_item_entity->setQuantity($value->quantity);
             $invoice_item_entity->setPrice($value->price);
 
-            if ($value->item_id != '') {
-                $item_entity = $this->getDoctrine()->getRepository(Item::class)->find($value->item_id);
-                $invoice_item_entity->setItem($item_entity);
+            if ($value->project_item_id != '') {
+                $project_item_entity = $this->getDoctrine()->getRepository(ProjectItem::class)->find($value->project_item_id);
+                $invoice_item_entity->setProjectItem($project_item_entity);
             }
 
 

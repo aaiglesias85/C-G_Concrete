@@ -665,7 +665,7 @@ var Invoices = function () {
 
             $.ajax({
                 type: "POST",
-                url: "project/listarDataTrackingParaInvoice",
+                url: "project/listarItemsParaInvoice",
                 dataType: "json",
                 data: {
                     'project_id': project_id,
@@ -680,12 +680,18 @@ var Invoices = function () {
                         for (let item of response.items) {
                             items.push({
                                 invoice_item_id: '',
+                                project_item_id: item.project_item_id,
                                 item_id: item.item_id,
                                 item: item.item,
                                 unit: item.unit,
+                                contract_qty: item.contract_qty,
                                 quantity: item.quantity,
                                 price: item.price,
-                                total: item.total,
+                                contract_amount: item.contract_amount,
+                                quantity_from_previous: item.quantity_from_previous,
+                                quantity_completed: item.quantity_completed,
+                                amount: item.amount,
+                                total_amount: item.total_amount,
                                 posicion: items.length
                             });
                         }
@@ -970,14 +976,14 @@ var Invoices = function () {
                 width: 100,
             },
             {
-                field: "quantity",
-                title: "Quatity",
+                field: "contract_qty",
+                title: "Contract QTY",
                 width: 100,
                 textAlign: 'center',
             },
             {
                 field: "price",
-                title: "Price",
+                title: "Unit Price",
                 width: 100,
                 textAlign: 'center',
                 template: function (row) {
@@ -985,12 +991,48 @@ var Invoices = function () {
                 }
             },
             {
-                field: "total",
-                title: "Total",
+                field: "contract_amount",
+                title: "Contract Amount",
                 width: 100,
                 textAlign: 'center',
                 template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.total, 2, '.', ',')}</span>`;
+                    return `<span>${MyApp.formatearNumero(row.contract_amount, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "quantity_from_previous",
+                title: "Quatity Previous Application",
+                width: 100,
+                textAlign: 'center',
+            },
+            {
+                field: "quantity",
+                title: "Quatity This Period",
+                width: 100,
+                textAlign: 'center',
+            },
+            {
+                field: "quantity_completed",
+                title: "Total Quatity Completed",
+                width: 100,
+                textAlign: 'center',
+            },
+            {
+                field: "amount",
+                title: "Amount This Period",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.amount, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "total_amount",
+                title: "Total Amount (ToDate)",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.total_amount, 2, '.', ',')}</span>`;
                 }
             },
             {
@@ -1138,39 +1180,22 @@ var Invoices = function () {
         $(document).on('click', "#btn-salvar-item", function (e) {
             e.preventDefault();
 
-            var item_id = $('#item').val();
-            if ($('#item-form').valid() && item_id != '') {
-
-                var item = $("#item option:selected").text();
-                var unit = $('#item option[value="' + item_id + '"]').data("unit");
+            if ($('#item-form').valid()) {
 
                 var quantity = $('#item-quantity').val();
                 var price = $('#item-price').val();
                 var total = $('#item-total').val();
 
-                if (nEditingRowItem == null) {
+                var posicion = nEditingRowItem;
+                if (items[posicion]) {
+                    items[posicion].quantity = quantity;
+                    items[posicion].price = price;
+                    items[posicion].amount = total;
 
-                    items.push({
-                        invoice_item_id: '',
-                        item_id: item_id,
-                        item: item,
-                        unit: unit,
-                        quantity: quantity,
-                        price: price,
-                        total: total,
-                        posicion: items.length
-                    });
+                    items[posicion].quantity_completed = quantity + items[posicion].quantity_from_previous;
 
-                } else {
-                    var posicion = nEditingRowItem;
-                    if (items[posicion]) {
-                        items[posicion].item_id = item_id;
-                        items[posicion].item = item;
-                        items[posicion].unit = unit;
-                        items[posicion].quantity = quantity;
-                        items[posicion].price = price;
-                        items[posicion].total = total;
-                    }
+                    var total_amount = items[posicion].quantity_completed  * price;
+                    tems[posicion].total_amount = total_amount;
                 }
 
                 //actualizar lista
@@ -1180,19 +1205,6 @@ var Invoices = function () {
                 resetFormItem();
                 $('#modal-item').modal('hide');
 
-            } else {
-                if (item_id == "") {
-                    var $element = $('#select-item .select2');
-                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
-                        .data("title", "This field is required")
-                        .addClass("has-error")
-                        .tooltip({
-                            placement: 'bottom'
-                        }); // Create a new tooltip based on the error messsage we just set in the title
-
-                    $element.closest('.form-group')
-                        .removeClass('has-success').addClass('has-error');
-                }
             }
 
         });
@@ -1207,19 +1219,14 @@ var Invoices = function () {
 
                 nEditingRowItem = posicion;
 
-                $('#item').off('change', changeItem);
                 $('#item-quantity').off('change', calcularTotalItem);
                 $('#item-price').off('change', calcularTotalItem);
-
-                $('#item').val(items[posicion].item_id);
-                $('#item').trigger('change');
 
                 $('#item-quantity').val(items[posicion].quantity);
                 $('#item-price').val(items[posicion].price);
 
                 calcularTotalItem();
 
-                $('#item').on('change', changeItem);
                 $('#item-quantity').on('change', calcularTotalItem);
                 $('#item-price').on('change', calcularTotalItem);
 
@@ -1301,13 +1308,6 @@ var Invoices = function () {
             $element.data("title", "").removeClass("has-error").tooltip("dispose");
             $element.closest('.form-group').removeClass('has-error').addClass('success');
         });
-
-        $('#item').val('');
-        $('#item').trigger('change');
-
-        var $element = $('.select2');
-        $element.removeClass('has-error').tooltip("dispose");
-
         nEditingRowItem = null;
     };
 

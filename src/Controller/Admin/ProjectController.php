@@ -318,14 +318,14 @@ class ProjectController extends AbstractController
      * listarDataTrackingParaInvoice Acción para listar los items para el invoice
      *
      */
-    public function listarDataTrackingParaInvoice(Request $request)
+    public function listarItemsParaInvoice(Request $request)
     {
         $project_id = $request->get('project_id');
         $fecha_inicial = $request->get('fechaInicial');
         $fecha_fin = $request->get('fechaFin');
 
         try {
-            $items = $this->projectService->ListarDataTrackingParaInvoice($project_id, $fecha_inicial, $fecha_fin);
+            $items = $this->projectService->ListarItemsParaInvoice($project_id, $fecha_inicial, $fecha_fin);
 
             $resultadoJson['success'] = true;
             $resultadoJson['items'] = $items;

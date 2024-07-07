@@ -29,14 +29,9 @@ class InvoiceController extends AbstractController
                 $companies = $this->invoiceService->getDoctrine()->getRepository(Company::class)
                     ->ListarOrdenados();
 
-                // items
-                $items = $this->invoiceService->getDoctrine()->getRepository(Item::class)
-                    ->ListarOrdenados();
-
                 return $this->render('admin/invoice/index.html.twig', array(
                     'permiso' => $permiso[0],
-                    'companies' => $companies,
-                    'items' => $items
+                    'companies' => $companies
                 ));
             }
         } else {

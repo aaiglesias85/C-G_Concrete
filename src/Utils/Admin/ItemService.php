@@ -103,13 +103,6 @@ class ItemService extends Base
             $texto_error = "The item could not be deleted, because it has associated projects";
         }
 
-        //invoices
-        $invoices = $this->getDoctrine()->getRepository(InvoiceItem::class)
-            ->ListarInvoicesDeItem($item_id);
-        if (!empty($invoices)) {
-            $texto_error = "The item could not be deleted, because it has associated invoices";
-        }
-
         return $texto_error;
 
     }
