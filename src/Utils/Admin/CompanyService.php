@@ -63,6 +63,7 @@ class CompanyService extends Base
 
             $arreglo_resultado['name'] = $entity->getName();
             $arreglo_resultado['phone'] = $entity->getPhone();
+            $arreglo_resultado['address'] = $entity->getAddress();
             $arreglo_resultado['contactName'] = $entity->getContactName();
             $arreglo_resultado['contactEmail'] = $entity->getContactEmail();
 
@@ -220,7 +221,7 @@ class CompanyService extends Base
      * @param int $company_id Id
      * @author Marcel
      */
-    public function ActualizarCompany($company_id, $name, $phone, $contactName, $contactEmail, $contacts)
+    public function ActualizarCompany($company_id, $name, $phone, $address, $contactName, $contactEmail, $contacts)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -239,6 +240,7 @@ class CompanyService extends Base
 
             $entity->setName($name);
             $entity->setPhone($phone);
+            $entity->setAddress($address);
             $entity->setContactName($contactName);
             $entity->setContactEmail($contactEmail);
 
@@ -266,7 +268,7 @@ class CompanyService extends Base
      * @param string $description Nombre
      * @author Marcel
      */
-    public function SalvarCompany($name, $phone, $contactName, $contactEmail, $contacts)
+    public function SalvarCompany($name, $phone, $address, $contactName, $contactEmail, $contacts)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -283,6 +285,7 @@ class CompanyService extends Base
 
         $entity->setName($name);
         $entity->setPhone($phone);
+        $entity->setAddress($address);
         $entity->setContactName($contactName);
         $entity->setContactEmail($contactEmail);
 
@@ -370,6 +373,7 @@ class CompanyService extends Base
                 "id" => $company_id,
                 "name" => $value->getName(),
                 "phone" => $value->getPhone(),
+                "address" => $value->getAddress(),
                 "contactName" => $value->getContactName(),
                 "contactEmail" => $value->getContactEmail(),
                 "acciones" => $acciones

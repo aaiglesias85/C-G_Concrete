@@ -47,12 +47,13 @@ var Projects = function () {
                 field: "status",
                 title: "Status",
                 responsive: {visible: 'lg'},
-                width: 80,
+                width: 100,
                 // callback function support for column rendering
                 template: function (row) {
                     var status = {
-                        1: {'title': 'Active', 'class': ' m-badge--success'},
-                        0: {'title': 'Inactive', 'class': ' m-badge--danger'}
+                        1: {'title': 'In Progress', 'class': ' m-badge--info'},
+                        0: {'title': 'Not Started', 'class': ' m-badge--danger'},
+                        2: {'title': 'Completed', 'class': ' m-badge--success'},
                     };
                     return '<span class="m-badge ' + status[row.status].class + ' m-badge--wide">' + status[row.status].title + '</span>';
                 }
@@ -207,7 +208,11 @@ var Projects = function () {
         $('#inspector').val('');
         $('#inspector').trigger('change');
 
+        $('#estadoactivo').val(1);
+        $('#estadoinactivo').val(0);
+        $('#estadocompleted').val(2);
         $('#estadoactivo').prop('checked', true);
+
         $('#federal_funding').prop('checked', false);
         $('#resurfacing').prop('checked', false);
         $('#certified_payrolls').prop('checked', false);
@@ -231,10 +236,28 @@ var Projects = function () {
         //Validacion
         $("#project-form").validate({
             rules: {
+                subcontract: {
+                    required: true
+                },
+                end_date:{
+                    required: true
+                },
+                contract_amount:{
+                    required: true
+                },
+                owner:{
+                    required: true
+                },
                 number: {
                     required: true
                 },
+                county:{
+                    required: true
+                },
                 name: {
+                    required: true
+                },
+                project_id_number:{
                     required: true
                 }
             },
@@ -303,87 +326,8 @@ var Projects = function () {
 
             if ($('#project-form').valid() && company_id != '') {
 
-                var project_id = $('#project_id').val();
+                SalvarProject();
 
-                var inspector_id = $('#inspector').val();
-                var number = $('#number').val();
-                var name = $('#name').val();
-                var location = $('#location').val();
-                var po_number = $('#po_number').val();
-                var po_cg = $('#po_cg').val();
-                var manager = $('#manager').val();
-                var status = ($('#estadoactivo').prop('checked')) ? 1 : 0;
-                var owner = $('#owner').val();
-                var subcontract = $('#subcontract').val();
-                var county = $('#county').val();
-                var federal_funding = ($('#federal_funding').prop('checked')) ? 1 : 0;
-                var resurfacing = ($('#resurfacing').prop('checked')) ? 1 : 0;
-                var certified_payrolls = ($('#certified_payrolls').prop('checked')) ? 1 : 0;
-                var invoice_contact = $('#invoice_contact').val();
-                var start_date = $('#start_date').val();
-                var end_date = $('#end_date').val();
-                var due_date = $('#due_date').val();
-
-                MyApp.block('#form-project');
-
-                $.ajax({
-                    type: "POST",
-                    url: "project/salvarProject",
-                    dataType: "json",
-                    data: {
-                        'project_id': project_id,
-                        'company_id': company_id,
-                        'inspector_id': inspector_id,
-                        'name': name,
-                        'number': number,
-                        'location': location,
-                        'po_number': po_number,
-                        'po_cg': po_cg,
-                        'manager': manager,
-                        'status': status,
-                        'owner': owner,
-                        'subcontract': subcontract,
-                        'county': county,
-                        'federal_funding': federal_funding,
-                        'resurfacing': resurfacing,
-                        'certified_payrolls': certified_payrolls,
-                        'invoice_contact': invoice_contact,
-                        'start_date': start_date,
-                        'end_date': end_date,
-                        'due_date': due_date,
-                        'items': JSON.stringify(items)
-                    },
-                    success: function (response) {
-                        mApp.unblock('#form-project');
-                        if (response.success) {
-
-                            toastr.success(response.message, "Success");
-                            cerrarForms();
-
-                            btnClickFiltrar();
-
-                            // add new items
-                            if(response.items.length > 0){
-                                for (let item of response.items) {
-                                    $('#item').append(new Option(item.description, item.item_id, false, false));
-                                    $('#item option[value="' + item.item_id + '"]').attr("data-price", item.price);
-                                    $('#item option[value="' + item.item_id + '"]').attr("data-unit", item.unit);
-                                    $('#item option[value="' + item.item_id + '"]').attr("data-equation", item.equation);
-                                    $('#item option[value="' + item.item_id + '"]').attr("data-yield", item.yield);
-                                }
-                                $('#item').select2();
-                            }
-
-                        } else {
-                            toastr.error(response.error, "");
-                        }
-                    },
-                    failure: function (response) {
-                        mApp.unblock('#form-project');
-
-                        toastr.error(response.error, "");
-                    }
-                });
             } else {
                 if (company_id == "") {
                     var $element = $('#select-company .select2');
@@ -400,11 +344,121 @@ var Projects = function () {
             }
         };
     }
+
+    var SalvarProject = function (next = false) {
+        var project_id = $('#project_id').val();
+
+        var company_id = $('#company').val();
+        var inspector_id = $('#inspector').val();
+        var number = $('#number').val();
+        var name = $('#name').val();
+        var location = $('#location').val();
+        var po_number = $('#po_number').val();
+        var po_cg = $('#po_cg').val();
+        var manager = $('#manager').val();
+        var contract_amount = $('#contract_amount').val();
+        var proposal_number = $('#proposal_number').val();
+        var project_id_number = $('#project_id_number').val();
+
+        var status = 1;
+        $('.project-estado').each(function () {
+            if($(this).prop('checked')){
+                status = $(this).val();
+            }
+        });
+
+        var owner = $('#owner').val();
+        var subcontract = $('#subcontract').val();
+        var county = $('#county').val();
+        var federal_funding = ($('#federal_funding').prop('checked')) ? 1 : 0;
+        var resurfacing = ($('#resurfacing').prop('checked')) ? 1 : 0;
+        var certified_payrolls = ($('#certified_payrolls').prop('checked')) ? 1 : 0;
+        var invoice_contact = $('#invoice_contact').val();
+        var start_date = $('#start_date').val();
+        var end_date = $('#end_date').val();
+        var due_date = $('#due_date').val();
+
+        MyApp.block('#form-project');
+
+        $.ajax({
+            type: "POST",
+            url: "project/salvarProject",
+            dataType: "json",
+            data: {
+                'project_id': project_id,
+                'company_id': company_id,
+                'inspector_id': inspector_id,
+                'name': name,
+                'number': number,
+                'location': location,
+                'po_number': po_number,
+                'po_cg': po_cg,
+                'manager': manager,
+                'status': status,
+                'owner': owner,
+                'subcontract': subcontract,
+                'county': county,
+                'federal_funding': federal_funding,
+                'resurfacing': resurfacing,
+                'certified_payrolls': certified_payrolls,
+                'invoice_contact': invoice_contact,
+                'start_date': start_date,
+                'end_date': end_date,
+                'due_date': due_date,
+                'contract_amount': contract_amount,
+                'proposal_number': proposal_number,
+                'project_id_number': project_id_number,
+                'items': JSON.stringify(items)
+            },
+            success: function (response) {
+                mApp.unblock('#form-project');
+                if (response.success) {
+
+                    toastr.success(response.message, "Success");
+
+                    btnClickFiltrar();
+
+                    // add new items
+                    if(response.items.length > 0){
+                        for (let item of response.items) {
+                            $('#item').append(new Option(item.description, item.item_id, false, false));
+                            $('#item option[value="' + item.item_id + '"]').attr("data-price", item.price);
+                            $('#item option[value="' + item.item_id + '"]').attr("data-unit", item.unit);
+                            $('#item option[value="' + item.item_id + '"]').attr("data-equation", item.equation);
+                            $('#item option[value="' + item.item_id + '"]').attr("data-yield", item.yield);
+                        }
+                        $('#item').select2();
+                    }
+
+                    if(!next){
+                        cerrarForms();
+                    }else{
+                        var project_id = response.project_id;
+                        $('#project_id').val(project_id);
+
+                        editRow(project_id, false, true);
+                    }
+
+                } else {
+                    toastr.error(response.error, "");
+                }
+            },
+            failure: function (response) {
+                mApp.unblock('#form-project');
+
+                toastr.error(response.error, "");
+            }
+        });
+    }
+
     //Cerrar form
     var initAccionCerrar = function () {
         $(document).off('click', ".cerrar-form-project");
         $(document).on('click', ".cerrar-form-project", function (e) {
             cerrarForms();
+
+            // actualizar listado
+            btnClickFiltrar();
         });
     }
     //Cerrar forms
@@ -473,86 +527,99 @@ var Projects = function () {
 
             editRowNote(notes_id);
         });
+    };
 
-        function editRow(project_id, editar_notas) {
+    function editRow(project_id, editar_notas, next = false) {
 
-            MyApp.block('#form-project');
+        MyApp.block('#form-project');
 
-            $.ajax({
-                type: "POST",
-                url: "project/cargarDatos",
-                dataType: "json",
-                data: {
-                    'project_id': project_id
-                },
-                success: function (response) {
-                    mApp.unblock('#form-project');
-                    if (response.success) {
-                        //Datos project
+        $.ajax({
+            type: "POST",
+            url: "project/cargarDatos",
+            dataType: "json",
+            data: {
+                'project_id': project_id
+            },
+            success: function (response) {
+                mApp.unblock('#form-project');
+                if (response.success) {
+                    //Datos project
 
-                        var formTitle = "You want to update the project? Follow the next steps:";
-                        $('#form-project-title').html(formTitle);
+                    var formTitle = "You want to update the project? Follow the next steps:";
+                    $('#form-project-title').html(formTitle);
 
-                        $('#company').val(response.project.company_id);
-                        $('#company').trigger('change');
+                    $('#company').val(response.project.company_id);
+                    $('#company').trigger('change');
 
-                        $('#inspector').val(response.project.inspector_id);
-                        $('#inspector').trigger('change');
+                    $('#inspector').val(response.project.inspector_id);
+                    $('#inspector').trigger('change');
 
-                        $('#name').val(response.project.name);
-                        $('#number').val(response.project.number);
+                    $('#name').val(response.project.name);
+                    $('#number').val(response.project.number);
 
-                        $('#location').val(response.project.location);
-                        $('#po_number').val(response.project.po_number);
-                        $('#po_cg').val(response.project.po_cg);
-                        $('#manager').val(response.project.manager);
-                        $('#owner').val(response.project.owner);
-                        $('#subcontract').val(response.project.subcontract);
-                        $('#county').val(response.project.county);
-                        $('#invoice_contact').val(response.project.invoice_contact);
+                    $('#location').val(response.project.location);
+                    $('#po_number').val(response.project.po_number);
+                    $('#po_cg').val(response.project.po_cg);
+                    $('#manager').val(response.project.manager);
+                    $('#owner').val(response.project.owner);
+                    $('#subcontract').val(response.project.subcontract);
+                    $('#county').val(response.project.county);
+                    $('#invoice_contact').val(response.project.invoice_contact);
+                    $('#contract_amount').val(response.project.contract_amount);
+                    $('#proposal_number').val(response.project.proposal_number);
+                    $('#project_id_number').val(response.project.project_id_number);
 
-                        $('#federal_funding').prop('checked', response.project.federal_funding);
-                        $('#resurfacing').prop('checked', response.project.resurfacing);
-                        $('#certified_payrolls').prop('checked', response.project.certified_payrolls);
+                    $('#federal_funding').prop('checked', response.project.federal_funding);
+                    $('#resurfacing').prop('checked', response.project.resurfacing);
+                    $('#certified_payrolls').prop('checked', response.project.certified_payrolls);
 
-                        if (!response.project.status) {
-                            $('#estadoactivo').prop('checked', false);
-                            $('#estadoinactivo').prop('checked', true);
+
+                    $('.project-estado').each(function () {
+                        if($(this).val() == response.project.status){
+                            $(this).prop('checked', true);
+                        }else{
+                            $(this).prop('checked', false);
                         }
+                    });
 
-                        $('#start_date').val(response.project.start_date);
-                        $('#end_date').val(response.project.end_date);
-                        $('#due_date').val(response.project.due_date);
+                    $('#start_date').val(response.project.start_date);
+                    $('#end_date').val(response.project.end_date);
+                    $('#due_date').val(response.project.due_date);
 
-                        // items
-                        items = response.project.items;
-                        actualizarTableListaItems();
+                    // items
+                    items = response.project.items;
+                    actualizarTableListaItems();
 
-                        // habilitar tab
-                        totalTabs = 3;
-                        $('.nav-item-hide').removeClass('m--hide');
+                    // habilitar tab
+                    totalTabs = 3;
+                    $('.nav-item-hide').removeClass('m--hide');
 
-                        event_change = false;
+                    event_change = false;
 
-                        // ir al tab de notas
-                        if (editar_notas) {
-                            activeTab = 3;
-                            mostrarTab();
-                        }
-
-                    } else {
-                        toastr.error(response.error, "");
+                    // next tab
+                    if(next){
+                        siguienteTab();
                     }
-                },
-                failure: function (response) {
-                    mApp.unblock('#form-project');
 
+                    // ir al tab de notas
+                    if (editar_notas) {
+                        activeTab = 3;
+                        mostrarTab();
+                    }
+
+                } else {
                     toastr.error(response.error, "");
                 }
-            });
+            },
+            failure: function (response) {
+                mApp.unblock('#form-project');
 
-        }
-    };
+                toastr.error(response.error, "");
+            }
+        });
+
+    }
+
     //Eliminar
     var initAccionEliminar = function () {
         $(document).off('click', "#project-table-editable a.delete");
@@ -807,14 +874,7 @@ var Projects = function () {
         $(document).off('click', "#btn-wizard-siguiente");
         $(document).on('click', "#btn-wizard-siguiente", function (e) {
             if (validWizard()) {
-                activeTab++;
-                $('#btn-wizard-anterior').removeClass('m--hide');
-                if (activeTab == totalTabs) {
-                    $('#btn-wizard-finalizar').removeClass('m--hide');
-                    $('#btn-wizard-siguiente').addClass('m--hide');
-                }
-
-                mostrarTab();
+                SalvarProject(true);
             }
         });
         //anterior
@@ -832,6 +892,16 @@ var Projects = function () {
         });
 
     };
+    var siguienteTab = function () {
+        activeTab++;
+        $('#btn-wizard-anterior').removeClass('m--hide');
+        if (activeTab == totalTabs) {
+            $('#btn-wizard-finalizar').removeClass('m--hide');
+            $('#btn-wizard-siguiente').addClass('m--hide');
+        }
+
+        mostrarTab();
+    }
     var mostrarTab = function () {
         setTimeout(function () {
             switch (activeTab) {

@@ -101,6 +101,7 @@ class CompanyController extends AbstractController
 
         $name = $request->get('name');
         $phone = $request->get('phone');
+        $address = $request->get('address');
         $contactName = $request->get('contactName');
         $contactEmail = $request->get('contactEmail');
 
@@ -111,9 +112,9 @@ class CompanyController extends AbstractController
         try {
 
             if ($company_id == "") {
-                $resultado = $this->companyService->SalvarCompany($name, $phone, $contactName, $contactEmail, $contacts);
+                $resultado = $this->companyService->SalvarCompany($name, $phone, $address, $contactName, $contactEmail, $contacts);
             } else {
-                $resultado = $this->companyService->ActualizarCompany($company_id, $name, $phone, $contactName, $contactEmail, $contacts);
+                $resultado = $this->companyService->ActualizarCompany($company_id, $name, $phone, $address, $contactName, $contactEmail, $contacts);
             }
 
             if ($resultado['success']) {

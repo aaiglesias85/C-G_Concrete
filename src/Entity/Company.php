@@ -38,6 +38,13 @@ class Company
     /**
      * @var string
      *
+     * @ORM\Column(name="address", type="text", nullable=false)
+     */
+    private $address;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="contact_name", type="string", length=255, nullable=false)
      */
     private $contactName;
@@ -131,6 +138,16 @@ class Company
     public function setUpdatedAt(\DateTime $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+    public function setAddress($address)
+    {
+        $this->address = $address;
     }
 
 }

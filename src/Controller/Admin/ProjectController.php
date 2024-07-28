@@ -143,6 +143,9 @@ class ProjectController extends AbstractController
         $location = $request->get('location');
         $po_number = $request->get('po_number');
         $po_cg = $request->get('po_cg');
+        $contract_amount = $request->get('contract_amount');
+        $proposal_number = $request->get('proposal_number');
+        $project_id_number = $request->get('project_id_number');
 
         $manager = $request->get('manager');
         $status = $request->get('status');
@@ -166,16 +169,17 @@ class ProjectController extends AbstractController
             if ($project_id == "") {
                 $resultado = $this->projectService->SalvarProject($company_id, $inspector_id, $number, $name,
                     $location, $po_number, $po_cg, $manager, $status, $owner, $subcontract, $federal_funding, $county,
-                $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $due_date, $items);
+                $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $due_date, $contract_amount, $proposal_number, $project_id_number, $items);
             } else {
                 $resultado = $this->projectService->ActualizarProject($project_id, $company_id, $inspector_id, $number,
                     $name, $location, $po_number, $po_cg, $manager, $status, $owner, $subcontract, $federal_funding, $county,
-                    $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $due_date, $items);
+                    $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $due_date, $contract_amount, $proposal_number, $project_id_number, $items);
             }
 
             if ($resultado['success']) {
 
                 $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['project_id'] = $resultado['project_id'];
                 $resultadoJson['message'] = "The operation was successful";
 
                 // new items

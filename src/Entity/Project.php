@@ -31,6 +31,13 @@ class Project
     /**
      * @var string
      *
+     * @ORM\Column(name="project_id_number", type="string", length=50, nullable=false)
+     */
+    private $projectIdNumber;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="name", type="string", length=255, nullable=false)
      */
     private $name;
@@ -120,9 +127,9 @@ class Project
     private $manager;
 
     /**
-     * @var boolean
+     * @var integer
      *
-     * @ORM\Column(name="status", type="boolean", nullable=false)
+     * @ORM\Column(name="status", type="integer", nullable=false)
      */
     private $status;
 
@@ -153,6 +160,20 @@ class Project
      * @ORM\Column(name="updated_at", type="datetime", nullable=true)
      */
     private $updatedAt;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="contract_amount", type="float", nullable=false)
+     */
+    private $contractAmount;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="proposal_number", type="string", length=255, nullable=false)
+     */
+    private $proposalNumber;
 
     /**
      * @var Company
@@ -414,6 +435,36 @@ class Project
     public function setDueDate($dueDate)
     {
         $this->dueDate = $dueDate;
+    }
+
+    public function getContractAmount()
+    {
+        return $this->contractAmount;
+    }
+
+    public function setContractAmount($contractAmount)
+    {
+        $this->contractAmount = $contractAmount;
+    }
+
+    public function getProposalNumber()
+    {
+        return $this->proposalNumber;
+    }
+
+    public function setProposalNumber($proposalNumber)
+    {
+        $this->proposalNumber = $proposalNumber;
+    }
+
+    public function getProjectIdNumber()
+    {
+        return $this->projectIdNumber;
+    }
+
+    public function setProjectIdNumber( $projectIdNumber)
+    {
+        $this->projectIdNumber = $projectIdNumber;
     }
 
 }

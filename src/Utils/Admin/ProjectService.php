@@ -522,6 +522,9 @@ class ProjectService extends Base
             $arreglo_resultado['start_date'] = $entity->getStartDate() != '' ? $entity->getStartDate()->format('m/d/Y') : '';
             $arreglo_resultado['end_date'] = $entity->getEndDate() != '' ? $entity->getEndDate()->format('m/d/Y') : '';
             $arreglo_resultado['due_date'] = $entity->getDueDate() != '' ? $entity->getDueDate()->format('m/d/Y') : '';
+            $arreglo_resultado['contract_amount'] = $entity->getContractAmount();
+            $arreglo_resultado['proposal_number'] = $entity->getProposalNumber();
+            $arreglo_resultado['project_id_number'] = $entity->getProjectIdNumber();
 
             // items
             $items = $this->ListarItemsDeProject($project_id);
@@ -737,7 +740,7 @@ class ProjectService extends Base
     public function ActualizarProject($project_id, $company_id, $inspector_id, $number, $name, $location,
                                       $po_number, $po_cg, $manager, $status, $owner, $subcontract,
                                       $federal_funding, $county, $resurfacing, $invoice_contact,
-                                      $certified_payrolls, $start_date, $end_date, $due_date, $items)
+                                      $certified_payrolls, $start_date, $end_date, $due_date, $contract_amount, $proposal_number, $project_id_number, $items)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -761,6 +764,9 @@ class ProjectService extends Base
             $entity->setPoCG($po_cg);
             $entity->setManager($manager);
             $entity->setStatus($status);
+            $entity->setContractAmount($contract_amount);
+            $entity->setProposalNumber($proposal_number);
+            $entity->setProjectIdNumber($project_id_number);
 
             if ($company_id != '') {
                 $company = $this->getDoctrine()->getRepository(Company::class)
@@ -810,6 +816,7 @@ class ProjectService extends Base
             $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
             $resultado['success'] = true;
+            $resultado['project_id'] = $project_id;
             $resultado['items'] = $items_new;
 
             return $resultado;
@@ -824,7 +831,7 @@ class ProjectService extends Base
     public function SalvarProject($company_id, $inspector_id, $number, $name, $location,
                                   $po_number, $po_cg, $manager, $status, $owner, $subcontract,
                                   $federal_funding, $county, $resurfacing, $invoice_contact,
-                                  $certified_payrolls, $start_date, $end_date, $due_date, $items)
+                                  $certified_payrolls, $start_date, $end_date, $due_date, $contract_amount, $proposal_number, $project_id_number, $items)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -846,6 +853,9 @@ class ProjectService extends Base
         $entity->setPoCG($po_cg);
         $entity->setManager($manager);
         $entity->setStatus($status);
+        $entity->setContractAmount($contract_amount);
+        $entity->setProposalNumber($proposal_number);
+        $entity->setProjectIdNumber($project_id_number);
 
         if ($company_id != '') {
             $company = $this->getDoctrine()->getRepository(Company::class)
@@ -897,6 +907,7 @@ class ProjectService extends Base
         $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
         $resultado['success'] = true;
+        $resultado['project_id'] = $entity->getProjectId();
         $resultado['items'] = $items_new;
 
         return $resultado;
@@ -1035,7 +1046,7 @@ class ProjectService extends Base
                 "name" => $value->getName(),
                 "company" => $value->getCompany()->getName(),
                 "county" => $value->getCounty(),
-                "status" => $value->getStatus() ? 1 : 0,
+                "status" => $value->getStatus(),
                 "startDate" => $value->getStartDate() != '' ? $value->getStartDate()->format('m/d/Y') : '',
                 "endDate" => $value->getEndDate() != '' ? $value->getEndDate()->format('m/d/Y') : '',
                 "dueDate" => $value->getDueDate() != '' ? $value->getDueDate()->format('m/d/Y') : '',

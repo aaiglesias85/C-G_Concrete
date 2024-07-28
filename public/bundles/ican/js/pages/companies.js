@@ -34,16 +34,8 @@ var Companies = function () {
                 }
             },
             {
-                field: "contactName",
-                title: "Contact Name"
-            },
-            {
-                field: "contactEmail",
-                title: "Contact Email",
-                width: 200,
-                template: function (row) {
-                    return '<a class="m-link" href="mailto:' + row.contactEmail + '">' + row.contactEmail + '</a>';
-                }
+                field: "address",
+                title: "Address"
             },
             {
                 field: "acciones",
@@ -234,6 +226,7 @@ var Companies = function () {
 
                 var name = $('#name').val();
                 var phone = $('#phone').val();
+                var address = $('#address').val();
                 var contactName = $('#contactName').val();
                 var contactEmail = $('#contactEmail').val();
 
@@ -247,6 +240,7 @@ var Companies = function () {
                         'company_id': company_id,
                         'name': name,
                         'phone': phone,
+                        'address': address,
                         'contactName': contactName,
                         'contactEmail': contactEmail,
                         'contacts': JSON.stringify(contacts)
@@ -345,6 +339,7 @@ var Companies = function () {
 
                         $('#name').val(response.company.name);
                         $('#phone').val(response.company.phone);
+                        $('#address').val(response.company.address);
                         $('#contactName').val(response.company.contactName);
                         $('#contactEmail').val(response.company.contactEmail);
 

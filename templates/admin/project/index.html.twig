@@ -223,9 +223,10 @@
                             <input type="hidden" id="project_id" name="project_id"/>
 
                             <div class="m-form__section m-form__section--first">
+
                                 <div class="form-group m-form__group ic-form-group">
-                                    <div class="row">
-                                        <div class="col-md-4" id="select-company">
+                                    <div class="row mb-3">
+                                        <div class="col-md-3" id="select-company">
                                             <label>
                                                 <span class="ic-step-number">1</span>
                                                 Company
@@ -239,6 +240,133 @@
                                                 {% endfor %}
                                             </select>
                                         </div>
+                                        <div class="col-md-3">
+                                            <label>
+                                                Subcontract NO
+                                                <span class="ic-small italic">(required)</span>
+                                            </label>
+                                            <input type="text" class="form-control event-change" id="subcontract"
+                                                   name="subcontract">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>
+                                                Manager
+                                                <span class="ic-small italic">(optional)</span>
+                                            </label>
+                                            <input type="text" class="form-control event-change" id="manager"
+                                                   name="manager">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>
+                                                Invoice Contact
+                                                <span class="ic-small italic">(optional)</span>
+                                            </label>
+                                            <input type="text" class="form-control event-change" id="invoice_contact"
+                                                   name="invoice_contact">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label>
+                                                Invoice Due Date
+                                                <span class="ic-small italic">(optional)</span>
+                                            </label>
+                                            <div class='input-group date'>
+                                                <input type='text' class="form-control m-input date-picker event-change"
+                                                       placeholder="Due date" autocomplete="off"
+                                                       id="due_date" name="due_date"/>
+                                                <div class="input-group-append">
+                                                            <span class="input-group-text">
+                                                                <i class="la la-calendar glyphicon-th"></i>
+                                                            </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>
+                                                Start Date
+                                            </label>
+                                            <div class='input-group date'>
+                                                <input type='text' class="form-control m-input date-picker event-change"
+                                                       placeholder="From" autocomplete="off"
+                                                       id="start_date" name="start_date"/>
+                                                <div class="input-group-append">
+                                                            <span class="input-group-text">
+                                                                <i class="la la-calendar glyphicon-th"></i>
+                                                            </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>
+                                                End Date
+                                                <span class="ic-small italic">(required)</span>
+                                            </label>
+                                            <div class='input-group date'>
+                                                <input type='text' class="form-control m-input date-picker event-change"
+                                                       placeholder="To" autocomplete="off"
+                                                       id="end_date" name="end_date"/>
+                                                <div class="input-group-append">
+                                                            <span class="input-group-text">
+                                                                <i class="la la-calendar glyphicon-th"></i>
+                                                            </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>
+                                                Contract Amount
+                                                <span class="ic-small italic">(required)</span>
+                                            </label>
+                                            <div class="input-group m-input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">$</span>
+                                                </div>
+                                                <input type="text" class="form-control form-control-number" id="contract_amount"
+                                                       name="contract_amount">
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="form-group m-form__group ic-form-group">
+                                    <div class="row mb-3">
+                                        <div class="col-md-3">
+                                            <label>
+                                                <span class="ic-step-number">2</span>
+                                                Owner
+                                                <span class="ic-small italic">(required)</span>
+                                            </label>
+                                            <input type="text" class="form-control event-change" id="owner"
+                                                   name="owner">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>
+                                                Project ID #
+                                                <span class="ic-small italic">(required)</span>
+                                            </label>
+                                            <input type="text" class="form-control form-control-text event-change"
+                                                   id="project_id_number" name="project_id_number"/>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>
+                                                Proposal ID #
+                                                <span class="ic-small italic">(optional)</span>
+                                            </label>
+                                            <input type="text" class="form-control form-control-text event-change"
+                                                   id="proposal_number" name="proposal_number"/>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>
+                                                County
+                                                <span class="ic-small italic">(required)</span>
+                                            </label>
+                                            <input type="text" class="form-control event-change" id="county"
+                                                   name="county">
+                                        </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-md-4" id="select-inspector">
                                             <label>
                                                 Inspector
@@ -251,26 +379,6 @@
                                                 {% endfor %}
                                             </select>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="form-group m-form__group ic-form-group">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <label>
-                                                <span class="ic-step-number">2</span>
-                                                Owner
-                                                <span class="ic-small italic">(optional)</span>
-                                            </label>
-                                            <input type="text" class="form-control event-change" id="owner"
-                                                   name="owner">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label>
-                                                Subcontract NO
-                                            </label>
-                                            <input type="text" class="form-control event-change" id="subcontract"
-                                                   name="subcontract">
-                                        </div>
                                         <div class="col-md-2">
                                             <label>&nbsp;</label>
                                             <div>
@@ -281,22 +389,35 @@
                                                 </label>
                                             </div>
                                         </div>
+                                        <div class="col-md-2">
+                                            <label>&nbsp;</label>
+                                            <div>
+                                                <label class="m-checkbox">
+                                                    <input type="checkbox" class="form-control event-change"
+                                                           id="certified_payrolls" name="certified_payrolls"> Certified
+                                                    payrolls
+                                                    <span></span>
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+
                                 <div class="form-group m-form__group ic-form-group">
-                                    <div class="row">
+                                    <div class="row mb-3">
                                         <div class="col-md-3">
                                             <label>
                                                 <span class="ic-step-number">3</span>
-                                                County
-                                                <span class="ic-small italic">(optional)</span>
+                                                C&G Project #
+                                                <span class="ic-small italic">(required)</span>
                                             </label>
-                                            <input type="text" class="form-control event-change" id="county"
-                                                   name="county">
+                                            <input type="text" class="form-control form-control-text event-change"
+                                                   id="number" name="number"/>
                                         </div>
                                         <div class="col-md-7">
                                             <label>
                                                 Project Description
+                                                <span class="ic-small italic">(required)</span>
                                             </label>
                                             <input type="text" class="form-control form-control-text event-change"
                                                    id="name" name="name"/>
@@ -312,100 +433,35 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="form-group m-form__group ic-form-group">
+
                                     <div class="row">
-                                        <div class="col-md-2">
-                                            <label>
-                                                <span class="ic-step-number">4</span>
-                                                C & G Project #
-                                                <span class="ic-small italic">(required)</span>
-                                            </label>
-                                            <input type="text" class="form-control form-control-text event-change"
-                                                   id="number" name="number"/>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label>
-                                                Manager
-                                            </label>
-                                            <input type="text" class="form-control event-change" id="manager"
-                                                   name="manager">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label>
-                                                Invoice Contact
-                                            </label>
-                                            <input type="text" class="form-control event-change" id="invoice_contact"
-                                                   name="invoice_contact">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label>&nbsp;</label>
-                                            <div>
-                                                <label class="m-checkbox">
-                                                    <input type="checkbox" class="form-control event-change"
-                                                           id="certified_payrolls" name="certified_payrolls"> Certified
-                                                    payrolls
+                                        <div class="col-lg-12">
+                                            <label>Status</label>
+                                            <div class="m-radio-inline">
+                                                <label class="m-radio">
+                                                    <input type="radio" name="radioestado" id="estadoactivo"
+                                                           class="event-change project-estado" value="1" checked>
+                                                    In Progress
+                                                    <span></span>
+                                                </label>
+                                                <label class="m-radio">
+                                                    <input type="radio" name="radioestado" id="estadoinactivo"
+                                                           class="event-change project-estado" value="0">
+                                                    Not Started
+                                                    <span></span>
+                                                </label>
+                                                <label class="m-radio">
+                                                    <input type="radio" name="radioestado" id="estadocompleted"
+                                                           class="event-change project-estado" value="2">
+                                                    Completed
                                                     <span></span>
                                                 </label>
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
-                                <div class="form-group m-form__group ic-form-group">
-                                    <div class="row">
-                                        <div class="col-md-2">
-                                            <label>
-                                                <span class="ic-step-number">5</span>
-                                                Start Date
-                                                <span class="ic-small italic">(optional)</span>
-                                            </label>
-                                            <div class='input-group date'>
-                                                <input type='text' class="form-control m-input date-picker event-change"
-                                                       placeholder="From" autocomplete="off"
-                                                       id="start_date" name="start_date"/>
-                                                <div class="input-group-append">
-                                                            <span class="input-group-text">
-                                                                <i class="la la-calendar glyphicon-th"></i>
-                                                            </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label>
-                                                End Date
-                                            </label>
-                                            <div class='input-group date'>
-                                                <input type='text' class="form-control m-input date-picker event-change"
-                                                       placeholder="To" autocomplete="off"
-                                                       id="end_date" name="end_date"/>
-                                                <div class="input-group-append">
-                                                            <span class="input-group-text">
-                                                                <i class="la la-calendar glyphicon-th"></i>
-                                                            </span>
-                                                </div>
-                                            </div>
-                                        </div>
 
-                                        <div class="col-md-2">
-                                            <label>
-                                                Due Date
-                                            </label>
-                                            <div class='input-group date'>
-                                                <input type='text' class="form-control m-input date-picker event-change"
-                                                       placeholder="Due date" autocomplete="off"
-                                                       id="due_date" name="due_date"/>
-                                                <div class="input-group-append">
-                                                            <span class="input-group-text">
-                                                                <i class="la la-calendar glyphicon-th"></i>
-                                                            </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                </div>
+                                {#
                                 <div class="form-group m-form__group ic-form-group">
                                     <div class="row">
                                         <div class="col-md-6">
@@ -433,29 +489,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group m-form__group ic-form-group">
-                                    <label><span class="ic-step-number">7</span>Status</label>
-                                    <div class="row">
-                                        <div class="col-lg-12">
-                                            <div class="m-form__group form-group">
-                                                <div class="m-radio-inline">
-                                                    <label class="m-radio">
-                                                        <input type="radio" name="radioestado" id="estadoactivo"
-                                                               class="event-change" checked>
-                                                        Active
-                                                        <span></span>
-                                                    </label>
-                                                    <label class="m-radio">
-                                                        <input type="radio" name="radioestado" id="estadoinactivo"
-                                                               class="event-change">
-                                                        Inactive
-                                                        <span></span>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                #}
                             </div>
 
                         </form>
@@ -481,14 +515,20 @@
 
                                                 <div class="col-lg-2">
                                                     <div class="input-group m-input-group">
-                                                        <div class="input-group-prepend"><span class="input-group-text" id="basic-addon1">Items:</span></div>
-                                                        <input type="text" class="form-control m-input" id="total_count_items" value="">
+                                                        <div class="input-group-prepend"><span class="input-group-text"
+                                                                                               id="basic-addon1">Items:</span>
+                                                        </div>
+                                                        <input type="text" class="form-control m-input"
+                                                               id="total_count_items" value="">
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-3">
                                                     <div class="input-group m-input-group">
-                                                        <div class="input-group-prepend"><span class="input-group-text" id="basic-addon1">Total $:</span></div>
-                                                        <input type="text" class="form-control m-input" id="total_total_items" value="">
+                                                        <div class="input-group-prepend"><span class="input-group-text"
+                                                                                               id="basic-addon1">Total $:</span>
+                                                        </div>
+                                                        <input type="text" class="form-control m-input"
+                                                               id="total_total_items" value="">
                                                     </div>
                                                 </div>
 
