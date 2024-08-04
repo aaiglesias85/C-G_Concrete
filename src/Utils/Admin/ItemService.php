@@ -2,6 +2,7 @@
 
 namespace App\Utils\Admin;
 
+use App\Entity\DataTrackingItem;
 use App\Entity\Equation;
 use App\Entity\InvoiceItem;
 use App\Entity\Item;
@@ -59,12 +60,15 @@ class ItemService extends Base
         if ($entity != null) {
 
             // verificar si se puede eliminar
-            $se_puede_eliminar = $this->SePuedeEliminarItem($item_id);
+            /*$se_puede_eliminar = $this->SePuedeEliminarItem($item_id);
             if ($se_puede_eliminar != '') {
                 $resultado['success'] = false;
                 $resultado['error'] = $se_puede_eliminar;
                 return $resultado;
-            }
+            }*/
+
+            // eliminar informacion relacionada
+            $this->EliminarInformacionDeItem($item_id);
 
             $item_descripcion = $entity->getDescription();
 
@@ -85,6 +89,39 @@ class ItemService extends Base
         }
 
         return $resultado;
+    }
+
+    /**
+     * EliminarInformacionDeItem
+     * @param $item_id
+     * @return void
+     */
+    private function EliminarInformacionDeItem($item_id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        // project items
+        $project_items = $this->getDoctrine()->getRepository(ProjectItem::class)
+            ->ListarProjectsDeItem($item_id);
+        foreach ($project_items as $project_item) {
+            $project_item_id = $project_item->getId();
+
+            // data tracking
+            $data_tracking_items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                ->ListarDataTrackingsDeItem($project_item_id);
+            foreach ($data_tracking_items as $data_tracking_item) {
+                $em->remove($data_tracking_item);
+            }
+
+            // invoices
+            $invoice_items = $this->getDoctrine()->getRepository(InvoiceItem::class)
+                ->ListarInvoicesDeItem($project_item_id);
+            foreach ($invoice_items as $invoice_item) {
+                $em->remove($invoice_item);
+            }
+
+            $em->remove($project_item);
+        }
     }
 
     /**
@@ -128,20 +165,19 @@ class ItemService extends Base
                     /**@var Item $entity */
                     if ($entity != null) {
 
-                        // verificar si se puede eliminar
-                        $se_puede_eliminar = $this->SePuedeEliminarItem($item_id);
-                        if ($se_puede_eliminar == '') {
-                            $item_descripcion = $entity->getDescription();
+                        // eliminar informacion relacionada
+                        $this->EliminarInformacionDeItem($item_id);
 
-                            $em->remove($entity);
-                            $cant_eliminada++;
+                        $item_descripcion = $entity->getDescription();
 
-                            //Salvar log
-                            $log_operacion = "Delete";
-                            $log_categoria = "Item";
-                            $log_descripcion = "The item is deleted: $item_descripcion";
-                            $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
-                        }
+                        $em->remove($entity);
+                        $cant_eliminada++;
+
+                        //Salvar log
+                        $log_operacion = "Delete";
+                        $log_categoria = "Item";
+                        $log_descripcion = "The item is deleted: $item_descripcion";
+                        $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
 
 
                     }

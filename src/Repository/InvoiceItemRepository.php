@@ -39,7 +39,7 @@ class InvoiceItemRepository extends EntityRepository
     public function ListarInvoicesDeItem($project_item_id)
     {
         $consulta = $this->createQueryBuilder('i_i')
-            ->leftJoin('d_t.projectItem', 'p_i');
+            ->leftJoin('i_i.projectItem', 'p_i');
 
         if ($project_item_id != '') {
             $consulta->andWhere('p_i.id = :project_item_id')

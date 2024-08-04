@@ -21,3 +21,12 @@ salvarEquationAdmin:
 cargarDatosEquationAdmin:
   path:  /equation/cargarDatos
   defaults: { _controller: App\Controller\Admin\EquationController::cargarDatos, _format: json }
+
+#pay items
+listarPayItemsDeEquationsAdmin:
+  path:  /equation/listarPayItems
+  defaults: { _controller: App\Controller\Admin\EquationController::listarPayItems, _format: json }
+
+salvarPayItemsEquationAdmin:
+  path:  /equation/salvarPayItems
+  defaults: { _controller: App\Controller\Admin\EquationController::salvarPayItems, _format: json }

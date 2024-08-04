@@ -46,6 +46,30 @@
                 </div>
                 <div class="m-portlet__head-tools">
                     <ul class="m-portlet__nav">
+                        {% if permiso.agregar %}
+                            <li class="m-portlet__nav-item">
+                                <a id="btn-nuevo-equation"
+                                   class="btn btn-success btn-icon"
+                                   href="javascript:;">
+                                    <span>
+                                        <i class="la la-plus"></i>
+                                        <span class="m--hidden-mobile">New</span>
+                                    </span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if permiso.eliminar %}
+                            <li class="m-portlet__nav-item">
+                                <a id="btn-eliminar-equation"
+                                   class="btn btn-danger btn-icon"
+                                   href="javascript:;">
+                                    <span>
+                                        <i class="la la-trash-o"></i>
+                                        <span class="m--hidden-mobile">Delete</span>
+                                    </span>
+                                </a>
+                            </li>
+                        {% endif %}
                         <li class="m-portlet__nav-item">
                             <a href="javascript:;" m-portlet-tool="fullscreen"
                                class="m-portlet__nav-link m-portlet__nav-link--icon">
@@ -57,54 +81,19 @@
             </div>
             <div class="m-portlet__body">
                 <!--begin: Search Form -->
-                <div class="m-form m-form--label-align-right m--margin-bottom-15">
-                    <div class="row align-items-center">
-                        <div class="col-xl-12 order-1">
-                            <div class="form-group m-form__group row align-items-center">
-                                <div class="col-md-2">
-                                    {% if permiso.agregar %}
-                                        <a id="btn-nuevo-equation"
-                                           class="btn btn-success m-btn m-btn--custom m-btn--icon m-btn--air"
-                                           href="javascript:;">
-							<span>
-								<i class="la la-plus"></i>
-								<span>
-									New
-								</span>
-							</span>
-                                        </a>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-4"></div>
-                                <div class="col-md-4">
-                                    <div class="m-input-icon m-input-icon--left">
-                                        <input type="text" class="form-control m-input m_form_search"
-                                               placeholder="Search...">
-                                        <span class="m-input-icon__icon m-input-icon__icon--left">
+                <div class="form-group m-form__group row align-items-center mb-2">
+                    <div class="col-md-4">
+                        <div class="m-input-icon m-input-icon--left">
+                            <input type="text" class="form-control m-input m_form_search"
+                                   placeholder="Search...">
+                            <span class="m-input-icon__icon m-input-icon__icon--left">
 									<span><i class="la la-search"></i></span>
 								</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    {% if permiso.eliminar %}
-                                        <a id="btn-eliminar-equation"
-                                           class="btn btn-danger m-btn m-btn--custom m-btn--icon m-btn--air m--pull-right"
-                                           href="javascript:;">
-							<span>
-								<i class="la la-trash-o"></i>
-								<span>
-									Delete
-								</span>
-							</span>
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </div>
                         </div>
-
                     </div>
                 </div>
                 <!--end: Search Form -->
+
                 <!--begin: Datatable -->
                 <div class="m_datatable" id="equation-table-editable"></div>
                 <!--end: Datatable -->
@@ -130,63 +119,126 @@
                     </ul>
                 </div>
             </div>
-            <form class="m-form" id="equation-form" action="#"
-                  enctype="multipart/form-data" method="post">
 
-                <input type="hidden" id="equation_id" name="equation_id"/>
+            <div class="m-portlet__body">
 
-                <div class="m-portlet__body">
-                    <div class="m-form__section m-form__section--first">
-                        <div class="form-group m-form__group ic-form-group">
-                            <label>
-                                <span class="ic-step-number">1</span>
-                                Name
-                                <span class="ic-small italic">(required)</span>
-                            </label>
+                <ul class="nav nav-tabs m--hide" role="tablist" id="nav-tabs-equation">
+                    <li class="nav-item">
+                        <a class="nav-link active wizard-tab" data-item="1"
+                           data-toggle="tab" href="#tab-content-general" id="tab-general">
+                            General
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link wizard-tab" data-item="2"
+                           data-toggle="tab" href="#tab-content-items" id="tab-items">
+                           Pay Items
+                        </a>
+                    </li>
 
-                            <input type="text" class="form-control form-control-text event-change"
-                                   id="descripcion" name="descripcion"/>
-                        </div>
-                        <div class="form-group m-form__group ic-form-group">
-                            <label>
-                                <span class="ic-step-number">2</span>
-                                Equation
-                                <span class="ic-small italic">(required)</span>
-                            </label>
-                            <div class="row">
-                                <div class="col-md-4">
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab-content-general" role="tabpanel">
+                        <form class="m-form" id="equation-form" action="#"
+                              enctype="multipart/form-data" method="post">
+
+                            <input type="hidden" id="equation_id" name="equation_id"/>
+                            <div class="m-form__section m-form__section--first">
+                                <div class="form-group m-form__group ic-form-group">
+                                    <label>
+                                        <span class="ic-step-number">1</span>
+                                        Name
+                                        <span class="ic-small italic">(required)</span>
+                                    </label>
+
                                     <input type="text" class="form-control form-control-text event-change"
-                                           id="equation" name="equation"/>
+                                           id="descripcion" name="descripcion"/>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="form-group m-form__group ic-form-group">
-                            <label><span class="ic-step-number">3</span>Status</label>
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="m-form__group form-group">
-                                        <div class="m-radio-inline">
-                                            <label class="m-radio">
-                                                <input type="radio" name="radioestado" id="estadoactivo"
-                                                       class="event-change" checked>
-                                                Active
-                                                <span></span>
-                                            </label>
-                                            <label class="m-radio">
-                                                <input type="radio" name="radioestado" id="estadoinactivo"
-                                                       class="event-change">
-                                                Inactive
-                                                <span></span>
-                                            </label>
+                                <div class="form-group m-form__group ic-form-group">
+                                    <label>
+                                        <span class="ic-step-number">2</span>
+                                        Equation
+                                        <span class="ic-small italic">(required)</span>
+                                    </label>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control form-control-text event-change"
+                                                   id="equation" name="equation"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group m-form__group ic-form-group">
+                                    <label><span class="ic-step-number">3</span>Status</label>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="m-form__group form-group">
+                                                <div class="m-radio-inline">
+                                                    <label class="m-radio">
+                                                        <input type="radio" name="radioestado" id="estadoactivo"
+                                                               class="event-change" checked>
+                                                        Active
+                                                        <span></span>
+                                                    </label>
+                                                    <label class="m-radio">
+                                                        <input type="radio" name="radioestado" id="estadoinactivo"
+                                                               class="event-change">
+                                                        Inactive
+                                                        <span></span>
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </form>
+                    </div>
+                    <div class="tab-pane" id="tab-content-items" role="tabpanel">
+                        <div class="row" id="lista-items">
+                            <div class="col-lg-12">
+                                <!--begin: Search Form -->
+                                <div class="m-form m-form--label-align-right mb-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-xl-12 order-1">
+                                            <div class="form-group m-form__group row align-items-center">
+                                                <div class="col-md-9"></div>
+                                                <div class="col-md-3">
+                                                    <div class="m-input-icon m-input-icon--left">
+                                                        <input type="text" class="form-control m-input m_form_search"
+                                                               placeholder="Search...">
+                                                        <span class="m-input-icon__icon m-input-icon__icon--left">
+                                                        <span><i class="la la-search"></i></span>
+                                                    </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <!--end: Search Form -->
+                                <!--begin: Datatable -->
+                                <div class="m_datatable" id="items-table-editable"></div>
+                                <!--end: Datatable -->
+                            </div>
                         </div>
                     </div>
-                    <div class="m-form__actions">
+                </div>
+
+                <div class="m-form">
+                    <div class="m-form__actions text-center">
+                        <button id="btn-wizard-anterior"
+                                class="btn btn-info m--hide" type="button">
+                            Back
+                        </button>
+
+                        <button id="btn-wizard-siguiente"
+                                class="btn btn-primary " type="button">
+                            Next
+                        </button>
                         {% if permiso.agregar or permiso.editar %}
-                            <button id="btn-salvar-equation" class="btn btn-success" type="button">
+                            <button id="btn-wizard-finalizar" class="btn btn-success" type="button">
                                 Save
                             </button>
                         {% endif %}
@@ -195,9 +247,72 @@
                         </button>
                     </div>
                 </div>
-            </form>
+
+            </div>
+
         </div>
 
+    </div>
+
+    <!-- items -->
+    <div class="modal fade" id="modal-pay-items" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Pay Items
+                    </h5>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group m-form__group">
+                        <label>
+                            Change Equation
+                            <span class="ic-small italic">(required)</span>
+                        </label>
+
+                        <div class="row" id="lista-pay-items">
+                            <div class="col-lg-12">
+                                <!--begin: Search Form -->
+                                <div class="m-form m-form--label-align-right mb-2">
+                                    <div class="row align-items-center">
+                                        <div class="col-xl-12 order-1">
+                                            <div class="form-group m-form__group row align-items-center">
+                                                <div class="col-md-9"></div>
+                                                <div class="col-md-3">
+                                                    <div class="m-input-icon m-input-icon--left">
+                                                        <input type="text" class="form-control m-input m_form_search"
+                                                               placeholder="Search...">
+                                                        <span class="m-input-icon__icon m-input-icon__icon--left">
+                                                        <span><i class="la la-search"></i></span>
+                                                    </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <!--end: Search Form -->
+                                <!--begin: Datatable -->
+                                <div class="m_datatable" id="pay-items-table-editable"></div>
+                                <!--end: Datatable -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="btn-salvar-pay-items">Save</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
 
 {% endblock %}

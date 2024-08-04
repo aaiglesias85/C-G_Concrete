@@ -577,6 +577,7 @@ class ProjectController extends AbstractController
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
                 $resultadoJson['item'] = $resultado['item'];
+                $resultadoJson['is_new_item'] = $resultado['is_new_item'];
             } else {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['error'] = $resultado['error'];

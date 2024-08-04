@@ -396,3 +396,13 @@ div.tagsinput.has-error {
     display: block;
     text-align: center;
 }
+
+/** hide calendar time */
+.fc-unthemed .fc-event .fc-time, .fc-unthemed .fc-event-dot .fc-time {
+    display: none !important;
+}
+
+.m_form_search {
+    background: #eaecf2;
+    border-color: #eaecf2 !important;
+}

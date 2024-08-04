@@ -61,6 +61,7 @@ class ProjectService extends Base
                 $project_item_entity->setEquation($equation_entity);
             }
 
+            $is_new_item = false;
             if ($item_id != '') {
                 $item_entity = $this->getDoctrine()->getRepository(Item::class)->find($item_id);
             } else {
@@ -72,6 +73,8 @@ class ProjectService extends Base
                     'unit_id' => $unit_id
                 ]);
                 $item_entity = $this->AgregarNewItem(json_decode($new_item_data), $equation_entity);
+
+                $is_new_item = true;
             }
 
             $project_item_entity->setItem($item_entity);
@@ -87,18 +90,9 @@ class ProjectService extends Base
             $resultado['success'] = true;
 
             // devolver item
-            $resultado['item'] = [
-                'project_item_id' => $project_item_entity->getId(),
-                "item_id" => $project_item_entity->getItem()->getItemId(),
-                "item" => $project_item_entity->getItem()->getDescription(),
-                "unit" => $project_item_entity->getItem()->getUnit()->getDescription(),
-                "quantity" => $project_item_entity->getQuantity(),
-                "price" => $project_item_entity->getPrice(),
-                "yield_calculation" => $project_item_entity->getYieldCalculation(),
-                "yield_calculation_name" => $this->DevolverYieldCalculationDeItemProject($project_item_entity),
-                "equation_id" => $project_item_entity->getEquation() != null ? $project_item_entity->getEquation()->getEquationId() : ''
-            ];
-
+            $item = $this->DevolverItemDeProject($project_item_entity);
+            $resultado['item'] = $item;
+            $resultado['is_new_item'] = $is_new_item;
         } else {
             $resultado['success'] = false;
             $resultado['error'] = 'The project not exist';
@@ -122,12 +116,15 @@ class ProjectService extends Base
         if ($entity != null) {
 
             // verificar si se puede eliminar
-            $se_puede_eliminar = $this->SePuedeEliminarItem($project_item_id);
+            /*$se_puede_eliminar = $this->SePuedeEliminarItem($project_item_id);
             if ($se_puede_eliminar != '') {
                 $resultado['success'] = false;
                 $resultado['error'] = $se_puede_eliminar;
                 return $resultado;
-            }
+            }*/
+
+            // eliminar informacion relacionada
+            $this->EliminarInformacionDeProjectItem($project_item_id);
 
             $item_name = $entity->getItem()->getDescription();
 
@@ -147,6 +144,30 @@ class ProjectService extends Base
         }
 
         return $resultado;
+    }
+
+    /**
+     * EliminarInformacionDeProjectItem
+     * @param $project_item_id
+     * @return void
+     */
+    private function EliminarInformacionDeProjectItem($project_item_id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        // data tracking
+        $data_tracking_items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+            ->ListarDataTrackingsDeItem($project_item_id);
+        foreach ($data_tracking_items as $data_tracking_item) {
+            $em->remove($data_tracking_item);
+        }
+
+        // invoices
+        $invoice_items = $this->getDoctrine()->getRepository(InvoiceItem::class)
+            ->ListarInvoicesDeItem($project_item_id);
+        foreach ($invoice_items as $invoice_item) {
+            $em->remove($invoice_item);
+        }
     }
 
     /**
@@ -411,26 +432,27 @@ class ProjectService extends Base
      * @param $status
      * @return boolean
      */
-    private function FiltrarProjectPorStatus($project_id, $status){
+    private function FiltrarProjectPorStatus($project_id, $status)
+    {
         $is_valid = true;
 
-        if($status != ''){
+        if ($status != '') {
 
             $is_valid = false;
 
             $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
                 ->ListarDataTracking($project_id);
 
-            if($status == 'working' && !empty($data_tracking)){
+            if ($status == 'working' && !empty($data_tracking)) {
                 $is_valid = true;
             }
-            if($status == 'notworking' && empty($data_tracking)){
+            if ($status == 'notworking' && empty($data_tracking)) {
                 $is_valid = true;
             }
         }
 
 
-        return  $is_valid;
+        return $is_valid;
     }
 
     /**
@@ -464,7 +486,7 @@ class ProjectService extends Base
 
             $amount = $quantity * $price;
 
-            $total_amount = $quantity_completed  * $price;
+            $total_amount = $quantity_completed * $price;
 
             $items[] = [
                 "project_item_id" => $project_item_id,
@@ -549,30 +571,39 @@ class ProjectService extends Base
         $lista = $this->getDoctrine()->getRepository(ProjectItem::class)
             ->ListarItemsDeProject($project_id);
         foreach ($lista as $key => $value) {
-
-
-            $yield_calculation_name = $this->DevolverYieldCalculationDeItemProject($value);
-
-            $quantity = $value->getQuantity();
-            $price = $value->getPrice();
-            $total = $quantity * $price;
-
-            $items[] = [
-                'project_item_id' => $value->getId(),
-                "item_id" => $value->getItem()->getItemId(),
-                "item" => $value->getItem()->getDescription(),
-                "unit" => $value->getItem()->getUnit()->getDescription(),
-                "quantity" => $quantity,
-                "price" => $price,
-                "total" => $total,
-                "yield_calculation" => $value->getYieldCalculation(),
-                "yield_calculation_name" => $yield_calculation_name,
-                "equation_id" => $value->getEquation() != null ? $value->getEquation()->getEquationId() : '',
-                "posicion" => $key
-            ];
+            $item = $this->DevolverItemDeProject($value, $key);
+            $items[] = $item;
         }
 
         return $items;
+    }
+
+    /**
+     * DevolverItemDeProject
+     * @param ProjectItem $value
+     * @return array
+     */
+    public function DevolverItemDeProject($value, $key = -1)
+    {
+        $yield_calculation_name = $this->DevolverYieldCalculationDeItemProject($value);
+
+        $quantity = $value->getQuantity();
+        $price = $value->getPrice();
+        $total = $quantity * $price;
+
+        return [
+            'project_item_id' => $value->getId(),
+            "item_id" => $value->getItem()->getItemId(),
+            "item" => $value->getItem()->getDescription(),
+            "unit" => $value->getItem()->getUnit()->getDescription(),
+            "quantity" => $quantity,
+            "price" => $price,
+            "total" => $total,
+            "yield_calculation" => $value->getYieldCalculation(),
+            "yield_calculation_name" => $yield_calculation_name,
+            "equation_id" => $value->getEquation() != null ? $value->getEquation()->getEquationId() : '',
+            "posicion" => $key
+        ];
     }
 
     /**
@@ -1028,11 +1059,13 @@ class ProjectService extends Base
         $arreglo_resultado = array();
         $cont = 0;
 
-        $lista = $this->getDoctrine()->getRepository(Project::class)
+        $lista = $this->getDoctrine()->getRepository(ProjectItem::class)
             ->ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
                 $company_id, '', $status, $fecha_inicial, $fecha_fin);
 
-        foreach ($lista as $value) {
+        foreach ($lista as $p_i) {
+            $value = $p_i->getProject();
+
             $project_id = $value->getProjectId();
 
             $acciones = $this->ListarAcciones($project_id);
@@ -1089,7 +1122,7 @@ class ProjectService extends Base
      */
     public function TotalProjects($sSearch, $company_id, $status, $fecha_inicial, $fecha_fin)
     {
-        $total = $this->getDoctrine()->getRepository(Project::class)
+        $total = $this->getDoctrine()->getRepository(ProjectItem::class)
             ->TotalProjects($sSearch, $company_id, '', $status, $fecha_inicial, $fecha_fin);
 
         return $total;

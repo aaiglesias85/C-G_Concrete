@@ -39,8 +39,8 @@ class DataTrackingItemRepository extends EntityRepository
      */
     public function ListarDataTrackingsDeItem($project_item_id)
     {
-        $consulta = $this->createQueryBuilder('d_t')
-            ->leftJoin('d_t.projectItem', 'p_i');
+        $consulta = $this->createQueryBuilder('d_t_i')
+            ->leftJoin('d_t_i.projectItem', 'p_i');
 
         if ($project_item_id != '') {
             $consulta->andWhere('p_i.id = :project_item_id')
@@ -48,8 +48,7 @@ class DataTrackingItemRepository extends EntityRepository
         }
 
 
-        $consulta->orderBy('d_t.date', "ASC");
-
+        $consulta->orderBy('d_t_i.id', "ASC");
 
         return $consulta->getQuery()->getResult();
     }

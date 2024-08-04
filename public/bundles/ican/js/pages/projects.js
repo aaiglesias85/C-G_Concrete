@@ -239,25 +239,25 @@ var Projects = function () {
                 subcontract: {
                     required: true
                 },
-                end_date:{
+                end_date: {
                     required: true
                 },
-                contract_amount:{
+                contract_amount: {
                     required: true
                 },
-                owner:{
+                owner: {
                     required: true
                 },
                 number: {
                     required: true
                 },
-                county:{
+                county: {
                     required: true
                 },
                 name: {
                     required: true
                 },
-                project_id_number:{
+                project_id_number: {
                     required: true
                 }
             },
@@ -362,7 +362,7 @@ var Projects = function () {
 
         var status = 1;
         $('.project-estado').each(function () {
-            if($(this).prop('checked')){
+            if ($(this).prop('checked')) {
                 status = $(this).val();
             }
         });
@@ -419,7 +419,7 @@ var Projects = function () {
                     btnClickFiltrar();
 
                     // add new items
-                    if(response.items.length > 0){
+                    if (response.items.length > 0) {
                         for (let item of response.items) {
                             $('#item').append(new Option(item.description, item.item_id, false, false));
                             $('#item option[value="' + item.item_id + '"]').attr("data-price", item.price);
@@ -430,9 +430,9 @@ var Projects = function () {
                         $('#item').select2();
                     }
 
-                    if(!next){
+                    if (!next) {
                         cerrarForms();
-                    }else{
+                    } else {
                         var project_id = response.project_id;
                         $('#project_id').val(project_id);
 
@@ -575,9 +575,9 @@ var Projects = function () {
 
 
                     $('.project-estado').each(function () {
-                        if($(this).val() == response.project.status){
+                        if ($(this).val() == response.project.status) {
                             $(this).prop('checked', true);
-                        }else{
+                        } else {
                             $(this).prop('checked', false);
                         }
                     });
@@ -597,7 +597,7 @@ var Projects = function () {
                     event_change = false;
 
                     // next tab
-                    if(next){
+                    if (next) {
                         siguienteTab();
                     }
 
@@ -1175,59 +1175,77 @@ var Projects = function () {
 
             if ($('#item-form').valid() && isValidItem() && isValidYield() && isValidUnit()) {
 
+                var project_item_id = $('#project_item_id').val();
                 var unit_id = $('#unit').val();
-                var unit = item_type ? $('#item option[value="' + item_id + '"]').data("unit") : $("#unit option:selected").text();
-
-                var quantity = $('#item-quantity').val();
                 var price = $('#item-price').val();
-                var total = quantity * price;
-
+                var quantity = $('#item-quantity').val();
                 var yield_calculation = $('#yield-calculation').val();
                 var equation_id = $('#equation').val();
-                var yield_calculation_name = DevolverYieldCalculationDeItem();
 
-                if (nEditingRowItem == null) {
+                MyApp.block('#modal-item .modal-content');
 
-                    items.push({
-                        project_item_id: '',
+                $.ajax({
+                    type: "POST",
+                    url: "project/agregarItem",
+                    dataType: "json",
+                    data: {
+                        project_item_id: project_item_id,
+                        project_id: $('#project_id').val(),
                         item_id: item_id,
                         item: item,
                         unit_id: unit_id,
-                        unit: unit,
-                        equation_id: equation_id,
-                        yield_calculation: yield_calculation,
-                        yield_calculation_name: yield_calculation_name,
-                        quantity: quantity,
                         price: price,
-                        total: total,
-                        posicion: items.length
-                    });
+                        quantity: quantity,
+                        yield_calculation: yield_calculation,
+                        equation_id: equation_id
+                    },
+                    success: function (response) {
+                        mApp.unblock('#modal-item .modal-content');
+                        if (response.success) {
 
-                } else {
-                    var posicion = nEditingRowItem;
-                    if (items[posicion]) {
-                        items[posicion].item_id = item_id;
-                        items[posicion].item = item;
-                        items[posicion].unit_id = unit_id;
-                        items[posicion].unit = unit;
-                        items[posicion].yield_calculation = yield_calculation;
-                        items[posicion].yield_calculation_name = yield_calculation_name;
-                        items[posicion].equation_id = equation_id;
-                        items[posicion].quantity = quantity;
-                        items[posicion].price = price;
-                        items[posicion].total = total;
+                            toastr.success(response.message, "Success");
+
+                            //add item
+                            var item_new = response.item;
+                            if (nEditingRowItem == null) {
+                                item_new.posicion = items.length;
+                                items.push(item_new);
+                            } else {
+                                items[nEditingRowItem] = item_new;
+                            }
+
+                            // new item
+                            if (response.is_new_item) {
+                                $('#item').append(new Option(item_new.item, item_new.item_id, false, false));
+                                $('#item option[value="' + item_new.item_id + '"]').attr("data-price", item_new.price);
+                                $('#item option[value="' + item_new.item_id + '"]').attr("data-unit", item_new.unit);
+                                $('#item option[value="' + item_new.item_id + '"]').attr("data-equation", item_new.equation_id);
+                                $('#item option[value="' + item_new.item_id + '"]').attr("data-yield", item_new.yield_calculation);
+
+                                $('#item').select2();
+                            }
+
+                            //actualizar lista
+                            actualizarTableListaItems();
+
+                            if (nEditingRowItem != null) {
+                                $('#modal-item').modal('hide');
+                            }
+
+                            // reset
+                            resetFormItem();
+
+
+                        } else {
+                            toastr.error(response.error, "");
+                        }
+                    },
+                    failure: function (response) {
+                        mApp.unblock('#modal-item .modal-content');
+
+                        toastr.error(response.error, "");
                     }
-                }
-
-                //actualizar lista
-                actualizarTableListaItems();
-
-                if (nEditingRowItem != null) {
-                    $('#modal-item').modal('hide');
-                }
-
-                // reset
-                resetFormItem();
+                });
 
             } else {
                 if (!isValidItem()) {
@@ -1280,6 +1298,8 @@ var Projects = function () {
 
                 nEditingRowItem = posicion;
 
+                $('#project_item_id').val(items[posicion].project_item_id);
+
                 $('#item').off('change', changeItem);
 
                 $('#item').val(items[posicion].item_id);
@@ -1299,7 +1319,7 @@ var Projects = function () {
                 $('#equation').val(items[posicion].equation_id);
                 $('#equation').trigger('change');
 
-                if(items[posicion].equation_id != ''){
+                if (items[posicion].equation_id != '') {
                     $('#select-equation').removeClass('m--hide');
                 }
 
@@ -1847,7 +1867,7 @@ var Projects = function () {
 
         $('#modal-unit').on('hidden.bs.modal', function () {
             var unit = ModalUnit.getUnit();
-            if(unit != null){
+            if (unit != null) {
                 $('#unit').append(new Option(unit.description, unit.unit_id, false, false));
                 $('#unit').select2();
 
@@ -1866,7 +1886,7 @@ var Projects = function () {
 
         $('#modal-equation').on('hidden.bs.modal', function () {
             var equation = ModalEquation.getEquation();
-            if(equation != null){
+            if (equation != null) {
                 $('#equation').append(new Option(`${equation.description} ${equation.equation}`, equation.equation_id, false, false));
                 $('#equation').select2();
 

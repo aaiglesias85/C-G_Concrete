@@ -70,8 +70,9 @@ class ItemRepository extends EntityRepository
             ->leftJoin('i.unit', 'u');
 
         if ($sSearch != "")
-            $consulta->andWhere('u.description LIKE :description')
-                ->setParameter('description', "%${sSearch}%");
+            $consulta->andWhere('i.description LIKE :description OR u.description LIKE :unit')
+                ->setParameter('description', "%${sSearch}%")
+                ->setParameter('unit', "%${sSearch}%");
 
         switch ($iSortCol_0) {
             case "unit":
@@ -101,15 +102,15 @@ class ItemRepository extends EntityRepository
     {
         $em = $this->getEntityManager();
         $consulta = 'SELECT COUNT(i.itemId) FROM App\Entity\Item i ';
-        $join = '';
+        $join = ' LEFT JOIN i.unit u ';
         $where = '';
 
         if ($sSearch != "") {
             $esta_query = explode("WHERE", $where);
             if (count($esta_query) == 1)
-                $where .= 'WHERE i.description LIKE :description ';
+                $where .= 'WHERE (i.description LIKE :description OR u.description LIKE :unit) ';
             else
-                $where .= 'AND i.description LIKE :description ';
+                $where .= 'AND (i.description LIKE :description OR u.description LIKE :unit) ';
         }
 
         $consulta .= $join;
@@ -120,6 +121,10 @@ class ItemRepository extends EntityRepository
         $esta_query_description = substr_count($consulta, ':description');
         if ($esta_query_description == 1)
             $query->setParameter(':description', "%${sSearch}%");
+
+        $esta_query_unit = substr_count($consulta, ':unit');
+        if ($esta_query_unit == 1)
+            $query->setParameter(':unit', "%${sSearch}%");
 
         $total = $query->getSingleScalarResult();
         return $total;

@@ -4,192 +4,204 @@ var DataTracking = function () {
     var rowDelete = null;
     var items = [];
 
-    // init Calendario
-    var calendar = null;
-    var data_tracking = [];
+    //Inicializar table
+    var initTable = function () {
+        MyApp.block('#data-tracking-table-editable');
 
-    var initCalendario = function () {
-        // default date
-        var todayDate = moment().startOf('day');
-        var TODAY = todayDate.format('YYYY-MM-DD');
+        var table = $('#data-tracking-table-editable');
 
-        // poner fecha del filtro inicial si lo selecciono, esto para que el calendario empiece ahi
-        var fechaInicial = $('#fechaInicial').val();
-        if (fechaInicial != "") {
-            fechaInicial = MyApp.convertirStringAFecha(fechaInicial);
-            TODAY = fechaInicial.format('Y-m-d');
-        }
+        var aoColumns = [];
 
-        // init calendar
-        var calendarEl = document.getElementById('kt_calendar');
-        calendar = new FullCalendar.Calendar(calendarEl, {
-            locale: 'en-US',
-            plugins: ['interaction', 'dayGrid', 'timeGrid', 'list'],
-            isRTL: mUtil.isRTL(),
-            header: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            },
-
-            height: 800,
-            contentHeight: 780,
-            aspectRatio: 3,  // see: https://fullcalendar.io/docs/aspectRatio
-
-            nowIndicator: true,
-            now: todayDate.format('YYYY-MM-DD') + 'T09:25:00', // just for demo
-
-            views: {
-                dayGridMonth: {buttonText: 'Month'},
-                timeGridWeek: {buttonText: 'Week'},
-                timeGridDay: {buttonText: 'Day'}
-            },
-
-            defaultView: 'dayGridMonth',
-            defaultDate: TODAY,
-
-            editable: true,
-            eventLimit: true, // allow "more" link when too many events
-            navLinks: true,
-            events: data_tracking,
-            eventRender: function (info) {
-                var element = $(info.el);
-                var event = info.event;
-                console.log(event);
-
-                if (info.event.extendedProps) {
-
-                    //Para editar
-                    element.attr('data-id', event.extendedProps.data_tracking_id);
-
-                    var descripcion = (event.extendedProps.notes.length > 100) ? event.extendedProps.notes.substring(0, 100) + "..." : event.extendedProps.notes;
-
-                    var content = '';
-                    if (element.hasClass('fc-day-grid-event')) {
-
-                        element.data('title', event.title);
-
-                        content = ` Pay Item Measured </br>
-                                    <b>${event.extendedProps.fecha}</b></br>
-                                    ${descripcion}</br>
-                                    <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
-                                    <b>Concrete Different: ${event.extendedProps.lostConcrete}</b></br>                               
-                                    <b>Total Concrete Yield: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
-                                    <b>Quantity Today: ${event.extendedProps.total_quantity_today}</b></br>
-                                    <b>Total Concrete: ${MyApp.formatearNumero(event.extendedProps.total_concrete, 2, '.', ',')}</b></br>
-                                    <b>Total Labor: ${MyApp.formatearNumero(event.extendedProps.totalLaborPrice, 2, '.', ',')}</b></br>
-                                    <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
-                                    <b>Profit: ${MyApp.formatearNumero(event.extendedProps.profit, 2, '.', ',')}</b>
-                            `;
-
-                        element.data('content', content);
-                        element.data('html', true);
-
-                        element.data('placement', 'top');
-                        mApp.initPopover(element);
-
-                    } else if (element.hasClass('fc-time-grid-event')) {
-
-
-                        element.data('title', event.title);
-
-                        content = `
-                                    <b>${event.extendedProps.fecha}</b></br>
-                                    ${descripcion}</br>
-                                    <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
-                                    <b>Concrete Different: ${event.extendedProps.lostConcrete}</b></br>                                    
-                                    <b>Total Concrete Yield: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
-                                    <b>Quantity Today: ${event.extendedProps.total_quantity_today}</b></br>
-                                    <b>Total Concrete: ${MyApp.formatearNumero(event.extendedProps.total_concrete, 2, '.', ',')}</b></br>
-                                    <b>Total Labor: ${MyApp.formatearNumero(event.extendedProps.totalLaborPrice, 2, '.', ',')}</b></br>
-                                    <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
-                                    <b>Profit: ${MyApp.formatearNumero(event.extendedProps.profit, 2, '.', ',')}</b>
-                            `;
-
-                        element.data('content', content);
-                        element.data('html', true);
-
-                        element.data('placement', 'top');
-                        mApp.initPopover(element);
-
-                    } else if (element.find('.fc-list-item-title').lenght !== 0) {
-
-                        element.data('title', event.title);
-
-                        content = `
-                                    <b>${event.extendedProps.fecha}</b></br>
-                                    ${descripcion}</br>
-                                    <b>Total Conc Used: ${event.extendedProps.totalConcUsed}</b></br>
-                                    <b>Concrete Different: ${event.extendedProps.lostConcrete}</b></br>                                   
-                                    <b>Total Concrete Yield: ${MyApp.formatearNumero(event.extendedProps.total_concrete_yiel, 2, '.', ',')}</b></br>
-                                    <b>Quantity Today: ${event.extendedProps.total_quantity_today}</b></br>
-                                    <b>Total Concrete: ${MyApp.formatearNumero(event.extendedProps.total_concrete, 2, '.', ',')}</b></br>
-                                    <b>Total Labor: ${MyApp.formatearNumero(event.extendedProps.totalLaborPrice, 2, '.', ',')}</b></br>
-                                    <b>Daily total: ${MyApp.formatearNumero(event.extendedProps.total_daily_today, 2, '.', ',')}</b></br>
-                                    <b>Profit: ${MyApp.formatearNumero(event.extendedProps.profit, 2, '.', ',')}</b>
-                            `;
-
-                        element.data('content', content);
-                        element.data('html', true);
-
-                        element.data('placement', 'top');
-                        mApp.initPopover(element);
-                    }
-                }
-            }
-        });
-        // render calendar
-        calendar.render();
-
-        // event date click
-        if (permiso.agregar == 1) {
-            calendar.on('dateClick', function (info) {
-                //console.log(info);
-                //console.log('clicked on ' + info.dateStr);
-
-                // validar que haya seleccionado un proyecto
-                var project_id = $('#project').val();
-                if (project_id == '') {
-
-                    toastr.error('Select the project in the top section', "");
-
-                    var $element = $('#select-project .select2');
-                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
-                        .data("title", "This field is required")
-                        .addClass("has-error")
-                        .tooltip({
-                            placement: 'bottom'
-                        }); // Create a new tooltip based on the error messsage we just set in the title
-
-                    $element.closest('.form-group')
-                        .removeClass('has-success').addClass('has-error');
-
-                    return;
-                }
-
-                resetForms();
-
-                var fecha = info.date;
-                fecha = fecha.format('m/d/Y');
-                $('#data-tracking-date').val(fecha);
-
-                // open modal
-                $('#modal-data-tracking').modal('show');
-
+        if (permiso.eliminar) {
+            aoColumns.push({
+                field: "id",
+                title: "#",
+                sortable: false, // disable sort for this column
+                width: 40,
+                textAlign: 'center',
+                selector: {class: 'm-checkbox--solid m-checkbox--brand'}
             });
         }
+        aoColumns.push(
+            {
+                field: "acciones",
+                width: 80,
+                title: "Actions",
+                sortable: false,
+                overflow: 'visible',
+                textAlign: 'center'
+            },
+            {
+                field: "date",
+                title: "Date",
+                width: 100,
+                textAlign: 'center'
+            },
+            {
+                field: "project",
+                title: "Project",
+                width: 200,
+            },
+            {
+                field: "totalConcUsed",
+                title: "Total Conc Used",
+                width: 120,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.totalConcUsed, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "lostConcrete",
+                title: "Lost Concrete",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.lostConcrete, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "totalLabor",
+                title: "Total Labor",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.totalLabor, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "totalStamps",
+                title: "Total Stamps",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.totalStamps, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "concVendor",
+                title: "Conc Vendor",
+            },
+            {
+                field: "total_concrete_yiel",
+                title: "Concrete Yield",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.total_concrete_yiel, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "total_quantity_today",
+                title: "Quantity Today",
+                width: 120,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.total_quantity_today, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "total_daily_today",
+                title: "Daily Today",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.total_daily_today, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "total_concrete",
+                title: "Total Concrete",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.total_concrete, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "profit",
+                title: "Profit",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.profit, 2, '.', ',')}</span>`;
+                }
+            },
+        );
+        oTable = table.mDatatable({
+            // datasource definition
+            data: {
+                type: 'remote',
+                source: {
+                    read: {
+                        url: 'data-tracking/listar',
+                    }
+                },
+                pageSize: 10,
+                saveState: {
+                    cookie: false,
+                    webstorage: false
+                },
+                serverPaging: true,
+                serverFiltering: true,
+                serverSorting: true
+            },
+            // layout definition
+            layout: {
+                theme: 'default', // datatable theme
+                class: '', // custom wrapper class
+                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
+                //height: 550, // datatable's body's fixed height
+                footer: false // display/hide footer
+            },
+            // column sorting
+            sortable: true,
+            pagination: true,
+            // columns definition
+            columns: aoColumns,
+            // toolbar
+            toolbar: {
+                // toolbar items
+                items: {
+                    // pagination
+                    pagination: {
+                        // page size select
+                        pageSizeSelect: [10, 25, 30, 50, -1] // display dropdown to select pagination size. -1 is used for "ALl" option
+                    }
+                }
+            },
+        });
 
-    }
-    var actualizarCalendario = function () {
-        //reset
-        if (calendar != null) {
-            calendar.destroy();
-            calendar = null;
-        }
-        // init
-        initCalendario();
-    }
+        //Events
+        oTable
+            .on('m-datatable--on-ajax-done', function () {
+                mApp.unblock('#data-tracking-table-editable');
+            })
+            .on('m-datatable--on-ajax-fail', function (e, jqXHR) {
+                mApp.unblock('#data-tracking-table-editable');
+            })
+            .on('m-datatable--on-goto-page', function (e, args) {
+                MyApp.block('#data-tracking-table-editable');
+            })
+            .on('m-datatable--on-reloaded', function (e) {
+                MyApp.block('#data-tracking-table-editable');
+            })
+            .on('m-datatable--on-sort', function (e, args) {
+                MyApp.block('#data-tracking-table-editable');
+            })
+            .on('m-datatable--on-check', function (e, args) {
+                //eventsWriter('Checkbox active: ' + args.toString());
+            })
+            .on('m-datatable--on-uncheck', function (e, args) {
+                //eventsWriter('Checkbox inactive: ' + args.toString());
+            });
 
+        //Busqueda
+        var query = oTable.getDataSourceQuery();
+        $('#lista-data-tracking .m_form_search').on('keyup', function (e) {
+            btnClickFiltrar();
+        }).val(query.generalSearch);
+    };
     //Filtrar
     var initAccionFiltrar = function () {
 
@@ -198,58 +210,24 @@ var DataTracking = function () {
             btnClickFiltrar();
         });
 
-        $(document).off('click', "#btn-reset-filters-data-tracking");
-        $(document).on('click', "#btn-reset-filters-data-tracking", function (e) {
-            // reset
-            $('#project').val('');
-            $('#project').trigger('change');
-
-            $('#lista-data-tracking .m_form_search').val('');
-            $('#fechaInicial').val('');
-            $('#fechaFin').val('');
-
-            btnClickFiltrar();
-        });
-
     };
     var btnClickFiltrar = function () {
+        var query = oTable.getDataSourceQuery();
+
+        var generalSearch = $('#lista-data-tracking .m_form_search').val();
+        query.generalSearch = generalSearch;
 
         var project_id = $('#project').val();
-        var generalSearch = $('#lista-data-tracking .m_form_search').val();
+        query.project_id = project_id;
+
         var fechaInicial = $('#fechaInicial').val();
+        query.fechaInicial = fechaInicial;
+
         var fechaFin = $('#fechaFin').val();
+        query.fechaFin = fechaFin;
 
-        MyApp.block('#lista-data-tracking');
-
-        $.ajax({
-            type: "POST",
-            url: "data-tracking/listarDataTracking",
-            dataType: "json",
-            data: {
-                'project_id': project_id,
-                'search': generalSearch,
-                'fechaInicial': fechaInicial,
-                'fechaFin': fechaFin
-            },
-            success: function (response) {
-                mApp.unblock('#lista-data-tracking');
-                if (response.success) {
-
-                    data_tracking = response.data_tracking;
-                    // update calendar
-                    actualizarCalendario();
-
-                } else {
-                    toastr.error(response.error, "Error !!!");
-                }
-            },
-            failure: function (response) {
-                mApp.unblock('#lista-data-tracking');
-
-                toastr.error(response.error, "Error !!!");
-            }
-        });
-
+        oTable.setDataSourceQuery(query);
+        oTable.load();
     }
 
     //Reset forms
@@ -463,27 +441,18 @@ var DataTracking = function () {
 
     //Editar
     var initAccionEditar = function () {
-
-        $(document).off('click', ".fc-event, .fc-list-item");
-        $(document).on('click', ".fc-event, .fc-list-item", function (e) {
+        $(document).off('click', "#data-tracking-table-editable a.edit");
+        $(document).on('click', "#data-tracking-table-editable a.edit", function (e) {
+            e.preventDefault();
+            resetForms();
 
             var data_tracking_id = $(this).data('id');
+            $('#data_tracking_id').val(data_tracking_id);
 
-            if (data_tracking_id != '') {
+            // open modal
+            $('#modal-data-tracking').modal('show');
 
-                //reset
-                resetForms();
-
-                // open modal
-                $('#modal-data-tracking').modal('show');
-
-                $('#btn-eliminar-data-tracking').removeClass('m--hide');
-
-                $('#data_tracking_id').val(data_tracking_id);
-
-                editRow(data_tracking_id);
-            }
-
+            editRow(data_tracking_id);
         });
 
         function editRow(data_tracking_id) {
@@ -585,17 +554,22 @@ var DataTracking = function () {
             $('.select-item-data-tracking').select2();
         }
     };
+
     //Eliminar
     var initAccionEliminar = function () {
-
-        $(document).off('click', "#btn-eliminar-data-tracking");
-        $(document).on('click', "#btn-eliminar-data-tracking", function (e) {
+        $(document).off('click', "#data-tracking-table-editable a.delete");
+        $(document).on('click', "#data-tracking-table-editable a.delete", function (e) {
             e.preventDefault();
 
-            rowDelete = $('#data_tracking_id').val();
+            rowDelete = $(this).data('id');
             $('#modal-eliminar').modal({
                 'show': true
             });
+        });
+
+        $(document).off('click', "#btn-eliminar-data-tracking");
+        $(document).on('click', "#btn-eliminar-data-tracking", function (e) {
+            btnClickEliminar();
         });
 
         $(document).off('click', "#btn-delete");
@@ -603,10 +577,35 @@ var DataTracking = function () {
             btnClickModalEliminar();
         });
 
+        $(document).off('click', "#btn-delete-selection");
+        $(document).on('click', "#btn-delete-selection", function (e) {
+            btnClickModalEliminarSeleccion();
+        });
+
+        function btnClickEliminar() {
+            var ids = '';
+            $('.m-datatable__cell--check .m-checkbox--brand > input[type="checkbox"]').each(function () {
+                if ($(this).prop('checked')) {
+                    var value = $(this).attr('value');
+                    if (value != undefined) {
+                        ids += value + ',';
+                    }
+                }
+            });
+
+            if (ids != '') {
+                $('#modal-eliminar-seleccion').modal({
+                    'show': true
+                });
+            } else {
+                toastr.error('Select items to delete', "");
+            }
+        };
+
         function btnClickModalEliminar() {
             var data_tracking_id = rowDelete;
 
-            MyApp.block('#modal-data-tracking .modal-content');
+            MyApp.block('#data-tracking-table-editable');
 
             $.ajax({
                 type: "POST",
@@ -616,13 +615,11 @@ var DataTracking = function () {
                     'data_tracking_id': data_tracking_id
                 },
                 success: function (response) {
-                    mApp.unblock('#modal-data-tracking .modal-content');
+                    mApp.unblock('#data-tracking-table-editable');
 
                     if (response.success) {
 
                         btnClickFiltrar();
-
-                        $('#modal-data-tracking').modal('hide');
 
                         toastr.success(response.message, "Success");
 
@@ -631,7 +628,47 @@ var DataTracking = function () {
                     }
                 },
                 failure: function (response) {
-                    mApp.unblock('#modal-data-tracking .modal-content');
+                    mApp.unblock('#data-tracking-table-editable');
+
+                    toastr.error(response.error, "");
+                }
+            });
+        };
+
+        function btnClickModalEliminarSeleccion() {
+            var ids = '';
+            $('.m-datatable__cell--check .m-checkbox--brand > input[type="checkbox"]').each(function () {
+                if ($(this).prop('checked')) {
+                    var value = $(this).attr('value');
+                    if (value != undefined) {
+                        ids += value + ',';
+                    }
+                }
+            });
+
+            MyApp.block('#data-tracking-table-editable');
+
+            $.ajax({
+                type: "POST",
+                url: "data-tracking/eliminarDataTrackings",
+                dataType: "json",
+                data: {
+                    'ids': ids
+                },
+                success: function (response) {
+                    mApp.unblock('#data-tracking-table-editable');
+                    if (response.success) {
+
+                        btnClickFiltrar();
+
+                        toastr.success(response.message, "Success");
+
+                    } else {
+                        toastr.error(response.error, "");
+                    }
+                },
+                failure: function (response) {
+                    mApp.unblock('#data-tracking-table-editable');
 
                     toastr.error(response.error, "");
                 }
@@ -805,9 +842,10 @@ var DataTracking = function () {
         $('.select-item-data-tracking').select2();
 
         if (project_id != '') {
-            btnClickFiltrar();
             listarItemsDeProject(project_id);
         }
+
+        btnClickFiltrar();
     }
 
     var listarItemsDeProject = function (project_id) {
@@ -1424,6 +1462,7 @@ var DataTracking = function () {
         init: function () {
 
             initWidgets();
+            initTable();
             initForm();
             initWizard();
 
@@ -1444,9 +1483,6 @@ var DataTracking = function () {
             initTableItems();
             initFormItem();
             initAccionesItems();
-
-            // listar data tracking
-            btnClickFiltrar();
         }
 
     };

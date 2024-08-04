@@ -33,8 +33,8 @@ class DataTrackingController extends AbstractController
             if ($permiso[0]['ver']) {
 
                 // projects
-                /*$projects = $this->trackingService->getDoctrine()->getRepository(Project::class)
-                    ->ListarOrdenados();*/
+                $projects = $this->trackingService->getDoctrine()->getRepository(Project::class)
+                    ->ListarOrdenados();
 
                 // inspectors
                 $inspectors = $this->projectService->getDoctrine()->getRepository(Inspector::class)
@@ -42,7 +42,7 @@ class DataTrackingController extends AbstractController
 
                 return $this->render('admin/data-tracking/index.html.twig', array(
                     'permiso' => $permiso[0],
-                    // 'projects' => $projects,
+                    'projects' => $projects,
                     'inspectors' => $inspectors
                 ));
             }
@@ -52,10 +52,10 @@ class DataTrackingController extends AbstractController
     }
 
     /**
-     * listar Acción que lista los dataTrackings
+     * listarCalendario Acción que lista los dataTrackings
      *
      */
-    public function listar(Request $request)
+    public function listarCalendario(Request $request)
     {
 
         $sSearch = $request->get('search');
@@ -66,10 +66,74 @@ class DataTrackingController extends AbstractController
         try {
 
 
-            $lista = $this->trackingService->ListarDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin);
+            $lista = $this->trackingService->ListarDataTrackingsParaCalendario($sSearch, $project_id, $fecha_inicial, $fecha_fin);
 
             $resultadoJson['success'] = true;
             $resultadoJson['data_tracking'] = $lista;
+
+            return $this->json($resultadoJson);
+
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+    }
+
+    /**
+     * listar Acción que lista los projects
+     *
+     */
+    public function listar(Request $request)
+    {
+
+        // search filter by keywords
+        $query = !empty($request->get('query')) ? $request->get('query') : array();
+        $sSearch = isset($query['generalSearch']) && is_string($query['generalSearch']) ? $query['generalSearch'] : '';
+        $project_id = isset($query['project_id']) && is_string($query['project_id']) ? $query['project_id'] : '';
+        $fecha_inicial = isset($query['fechaInicial']) && is_string($query['fechaInicial']) ? $query['fechaInicial'] : '';
+        $fecha_fin = isset($query['fechaFin']) && is_string($query['fechaFin']) ? $query['fechaFin'] : '';
+
+        //Sort
+        $sort = !empty($request->get('sort')) ? $request->get('sort') : array();
+        $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'desc';
+        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'date';
+        //$start and $limit
+        $pagination = !empty($request->get('pagination')) ? $request->get('pagination') : array();
+        $page = !empty($pagination['page']) ? (int)$pagination['page'] : 1;
+        $limit = !empty($pagination['perpage']) ? (int)$pagination['perpage'] : -1;
+        $start = 0;
+
+        try {
+            $pages = 1;
+            $total = $this->trackingService->TotalDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin);
+            if ($limit > 0) {
+                $pages = ceil($total / $limit); // calculate total pages
+                $page = max($page, 1); // get 1 page when $_REQUEST['page'] <= 0
+                $page = min($page, $pages); // get last page when $_REQUEST['page'] > $totalPages
+                $start = ($page - 1) * $limit;
+                if ($start < 0) {
+                    $start = 0;
+                }
+            }
+
+            $meta = array(
+                'page' => $page,
+                'pages' => $pages,
+                'perpage' => $limit,
+                'total' => $total,
+                'field' => $iSortCol_0,
+                'sort' => $sSortDir_0
+            );
+
+            $data = $this->trackingService->ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
+                $project_id, $fecha_inicial, $fecha_fin);
+
+            $resultadoJson = array(
+                'meta' => $meta,
+                'data' => $data
+            );
 
             return $this->json($resultadoJson);
 

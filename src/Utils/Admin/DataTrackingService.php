@@ -457,7 +457,7 @@ class DataTrackingService extends Base
 
 
     /**
-     * ListarDataTrackings: Listar los items details
+     * ListarDataTrackingsParaCalendario: Listar los items details
      *
      * @param int $start Inicio
      * @param int $limit Limite
@@ -465,7 +465,7 @@ class DataTrackingService extends Base
      *
      * @author Marcel
      */
-    public function ListarDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin)
+    public function ListarDataTrackingsParaCalendario($sSearch, $project_id, $fecha_inicial, $fecha_fin)
     {
         $arreglo_resultado = array();
 
@@ -584,5 +584,117 @@ class DataTrackingService extends Base
         }
 
         return round($total_conc_used - $total_conc_item, 2);
+    }
+
+    /**
+     * ListarDataTrackings: Listar los items details
+     *
+     * @param int $start Inicio
+     * @param int $limit Limite
+     * @param string $sSearch Para buscar
+     *
+     * @author Marcel
+     */
+    public function ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $fecha_inicial, $fecha_fin)
+    {
+        $arreglo_resultado = array();
+
+        $lista = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $fecha_inicial, $fecha_fin);
+
+        foreach ($lista as $value) {
+            $data_tracking_id = $value->getId();
+
+            $acciones = $this->ListarAcciones($data_tracking_id);
+
+            $lost_concrete = $this->CalcularLostConcrete($value);
+            // totales
+            $total_concrete_yiel = $this->CalcularTotalConcreteYiel($data_tracking_id);
+
+            $total_quantity_today = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                ->TotalQuantity($data_tracking_id);
+
+            $total_daily_today = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+                ->TotalDaily($data_tracking_id);
+
+            $total_conc_used = $value->getTotalConcUsed();
+            $conc_price = $value->getConcPrice();
+            $total_concrete = $total_conc_used * $conc_price;
+
+            $total_labor = $value->getTotalLabor();
+            $labor_price = $value->getLaborPrice();
+            $total_labor_price = $total_labor * $labor_price;
+
+            $profit = $total_daily_today - ($total_concrete + $total_labor_price);
+
+            $arreglo_resultado[] = [
+                "id" => $data_tracking_id,
+                'project' => $value->getProject()->getProjectNumber() . " - " . $value->getProject()->getName(),
+                'date' => $value->getDate()->format('d/m/Y'),
+                "stationNumber" => $value->getStationNumber(),
+                "measuredBy" => $value->getMeasuredBy(),
+                "totalConcUsed" => $total_conc_used,
+                "lostConcrete" => $lost_concrete,
+                "concVendor" => $value->getConcVendor(),
+                "concPrice" => $value->getConcPrice(),
+                "inspector" => $value->getInspector() != null ? $value->getInspector()->getName() : '',
+                "inspectorNumber" => $value->getInspector() != null ? $value->getInspector()->getPhone() : '',
+                "crewLead" => $value->getCrewLead(),
+                "notes" => $value->getNotes(),
+                "totalLabor" => $total_labor,
+                "laborPrice" => $labor_price,
+                "totalLaborPrice" => $total_labor_price,
+                "totalStamps" => $value->getTotalStamps(),
+                "otherMaterials" => $value->getOtherMaterials(),
+                // totales
+                "total_concrete_yiel" => $total_concrete_yiel,
+                'total_quantity_today' => $total_quantity_today != null ? $total_quantity_today : 0,
+                'total_daily_today' => $total_daily_today,
+                'total_concrete' => $total_concrete,
+                'profit' => $profit,
+                'acciones' => $acciones
+            ];
+        }
+
+        return $arreglo_resultado;
+    }
+
+    /**
+     * TotalDataTrackings: Total de items
+     * @param string $sSearch Para buscar
+     * @author Marcel
+     */
+    public function TotalDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin)
+    {
+        $total = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->TotalDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin);
+
+        return $total;
+    }
+
+    /**
+     * ListarAcciones: Lista los permisos de un usuario de la BD
+     *
+     * @author Marcel
+     */
+    public function ListarAcciones($id)
+    {
+        $usuario = $this->getUser();
+        $permiso = $this->BuscarPermiso($usuario->getUsuarioId(), 10);
+
+        $acciones = "";
+
+        if (count($permiso) > 0) {
+            if ($permiso[0]['editar']) {
+                $acciones .= '<a href="javascript:;" class="edit m-portlet__nav-link btn m-btn m-btn--hover-success m-btn--icon m-btn--icon-only m-btn--pill" title="Edit record" data-id="' . $id . '"> <i class="la la-edit"></i> </a> ';
+            } else {
+                $acciones .= '<a href="javascript:;" class="edit m-portlet__nav-link btn m-btn m-btn--hover-success m-btn--icon m-btn--icon-only m-btn--pill" title="View record" data-id="' . $id . '"> <i class="la la-eye"></i> </a> ';
+            }
+            if ($permiso[0]['eliminar']) {
+                $acciones .= ' <a href="javascript:;" class="delete m-portlet__nav-link btn m-btn m-btn--hover-danger m-btn--icon m-btn--icon-only m-btn--pill" title="Delete record" data-id="' . $id . '"><i class="la la-trash"></i></a>';
+            }
+        }
+
+        return $acciones;
     }
 }

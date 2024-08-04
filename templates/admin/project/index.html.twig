@@ -53,6 +53,30 @@
                 </div>
                 <div class="m-portlet__head-tools">
                     <ul class="m-portlet__nav">
+                        {% if permiso.agregar %}
+                            <li class="m-portlet__nav-item">
+                                <a id="btn-nuevo-project"
+                                   class="btn btn-success btn-icon"
+                                   href="javascript:;">
+                                    <span>
+                                        <i class="la la-plus"></i>
+                                        <span class="m--hidden-mobile">New</span>
+                                    </span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if permiso.eliminar %}
+                            <li class="m-portlet__nav-item">
+                                <a id="btn-eliminar-project"
+                                   class="btn btn-danger btn-icon"
+                                   href="javascript:;">
+                                    <span>
+                                        <i class="la la-trash-o"></i>
+                                        <span class="m--hidden-mobile">Delete</span>
+                                    </span>
+                                </a>
+                            </li>
+                        {% endif %}
                         <li class="m-portlet__nav-item">
                             <a href="javascript:;" m-portlet-tool="fullscreen"
                                class="m-portlet__nav-link m-portlet__nav-link--icon">
@@ -64,104 +88,62 @@
             </div>
             <div class="m-portlet__body">
                 <!--begin: Search Form -->
-                <div class="m-form m-form--label-align-right m--margin-bottom-15">
-                    <div class="row align-items-center mb-4">
-                        <div class="col-xl-12 order-1">
-                            <div class="form-group m-form__group row align-items-center">
-                                <div class="col-md-2">
-                                    {% if permiso.agregar %}
-                                        <a id="btn-nuevo-project"
-                                           class="btn btn-success m-btn m-btn--custom m-btn--icon m-btn--air"
-                                           href="javascript:;">
-							<span>
-								<i class="la la-plus"></i>
-								<span>
-									New
-								</span>
-							</span>
-                                        </a>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-8"></div>
-                                <div class="col-md-2">
-                                    {% if permiso.eliminar %}
-                                        <a id="btn-eliminar-project"
-                                           class="btn btn-danger m-btn m-btn--custom m-btn--icon m-btn--air m--pull-right"
-                                           href="javascript:;">
-							<span>
-								<i class="la la-trash-o"></i>
-								<span>
-									Delete
-								</span>
-							</span>
-                                        </a>
-                                    {% endif %}
-                                </div>
+                <div class="form-group m-form__group row align-items-center mb-2">
+                    <div class="col-md-2">
+                        <select class="form-control m-select2" id="filtro-company">
+                            <option value="">Company</option>
+                            {% for item in companies %}
+                                <option value="{{ item.companyId }}">{{ item.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-control m-select2" id="filtro-status">
+                            <option value="">Status</option>
+                            <option value="1">Active</option>
+                            <option value="0">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <div class='input-group date'>
+                            <input type='text' class="form-control m-input date-picker"
+                                   placeholder="From" autocomplete="off" id="fechaInicial"/>
+                            <div class="input-group-append">
+                                            <span class="input-group-text">
+                                                <i class="la la-calendar glyphicon-th"></i>
+                                            </span>
                             </div>
                         </div>
                     </div>
-                    <div class="row align-items-center">
-                        <div class="col-xl-12 order-1">
-                            <div class="form-group m-form__group row align-items-center">
-                                <div class="col-md-2">
-                                    <select class="form-control m-select2" id="filtro-company">
-                                        <option value="">Company</option>
-                                        {% for item in companies %}
-                                            <option value="{{ item.companyId }}">{{ item.name }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <select class="form-control m-select2" id="filtro-status">
-                                        <option value="">Status</option>
-                                        <option value="1">Active</option>
-                                        <option value="0">Inactive</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class='input-group date'>
-                                        <input type='text' class="form-control m-input date-picker"
-                                               placeholder="From" autocomplete="off" id="fechaInicial"/>
-                                        <div class="input-group-append">
+                    <div class="col-md-2">
+                        <div class='input-group date'>
+                            <input type='text' class="form-control m-input date-picker"
+                                   placeholder="To" autocomplete="off" id="fechaFin"/>
+                            <div class="input-group-append">
                                             <span class="input-group-text">
                                                 <i class="la la-calendar glyphicon-th"></i>
                                             </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class='input-group date'>
-                                        <input type='text' class="form-control m-input date-picker"
-                                               placeholder="To" autocomplete="off" id="fechaFin"/>
-                                        <div class="input-group-append">
-                                            <span class="input-group-text">
-                                                <i class="la la-calendar glyphicon-th"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="m-input-icon m-input-icon--left">
-                                        <input type="text" class="form-control m-input m_form_search"
-                                               placeholder="Search...">
-                                        <span class="m-input-icon__icon m-input-icon__icon--left">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="m-input-icon m-input-icon--left">
+                            <input type="text" class="form-control m-input m_form_search"
+                                   placeholder="Search...">
+                            <span class="m-input-icon__icon m-input-icon__icon--left">
 									<span><i class="la la-search"></i></span>
 								</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <a href="javascript:;" id="btn-filtrar"
-                                       class="btn btn-info m-btn m-btn--custom m-btn--icon m-btn--air">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="javascript:;" id="btn-filtrar"
+                           class="btn btn-info m-btn m-btn--custom m-btn--icon m-btn--air">
                                         <span>
                                             <i class="la la-search"></i>
                                             <span>Search</span>
                                         </span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-
+                        </a>
                     </div>
                 </div>
                 <!--end: Search Form -->

@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Equation;
 use App\Utils\Admin\EquationService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -148,6 +149,7 @@ class EquationController extends AbstractController
             } else {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['error'] = $resultado['error'];
+                $resultadoJson['equation_ids_con_items'] = $resultado['equation_ids_con_items'];
                 return $this->json($resultadoJson);
             }
         } catch (\Exception $e) {
@@ -173,10 +175,12 @@ class EquationController extends AbstractController
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
+                $resultadoJson['equation_ids_con_items'] = $resultado['equation_ids_con_items'];
                 return $this->json($resultadoJson);
             } else {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['error'] = $resultado['error'];
+                $resultadoJson['equation_ids_con_items'] = $resultado['equation_ids_con_items'];
                 return $this->json($resultadoJson);
             }
         } catch (\Exception $e) {
@@ -218,6 +222,71 @@ class EquationController extends AbstractController
             return $this->json($resultadoJson);
         }
 
+    }
+
+    /**
+     * listarPayItems Acción que lista los pay items de las equations
+     *
+     */
+    public function listarPayItems(Request $request)
+    {
+        $ids = $request->get('ids');
+
+        try {
+
+            $lista = $this->equationService->ListarPayItems($ids);
+
+            $resultadoJson['success'] = true;
+            $resultadoJson['items'] = $lista;
+
+            // listar equations disponibles
+            $equations = $this->equationService->getDoctrine()->getRepository(Equation::class)
+                ->ListarOrdenados();
+            $resultadoJson['equations'] = $equations;
+
+            return $this->json($resultadoJson);
+
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+
+
+    }
+
+    /**
+     * salvarPayItems Acción para salvar los cambios de pay items
+     *
+     */
+    public function salvarPayItems(Request $request)
+    {
+        $pay_items = $request->get('pay_items');
+        $pay_items = json_decode($pay_items);
+
+        try {
+
+            $resultado = $this->equationService->SalvarPayItems($pay_items);
+
+            if ($resultado['success']) {
+
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['message'] = "The operation was successful";
+
+                return $this->json($resultadoJson);
+            } else {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['error'] = $resultado['error'];
+
+                return $this->json($resultadoJson);
+            }
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
     }
 
 }
