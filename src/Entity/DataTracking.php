@@ -84,19 +84,6 @@ class DataTracking
      */
     private $concPrice;
 
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="total_labor", type="float", nullable=false)
-     */
-    private $totalLabor;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="labor_price", type="float", nullable=false)
-     */
-    private $laborPrice;
 
     /**
      * @var float
@@ -104,6 +91,20 @@ class DataTracking
      * @ORM\Column(name="total_stamps", type="float", nullable=false)
      */
     private $totalStamps;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="total_people", type="float", nullable=false)
+     */
+    private $totalPeople;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="overhead_price", type="float", nullable=false)
+     */
+    private $overheadPrice;
 
     /**
      * @var \DateTime
@@ -276,16 +277,6 @@ class DataTracking
         $this->totalConcUsed = $totalConcUsed;
     }
 
-    public function getTotalLabor()
-    {
-        return $this->totalLabor;
-    }
-
-    public function setTotalLabor($total_labor)
-    {
-        $this->totalLabor = $total_labor;
-    }
-
     public function getTotalStamps()
     {
         return $this->totalStamps;
@@ -306,13 +297,23 @@ class DataTracking
         $this->concPrice = $concPrice;
     }
 
-    public function getLaborPrice()
+    public function getTotalPeople(): float
     {
-        return $this->laborPrice;
+        return $this->totalPeople;
     }
 
-    public function setLaborPrice($laborPrice)
+    public function setTotalPeople(float $totalPeople): void
     {
-        $this->laborPrice = $laborPrice;
+        $this->totalPeople = $totalPeople;
+    }
+
+    public function getOverheadPrice()
+    {
+        return $this->overheadPrice;
+    }
+
+    public function setOverheadPrice( $overheadPrice)
+    {
+        $this->overheadPrice = $overheadPrice;
     }
 }

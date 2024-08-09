@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 07-07-2024 a las 20:32:11
+-- Tiempo de generación: 09-08-2024 a las 20:41:21
 -- Versión del servidor: 5.7.44
 -- Versión de PHP: 8.1.29
 
@@ -31,6 +31,7 @@ CREATE TABLE `company` (
   `company_id` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `phone` varchar(50) DEFAULT NULL,
+  `address` text,
   `contact_name` varchar(255) DEFAULT NULL,
   `contact_email` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
@@ -41,9 +42,9 @@ CREATE TABLE `company` (
 -- Volcado de datos para la tabla `company`
 --
 
-INSERT INTO `company` (`company_id`, `name`, `phone`, `contact_name`, `contact_email`, `created_at`, `updated_at`) VALUES
-(1, 'CONTRACTOR, INC', '(618)985-7850', 'Dan Schamerhorn', 'merhorn@earsnel.com', '2024-04-13 19:10:40', '2024-04-29 14:51:27'),
-(3, 'CONTRACTOR TWO , INC', '(653)289-6532', 'Dan Smith', 'dan@gmail.com', '2024-04-24 04:23:31', NULL);
+INSERT INTO `company` (`company_id`, `name`, `phone`, `address`, `contact_name`, `contact_email`, `created_at`, `updated_at`) VALUES
+(1, 'CONTRACTOR, INC', '(618)985-7850', NULL, 'Dan Schamerhorn', 'merhorn@earsnel.com', '2024-04-13 19:10:40', '2024-04-29 14:51:27'),
+(3, 'CONTRACTOR TWO , INC', '(653)289-6532', '', NULL, NULL, '2024-04-24 04:23:31', '2024-07-28 17:43:32');
 
 -- --------------------------------------------------------
 
@@ -86,6 +87,8 @@ CREATE TABLE `data_tracking` (
   `total_labor` float(8,2) DEFAULT NULL,
   `labor_price` float(8,2) DEFAULT NULL,
   `total_stamps` float(8,2) DEFAULT NULL,
+  `total_people` float(18,2) NOT NULL,
+  `overhead_price` float(18,2) NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL,
@@ -96,10 +99,9 @@ CREATE TABLE `data_tracking` (
 -- Volcado de datos para la tabla `data_tracking`
 --
 
-INSERT INTO `data_tracking` (`id`, `date`, `station_number`, `measured_by`, `conc_vendor`, `crew_lead`, `notes`, `other_materials`, `total_conc_used`, `conc_price`, `total_labor`, `labor_price`, `total_stamps`, `created_at`, `updated_at`, `project_id`, `inspector_id`) VALUES
-(2, '2024-05-22', '98653865', 'Marcel', 'ROM', 'dsfsdfds', 'fdgfd fdg ', 'fdgdf gdfgdfg', 3.00, 1500.00, 4.00, 500.00, 4.00, '2024-05-22 14:15:58', '2024-06-23 16:57:05', 3, 1),
-(3, '2024-06-11', '45453', 'Marcel', 'CMP', '', '', '', 20.00, 150.00, 4.00, 50.00, 0.00, '2024-06-23 21:07:27', '2024-06-23 21:14:41', 2, NULL),
-(4, '2024-06-11', '435435', 'Marcel', 'CMP', '', '', '', 20.00, 100.00, 5.00, 50.00, 0.00, '2024-06-23 21:16:44', '2024-06-23 21:24:33', 3, NULL);
+INSERT INTO `data_tracking` (`id`, `date`, `station_number`, `measured_by`, `conc_vendor`, `crew_lead`, `notes`, `other_materials`, `total_conc_used`, `conc_price`, `total_labor`, `labor_price`, `total_stamps`, `total_people`, `overhead_price`, `created_at`, `updated_at`, `project_id`, `inspector_id`) VALUES
+(3, '2024-06-11', '45453', 'Marcel', 'CMP', '', '', '', 20.00, 150.00, 4.00, 50.00, 0.00, 0.00, 0.00, '2024-06-23 21:07:27', '2024-08-04 22:35:04', 2, NULL),
+(4, '2024-06-11', '435435', 'Marcel', 'CMP', '', '', '', 20.00, 100.00, NULL, NULL, 0.00, 40.00, 3500.00, '2024-06-23 21:16:44', '2024-08-09 20:25:39', 3, NULL);
 
 -- --------------------------------------------------------
 
@@ -120,14 +122,60 @@ CREATE TABLE `data_tracking_item` (
 --
 
 INSERT INTO `data_tracking_item` (`id`, `quantity`, `price`, `data_tracking_id`, `project_item_id`) VALUES
-(5, 150.00, 16.50, 2, 1),
-(6, 50.00, 63.00, 2, 2),
-(7, 250.00, 25.00, 2, 8),
 (8, 40.00, 160.00, 3, 11),
 (9, 50.00, 200.00, 3, 12),
 (10, 30.00, 300.00, 3, 13),
 (11, 50.00, 16.50, 4, 1),
 (12, 30.00, 63.00, 4, 2);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `data_tracking_labor`
+--
+
+CREATE TABLE `data_tracking_labor` (
+  `id` int(11) NOT NULL,
+  `hours` float(8,2) DEFAULT NULL,
+  `hourly_rate` float(8,2) DEFAULT NULL,
+  `data_tracking_id` int(11) NOT NULL,
+  `employee_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `data_tracking_material`
+--
+
+CREATE TABLE `data_tracking_material` (
+  `id` int(11) NOT NULL,
+  `quantity` float(8,2) DEFAULT NULL,
+  `price` float(8,2) DEFAULT NULL,
+  `data_tracking_id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `employee`
+--
+
+CREATE TABLE `employee` (
+  `employee_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `hourly_rate` float(8,2) DEFAULT NULL,
+  `position` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Volcado de datos para la tabla `employee`
+--
+
+INSERT INTO `employee` (`employee_id`, `name`, `hourly_rate`, `position`) VALUES
+(1, 'Marcel Curbelo Carmona', 56.00, 'Gerente'),
+(2, 'Andres Iglesias', 70.00, 'Developer');
 
 -- --------------------------------------------------------
 
@@ -147,9 +195,7 @@ CREATE TABLE `equation` (
 --
 
 INSERT INTO `equation` (`equation_id`, `description`, `equation`, `status`) VALUES
-(1, 'SW, 4 IN, SY', '(X*4)/36', 1),
-(2, 'SW, 4 IN, SF', '(X*4)/324', 1),
-(3, 'SW 6 IN, SF', '(X*6)/25', 1);
+(2, 'SW, 4 IN, SF', '(X*4)/324', 1);
 
 -- --------------------------------------------------------
 
@@ -180,7 +226,9 @@ INSERT INTO `function` (`function_id`, `url`, `description`) VALUES
 (10, 'data_tracking', 'Data Tracking'),
 (11, 'invoice', 'Invoices'),
 (12, 'notification', 'Notifications'),
-(13, 'equation', 'Equations');
+(13, 'equation', 'Equations'),
+(14, 'employees', 'Employees'),
+(15, 'materials', 'Materials');
 
 -- --------------------------------------------------------
 
@@ -295,7 +343,7 @@ INSERT INTO `item` (`item_id`, `description`, `price`, `yield_calculation`, `sta
 (15, 'CONC SIDEWALK 8IN', 63.00, NULL, 1, '2024-04-12 20:25:30', NULL, 1, NULL),
 (16, 'CONC SPILLWAY TP3', 2100.00, 'none', 1, '2024-04-12 20:25:50', '2024-05-12 19:18:34', 5, NULL),
 (17, 'PLAIN CONC DITCH PAVING', 47.18, 'equation', 1, '2024-04-12 20:26:54', '2024-05-12 19:18:15', 1, 2),
-(18, 'EXTRA CONCRETE', 208.00, 'equation', 1, '2024-04-12 20:27:17', '2024-05-12 19:18:05', 3, 1),
+(18, 'EXTRA CONCRETE', 208.00, NULL, 1, '2024-04-12 20:27:17', '2024-05-12 19:18:05', 3, NULL),
 (19, 'EXTRA LABOR', 1500.00, 'same', 1, '2024-04-12 20:27:37', '2024-05-12 19:17:54', 6, NULL),
 (20, 'Cubic Yards of Concrete', 150.00, 'none', 1, '2024-04-12 20:28:15', '2024-06-21 18:34:07', 3, NULL);
 
@@ -480,7 +528,69 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (159, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009002 - FL MIAMI, Date: 06/11/2024', '::1', '2024-06-23 21:14:41', 1),
 (160, 'Add', 'Data Tracking', 'The data tracking is add, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-06-23 21:16:44', 1),
 (161, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-06-23 21:24:33', 1),
-(162, 'Add', 'Invoice', 'The invoice #1 is added', '::1', '2024-07-07 19:19:29', 1);
+(162, 'Add', 'Invoice', 'The invoice #1 is added', '::1', '2024-07-07 19:19:29', 1),
+(163, 'Update', 'Company', 'The company is modified: CONTRACTOR TWO , INC', '::1', '2024-07-28 17:43:27', 1),
+(164, 'Update', 'Company', 'The company is modified: CONTRACTOR TWO , INC', '::1', '2024-07-28 17:43:32', 1),
+(165, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-07-28 18:07:28', 1),
+(166, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-07-28 18:09:03', 1),
+(167, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-07-28 18:09:08', 1),
+(168, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-07-28 18:10:04', 1),
+(169, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-07-28 18:30:01', 1),
+(170, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-07-28 18:30:08', 1),
+(171, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-07-28 18:31:52', 1),
+(172, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-07-28 19:23:17', 1),
+(173, 'Add', 'Project', 'The project is added: Prueba de nuevos cambios', '::1', '2024-08-04 17:25:34', 1),
+(174, 'Update', 'Project', 'The project is modified: Prueba de nuevos cambios', '::1', '2024-08-04 17:26:58', 1),
+(175, 'Update', 'Project', 'The project is modified: Prueba de nuevos cambios', '::1', '2024-08-04 17:50:13', 1),
+(176, 'Delete', 'Item', 'The item is deleted: Nuevo Item', '::1', '2024-08-04 18:02:10', 1),
+(177, 'Update', 'Equation', 'The equation is modified: SW 6 IN, SF', '::1', '2024-08-04 18:03:31', 1),
+(178, 'Update', 'Equation', 'The equation is modified: SW 6 IN, SF', '::1', '2024-08-04 18:06:45', 1),
+(179, 'Add', 'Equation', 'The equation is added: New', '::1', '2024-08-04 18:44:57', 1),
+(180, 'Delete', 'Equation', 'The equation is deleted: New', '::1', '2024-08-04 18:45:03', 1),
+(181, 'Delete', 'Equation', 'The equation is deleted: SW 6 IN, SF', '::1', '2024-08-04 20:38:42', 1),
+(182, 'Delete', 'Equation', 'The equation is deleted: SW, 4 IN, SY', '::1', '2024-08-04 20:39:03', 1),
+(183, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009002 - FL MIAMI, Date: 06/11/2024', '::1', '2024-08-04 22:35:04', 1),
+(184, 'Delete', 'Data Tracking', 'The data tracking is deleted, Project: 0009003 - Houston Texas, Date: 05/22/2024', '::1', '2024-08-04 22:42:25', 1),
+(185, 'Delete', 'Project', 'The project is deleted: Prueba de nuevos cambios', '::1', '2024-08-09 18:10:55', 1),
+(186, 'Add', 'Project', 'The project is added: Prueba', '::1', '2024-08-09 18:12:18', 1),
+(187, 'Delete', 'Project', 'The project is deleted: Prueba', '::1', '2024-08-09 18:18:27', 1),
+(188, 'Add', 'Employee', 'The employee is added: Marcel Curbelo Carmona', '::1', '2024-08-09 19:38:01', 1),
+(189, 'Update', 'Employee', 'The employee is modified: Marcel Curbelo Carmona', '::1', '2024-08-09 19:38:32', 1),
+(190, 'Add', 'Employee', 'The employee is added: Andres Iglesias', '::1', '2024-08-09 19:38:48', 1),
+(191, 'Update', 'Employee', 'The employee is modified: Andres Iglesias', '::1', '2024-08-09 19:38:51', 1),
+(192, 'Add', 'Employee', 'The employee is added: dsfdsf', '::1', '2024-08-09 19:38:56', 1),
+(193, 'Delete', 'Employee', 'The employee is deleted: dsfdsf', '::1', '2024-08-09 19:39:00', 1),
+(194, 'Add', 'Employee', 'The employee is added: fgdfg', '::1', '2024-08-09 19:39:04', 1),
+(195, 'Delete', 'Employee', 'The employee is deleted: fgdfg', '::1', '2024-08-09 19:39:07', 1),
+(196, 'Add', 'Material', 'The material is added: Material 1', '::1', '2024-08-09 19:53:40', 1),
+(197, 'Add', 'Material', 'The material is added: Material 2', '::1', '2024-08-09 19:53:50', 1),
+(198, 'Add', 'Material', 'The material is added: Material 3', '::1', '2024-08-09 19:54:01', 1),
+(199, 'Add', 'Material', 'The material is added: sdfdf', '::1', '2024-08-09 19:54:09', 1),
+(200, 'Update', 'Material', 'The material is modified: sdfdf fdgdfg', '::1', '2024-08-09 19:54:13', 1),
+(201, 'Delete', 'Material', 'The material is deleted: sdfdf fdgdfg', '::1', '2024-08-09 19:54:17', 1),
+(202, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-08-09 20:25:39', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `material`
+--
+
+CREATE TABLE `material` (
+  `material_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `price` float(8,2) DEFAULT NULL,
+  `unit_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Volcado de datos para la tabla `material`
+--
+
+INSERT INTO `material` (`material_id`, `name`, `price`, `unit_id`) VALUES
+(1, 'Material 1', 5000.00, 3),
+(2, 'Material 2', 500.00, 5),
+(3, 'Material 3', 500.00, 4);
 
 -- --------------------------------------------------------
 
@@ -511,11 +621,14 @@ INSERT INTO `notification` (`id`, `content`, `readed`, `created_at`, `user_id`) 
 
 CREATE TABLE `project` (
   `project_id` int(11) NOT NULL,
+  `project_id_number` varchar(50) DEFAULT NULL,
   `project_number` varchar(50) DEFAULT NULL,
+  `proposal_number` varchar(255) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   `location` varchar(255) DEFAULT NULL,
   `owner` varchar(255) DEFAULT NULL,
   `subcontract` varchar(255) DEFAULT NULL,
+  `contract_amount` float(18,2) DEFAULT NULL,
   `federal_funding` tinyint(1) DEFAULT NULL,
   `county` varchar(255) DEFAULT NULL,
   `resurfacing` tinyint(1) DEFAULT NULL,
@@ -525,7 +638,7 @@ CREATE TABLE `project` (
   `end_date` date DEFAULT NULL,
   `due_date` date DEFAULT NULL,
   `manager` varchar(255) DEFAULT NULL,
-  `status` tinyint(1) DEFAULT NULL,
+  `status` int(1) DEFAULT NULL,
   `po_number` varchar(255) DEFAULT NULL,
   `po_cg` varchar(255) DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
@@ -538,10 +651,10 @@ CREATE TABLE `project` (
 -- Volcado de datos para la tabla `project`
 --
 
-INSERT INTO `project` (`project_id`, `project_number`, `name`, `location`, `owner`, `subcontract`, `federal_funding`, `county`, `resurfacing`, `invoice_contact`, `certified_payrolls`, `start_date`, `end_date`, `due_date`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `company_id`, `inspector_id`) VALUES
-(1, '0009001', 'FL COUNTY', 'FL COUNTY', '', '', 0, '', 0, '', 0, NULL, NULL, '2024-05-31', 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-05-14 15:52:54', 1, 1),
-(2, '0009002', 'FL MIAMI', 'FL MIAMI', '', '', 0, '', 0, '', 0, NULL, NULL, '2024-05-28', 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-06-23 21:06:22', 1, 1),
-(3, '0009003', 'Houston Texas', 'Houston Texas', 'Marcel', '896532', 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 1, '86532', '89653', '2024-04-24 04:24:02', '2024-06-21 18:22:19', 3, 1);
+INSERT INTO `project` (`project_id`, `project_id_number`, `project_number`, `proposal_number`, `name`, `location`, `owner`, `subcontract`, `contract_amount`, `federal_funding`, `county`, `resurfacing`, `invoice_contact`, `certified_payrolls`, `start_date`, `end_date`, `due_date`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `company_id`, `inspector_id`) VALUES
+(1, NULL, '0009001', NULL, 'FL COUNTY', 'FL COUNTY', '', '', NULL, 0, '', 0, '', 0, NULL, NULL, '2024-05-31', 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-05-14 15:52:54', 1, 1),
+(2, NULL, '0009002', NULL, 'FL MIAMI', 'FL MIAMI', '', '', NULL, 0, '', 0, '', 0, NULL, NULL, '2024-05-28', 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-06-23 21:06:22', 1, 1),
+(3, '32435', '0009003', '345345', 'Houston Texas', NULL, 'Marcel', '896532', 500000.00, 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 2, NULL, NULL, '2024-04-24 04:24:02', '2024-07-28 19:23:17', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -564,13 +677,13 @@ CREATE TABLE `project_item` (
 --
 
 INSERT INTO `project_item` (`id`, `quantity`, `price`, `yield_calculation`, `project_id`, `item_id`, `equation_id`) VALUES
-(1, 1500.00, 16.50, 'equation', 3, 6, 1),
+(1, 1500.00, 16.50, 'equation', 3, 6, 2),
 (2, 2000.00, 63.00, 'same', 3, 15, NULL),
 (4, 1600.00, 150.00, 'equation', 3, 20, 2),
 (5, NULL, 253.00, 'none', 1, 10, NULL),
-(8, 2500.00, 25.00, 'equation', 3, 3, 1),
+(8, 2500.00, 25.00, 'equation', 3, 3, 2),
 (9, 2500.00, 16.50, 'equation', 3, 7, 2),
-(10, 5000.00, 70.00, 'equation', 3, 12, 1),
+(10, 5000.00, 70.00, 'equation', 3, 12, 2),
 (11, 50.00, 160.00, 'none', 2, 12, NULL),
 (12, 60.00, 200.00, '', 2, 6, NULL),
 (13, 50.00, 300.00, '', 2, 7, NULL);
@@ -650,7 +763,9 @@ INSERT INTO `rol_permission` (`id`, `view_permission`, `add_permission`, `edit_p
 (22, 1, 1, 1, 1, 1, 11),
 (23, 1, 1, 1, 1, 1, 12),
 (24, 1, 1, 1, 1, 2, 12),
-(25, 1, 1, 1, 1, 1, 13);
+(25, 1, 1, 1, 1, 1, 13),
+(26, 1, 1, 1, 1, 1, 14),
+(27, 1, 1, 1, 1, 1, 15);
 
 -- --------------------------------------------------------
 
@@ -735,7 +850,9 @@ INSERT INTO `user_permission` (`id`, `view_permission`, `add_permission`, `edit_
 (14, 1, 1, 1, 1, 1, 10),
 (15, 1, 1, 1, 1, 1, 11),
 (16, 1, 1, 1, 1, 1, 12),
-(17, 1, 1, 1, 1, 1, 13);
+(17, 1, 1, 1, 1, 1, 13),
+(18, 1, 1, 1, 1, 1, 14),
+(19, 1, 1, 1, 1, 1, 15);
 
 --
 -- Índices para tablas volcadas
@@ -769,6 +886,28 @@ ALTER TABLE `data_tracking_item`
   ADD PRIMARY KEY (`id`),
   ADD KEY `Ref7185` (`data_tracking_id`),
   ADD KEY `Ref7686` (`project_item_id`);
+
+--
+-- Indices de la tabla `data_tracking_labor`
+--
+ALTER TABLE `data_tracking_labor`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_data_tracking_labor` (`data_tracking_id`),
+  ADD KEY `fk_data_tracking_labor_employee` (`employee_id`);
+
+--
+-- Indices de la tabla `data_tracking_material`
+--
+ALTER TABLE `data_tracking_material`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_data_tracking_material` (`data_tracking_id`),
+  ADD KEY `fk_data_tracking_material_2` (`material_id`);
+
+--
+-- Indices de la tabla `employee`
+--
+ALTER TABLE `employee`
+  ADD PRIMARY KEY (`employee_id`);
 
 --
 -- Indices de la tabla `equation`
@@ -817,6 +956,13 @@ ALTER TABLE `item`
 ALTER TABLE `log`
   ADD PRIMARY KEY (`log_id`),
   ADD KEY `Ref135434` (`user_id`);
+
+--
+-- Indices de la tabla `material`
+--
+ALTER TABLE `material`
+  ADD PRIMARY KEY (`material_id`),
+  ADD KEY `fk_material_unit` (`unit_id`);
 
 --
 -- Indices de la tabla `notification`
@@ -913,16 +1059,34 @@ ALTER TABLE `data_tracking_item`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
+-- AUTO_INCREMENT de la tabla `data_tracking_labor`
+--
+ALTER TABLE `data_tracking_labor`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `data_tracking_material`
+--
+ALTER TABLE `data_tracking_material`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `employee`
+--
+ALTER TABLE `employee`
+  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT de la tabla `equation`
 --
 ALTER TABLE `equation`
-  MODIFY `equation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `equation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `function`
 --
 ALTER TABLE `function`
-  MODIFY `function_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `function_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `inspector`
@@ -946,13 +1110,19 @@ ALTER TABLE `invoice_item`
 -- AUTO_INCREMENT de la tabla `item`
 --
 ALTER TABLE `item`
-  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=163;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=203;
+
+--
+-- AUTO_INCREMENT de la tabla `material`
+--
+ALTER TABLE `material`
+  MODIFY `material_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `notification`
@@ -964,13 +1134,13 @@ ALTER TABLE `notification`
 -- AUTO_INCREMENT de la tabla `project`
 --
 ALTER TABLE `project`
-  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `project_item`
 --
 ALTER TABLE `project_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `project_notes`
@@ -988,7 +1158,7 @@ ALTER TABLE `rol`
 -- AUTO_INCREMENT de la tabla `rol_permission`
 --
 ALTER TABLE `rol_permission`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT de la tabla `unit`
@@ -1006,7 +1176,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT de la tabla `user_permission`
 --
 ALTER TABLE `user_permission`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- Restricciones para tablas volcadas
@@ -1033,6 +1203,20 @@ ALTER TABLE `data_tracking_item`
   ADD CONSTRAINT `Refproject_item86` FOREIGN KEY (`project_item_id`) REFERENCES `project_item` (`id`);
 
 --
+-- Filtros para la tabla `data_tracking_labor`
+--
+ALTER TABLE `data_tracking_labor`
+  ADD CONSTRAINT `fk_data_tracking_labor` FOREIGN KEY (`data_tracking_id`) REFERENCES `data_tracking` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `fk_data_tracking_labor_employee` FOREIGN KEY (`employee_id`) REFERENCES `employee` (`employee_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Filtros para la tabla `data_tracking_material`
+--
+ALTER TABLE `data_tracking_material`
+  ADD CONSTRAINT `fk_data_tracking_material` FOREIGN KEY (`data_tracking_id`) REFERENCES `data_tracking` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `fk_data_tracking_material_2` FOREIGN KEY (`material_id`) REFERENCES `material` (`material_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
 -- Filtros para la tabla `invoice`
 --
 ALTER TABLE `invoice`
@@ -1057,6 +1241,12 @@ ALTER TABLE `item`
 --
 ALTER TABLE `log`
   ADD CONSTRAINT `Refuser434` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`);
+
+--
+-- Filtros para la tabla `material`
+--
+ALTER TABLE `material`
+  ADD CONSTRAINT `fk_material_unit` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`unit_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Filtros para la tabla `notification`

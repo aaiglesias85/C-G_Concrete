@@ -2,48 +2,29 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Company;
-use App\Entity\Equation;
-use App\Entity\Inspector;
-use App\Entity\Item;
-use App\Entity\Project;
-use App\Entity\Unit;
-use App\Utils\Admin\DataTrackingService;
-use App\Utils\Admin\ProjectService;
+use App\Utils\Admin\EmployeeService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class DataTrackingController extends AbstractController
+class EmployeeController extends AbstractController
 {
 
-    private $trackingService;
-    private $projectService;
+    private $employeeService;
 
-    public function __construct(DataTrackingService $trackingService, ProjectService $projectService)
+    public function __construct(EmployeeService $employeeService)
     {
-        $this->trackingService = $trackingService;
-        $this->projectService = $projectService;
+        $this->employeeService = $employeeService;
     }
 
     public function index()
     {
         $usuario = $this->getUser();
-        $permiso = $this->trackingService->BuscarPermiso($usuario->getUsuarioId(), 10);
+        $permiso = $this->employeeService->BuscarPermiso($usuario->getUsuarioId(), 14);
         if (count($permiso) > 0) {
             if ($permiso[0]['ver']) {
 
-                // projects
-                $projects = $this->trackingService->getDoctrine()->getRepository(Project::class)
-                    ->ListarOrdenados();
-
-                // inspectors
-                $inspectors = $this->projectService->getDoctrine()->getRepository(Inspector::class)
-                    ->ListarOrdenados();
-
-                return $this->render('admin/data-tracking/index.html.twig', array(
-                    'permiso' => $permiso[0],
-                    'projects' => $projects,
-                    'inspectors' => $inspectors
+                return $this->render('admin/employee/index.html.twig', array(
+                    'permiso' => $permiso[0]
                 ));
             }
         } else {
@@ -52,7 +33,7 @@ class DataTrackingController extends AbstractController
     }
 
     /**
-     * listar Acción que lista los projects
+     * listar Acción que lista los employees
      *
      */
     public function listar(Request $request)
@@ -61,14 +42,10 @@ class DataTrackingController extends AbstractController
         // search filter by keywords
         $query = !empty($request->get('query')) ? $request->get('query') : array();
         $sSearch = isset($query['generalSearch']) && is_string($query['generalSearch']) ? $query['generalSearch'] : '';
-        $project_id = isset($query['project_id']) && is_string($query['project_id']) ? $query['project_id'] : '';
-        $fecha_inicial = isset($query['fechaInicial']) && is_string($query['fechaInicial']) ? $query['fechaInicial'] : '';
-        $fecha_fin = isset($query['fechaFin']) && is_string($query['fechaFin']) ? $query['fechaFin'] : '';
-
         //Sort
         $sort = !empty($request->get('sort')) ? $request->get('sort') : array();
-        $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'desc';
-        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'date';
+        $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'asc';
+        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'name';
         //$start and $limit
         $pagination = !empty($request->get('pagination')) ? $request->get('pagination') : array();
         $page = !empty($pagination['page']) ? (int)$pagination['page'] : 1;
@@ -77,7 +54,7 @@ class DataTrackingController extends AbstractController
 
         try {
             $pages = 1;
-            $total = $this->trackingService->TotalDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin);
+            $total = $this->employeeService->TotalEmployees($sSearch);
             if ($limit > 0) {
                 $pages = ceil($total / $limit); // calculate total pages
                 $page = max($page, 1); // get 1 page when $_REQUEST['page'] <= 0
@@ -97,8 +74,7 @@ class DataTrackingController extends AbstractController
                 'sort' => $sSortDir_0
             );
 
-            $data = $this->trackingService->ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
-                $project_id, $fecha_inicial, $fecha_fin);
+            $data = $this->employeeService->ListarEmployees($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0);
 
             $resultadoJson = array(
                 'meta' => $meta,
@@ -121,40 +97,19 @@ class DataTrackingController extends AbstractController
      */
     public function salvar(Request $request)
     {
-        $data_tracking_id = $request->get('data_tracking_id');
+        $employee_id = $request->get('employee_id');
 
-        $project_id = $request->get('project_id');
-        $date = $request->get('date');
-        $inspector_id = $request->get('inspector_id');
-        $station_number = $request->get('station_number');
-        $measured_by = $request->get('measured_by');
-        $conc_vendor = $request->get('conc_vendor');
-        $conc_price = $request->get('conc_price');
-        $crew_lead = $request->get('crew_lead');
-        $notes = $request->get('notes');
-        $other_materials = $request->get('other_materials');
-        $total_conc_used = $request->get('total_conc_used');
-        $total_stamps = $request->get('total_stamps');
-        $total_people = $request->get('total_people');
-        $overhead_price = $request->get('overhead_price');
-
-        // items
-        $items = $request->get('items');
-        $items = json_decode($items);
-
-        // labor
-        $labor = $request->get('labor');
-        $labor = json_decode($labor);
-
-        // materials
-        $materials = $request->get('materials');
-        $materials = json_decode($materials);
+        $name = $request->get('name');
+        $hourly_rate = $request->get('hourly_rate');
+        $position = $request->get('position');
 
         try {
 
-            $resultado = $this->trackingService->SalvarDataTracking($data_tracking_id, $project_id, $date, $inspector_id,
-                $station_number, $measured_by, $conc_vendor, $conc_price, $crew_lead, $notes, $other_materials,
-                $total_conc_used, $total_stamps, $total_people, $overhead_price, $items, $labor, $materials);
+            if ($employee_id == "") {
+                $resultado = $this->employeeService->SalvarEmployee($name, $hourly_rate, $position);
+            } else {
+                $resultado = $this->employeeService->ActualizarEmployee($employee_id, $name, $hourly_rate, $position);
+            }
 
             if ($resultado['success']) {
 
@@ -177,15 +132,15 @@ class DataTrackingController extends AbstractController
     }
 
     /**
-     * eliminar Acción que elimina un dataTracking en la BD
+     * eliminar Acción que elimina un employee en la BD
      *
      */
     public function eliminar(Request $request)
     {
-        $data_tracking_id = $request->get('data_tracking_id');
+        $employee_id = $request->get('employee_id');
 
         try {
-            $resultado = $this->trackingService->EliminarDataTracking($data_tracking_id);
+            $resultado = $this->employeeService->EliminarEmployee($employee_id);
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
@@ -201,18 +156,20 @@ class DataTrackingController extends AbstractController
 
             return $this->json($resultadoJson);
         }
+
+
     }
 
     /**
-     * eliminarDataTrackings Acción que elimina los dataTrackings seleccionados en la BD
+     * eliminarEmployees Acción que elimina los employees seleccionados en la BD
      *
      */
-    public function eliminarDataTrackings(Request $request)
+    public function eliminarEmployees(Request $request)
     {
         $ids = $request->get('ids');
 
         try {
-            $resultado = $this->trackingService->EliminarDataTrackings($ids);
+            $resultado = $this->employeeService->EliminarEmployees($ids);
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";
@@ -233,19 +190,19 @@ class DataTrackingController extends AbstractController
     }
 
     /**
-     * cargarDatos Acción que carga los datos del dataTracking en la BD
+     * cargarDatos Acción que carga los datos del employee en la BD
      *
      */
     public function cargarDatos(Request $request)
     {
-        $data_tracking_id = $request->get('data_tracking_id');
+        $employee_id = $request->get('employee_id');
 
         try {
-            $resultado = $this->trackingService->CargarDatosDataTracking($data_tracking_id, $this->projectService);
+            $resultado = $this->employeeService->CargarDatosEmployee($employee_id);
             if ($resultado['success']) {
 
                 $resultadoJson['success'] = $resultado['success'];
-                $resultadoJson['data_tracking'] = $resultado['data_tracking'];
+                $resultadoJson['employee'] = $resultado['employee'];
 
                 return $this->json($resultadoJson);
             } else {
@@ -260,34 +217,6 @@ class DataTrackingController extends AbstractController
 
             return $this->json($resultadoJson);
         }
-    }
 
-    /**
-     * eliminarItem Acción que elimina un dataTracking en la BD
-     *
-     */
-    public function eliminarItem(Request $request)
-    {
-        $data_tracking_item_id = $request->get('data_tracking_item_id');
-
-        try {
-            $resultado = $this->trackingService->EliminarItemDataTracking($data_tracking_item_id);
-            if ($resultado['success']) {
-                $resultadoJson['success'] = $resultado['success'];
-                $resultadoJson['message'] = "The operation was successful";
-
-            } else {
-                $resultadoJson['success'] = $resultado['success'];
-                $resultadoJson['error'] = $resultado['error'];
-            }
-
-            return $this->json($resultadoJson);
-
-        } catch (\Exception $e) {
-            $resultadoJson['success'] = false;
-            $resultadoJson['error'] = $e->getMessage();
-
-            return $this->json($resultadoJson);
-        }
     }
 }

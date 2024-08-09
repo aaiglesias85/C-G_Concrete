@@ -4,8 +4,12 @@ namespace App\Utils\Admin;
 
 use App\Entity\DataTracking;
 use App\Entity\DataTrackingItem;
+use App\Entity\DataTrackingLabor;
+use App\Entity\DataTrackingMaterial;
+use App\Entity\Employee;
 use App\Entity\Inspector;
 use App\Entity\Item;
+use App\Entity\Material;
 use App\Entity\Project;
 use App\Entity\ProjectItem;
 use App\Utils\Base;
@@ -90,11 +94,11 @@ class DataTrackingService extends Base
             $arreglo_resultado['notes'] = $entity->getNotes();
             $arreglo_resultado['other_materials'] = $entity->getOtherMaterials();
 
-            $total_labor = $entity->getTotalLabor();
-            $arreglo_resultado['total_labor'] = $total_labor;
+            $total_people = $entity->getTotalPeople();
+            $arreglo_resultado['total_people'] = $total_people;
 
-            $labor_price = $entity->getLaborPrice();
-            $arreglo_resultado['labor_price'] = $labor_price;
+            $overhead_price = $entity->getOverheadPrice();
+            $arreglo_resultado['overhead_price'] = $overhead_price;
 
             $arreglo_resultado['total_stamps'] = $entity->getTotalStamps();
 
@@ -104,6 +108,14 @@ class DataTrackingService extends Base
 
             // project items
             $arreglo_resultado['project_items'] = $projectService->ListarItemsDeProject($project_id);
+
+            // labor
+            $labor = $this->ListarLaborDeDataTracking($data_tracking_id);
+            $arreglo_resultado['labor'] = $labor;
+
+            // materials
+            $materials = $this->ListarMaterialsDeDataTracking($data_tracking_id);
+            $arreglo_resultado['materials'] = $materials;
 
 
             // totales
@@ -124,7 +136,8 @@ class DataTrackingService extends Base
             $total_concrete = $total_conc_used * $conc_price;
             $arreglo_resultado['total_concrete'] = $total_concrete;
 
-            $total_labor_price = $total_labor * $labor_price;
+            $total_labor_price = $this->getDoctrine()->getRepository(DataTrackingLabor::class)
+                ->TotalLabor($data_tracking_id);
             $arreglo_resultado['total_labor_price'] = $total_labor_price;
 
             $profit = $total_daily_today - ($total_concrete + $total_labor_price);
@@ -135,6 +148,69 @@ class DataTrackingService extends Base
         }
 
         return $resultado;
+    }
+
+    /**
+     * ListarMaterialsDeDataTracking
+     * @param $data_tracking_id
+     * @return array
+     */
+    public function ListarMaterialsDeDataTracking($data_tracking_id)
+    {
+        $items = [];
+
+        $lista = $this->getDoctrine()->getRepository(DataTrackingMaterial::class)
+            ->ListarMaterials($data_tracking_id);
+        foreach ($lista as $key => $value) {
+
+            $quantity = $value->getQuantity();
+            $price = $value->getPrice();
+            $total = $quantity * $price;
+
+            $items[] = [
+                'data_tracking_material_id' => $value->getId(),
+                "material_id" => $value->getMaterial()->getMaterialId(),
+                "material" => $value->getMaterial()->getName(),
+                "unit" => $value->getMaterial()->getUnit()->getDescription(),
+                "quantity" => $quantity,
+                "price" => $price,
+                "total" => $total,
+                "posicion" => $key
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
+     * ListarLaborDeDataTracking
+     * @param $data_tracking_id
+     * @return array
+     */
+    public function ListarLaborDeDataTracking($data_tracking_id)
+    {
+        $items = [];
+
+        $lista = $this->getDoctrine()->getRepository(DataTrackingLabor::class)
+            ->ListarLabor($data_tracking_id);
+        foreach ($lista as $key => $value) {
+
+            $hours = $value->getHours();
+            $hourly_rate = $value->getHourlyRate();
+            $total = $hours * $hourly_rate;
+
+            $items[] = [
+                'data_tracking_labor_id' => $value->getId(),
+                "employee_id" => $value->getEmployee()->getEmployeeId(),
+                "employee" => $value->getEmployee()->getName(),
+                "hours" => $hours,
+                "hourly_rate" => $hourly_rate,
+                "total" => $total,
+                "posicion" => $key
+            ];
+        }
+
+        return $items;
     }
 
     /**
@@ -188,12 +264,9 @@ class DataTrackingService extends Base
         /**@var DataTracking $entity */
         if ($entity != null) {
 
-            // items
-            $items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
-                ->ListarItems($data_tracking_id);
-            foreach ($items as $item) {
-                $em->remove($item);
-            }
+            // eliminar informacion relacionada
+            $this->EliminarInformacionRelacionada($data_tracking_id);
+
 
             $project_name = $entity->getProject()->getProjectNumber() . " - " . $entity->getProject()->getName();
             $date = $entity->getDate()->format('m/d/Y');
@@ -237,12 +310,8 @@ class DataTrackingService extends Base
                     /**@var DataTracking $entity */
                     if ($entity != null) {
 
-                        // items
-                        $items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
-                            ->ListarItems($data_tracking_id);
-                        foreach ($items as $item) {
-                            $em->remove($item);
-                        }
+                        // eliminar informacion relacionada
+                        $this->EliminarInformacionRelacionada($data_tracking_id);
 
                         $project_name = $entity->getProject()->getProjectNumber() . " - " . $entity->getProject()->getName();
                         $date = $entity->getDate()->format('m/d/Y');
@@ -276,6 +345,37 @@ class DataTrackingService extends Base
     }
 
     /**
+     * EliminarInformacionRelacionada
+     * @param $data_tracking_id
+     * @return void
+     */
+    private function EliminarInformacionRelacionada($data_tracking_id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        // items
+        $items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
+            ->ListarItems($data_tracking_id);
+        foreach ($items as $item) {
+            $em->remove($item);
+        }
+
+        // labor
+        $data_tracking_labors = $this->getDoctrine()->getRepository(DataTrackingLabor::class)
+            ->ListarLabor($data_tracking_id);
+        foreach ($data_tracking_labors as $data_tracking_labor) {
+            $em->remove($data_tracking_labor);
+        }
+
+        // materials
+        $data_tracking_materials = $this->getDoctrine()->getRepository(DataTrackingMaterial::class)
+            ->ListarMaterials($data_tracking_id);
+        foreach ($data_tracking_materials as $data_tracking_material) {
+            $em->remove($data_tracking_material);
+        }
+    }
+
+    /**
      * SalvarDataTracking
      * @param $data_tracking_id
      * @param $project_item_id
@@ -283,7 +383,7 @@ class DataTrackingService extends Base
      */
     public function SalvarDataTracking($data_tracking_id, $project_id, $date, $inspector_id,
                                        $station_number, $measured_by, $conc_vendor, $conc_price, $crew_lead, $notes, $other_materials,
-                                       $total_conc_used, $total_labor, $labor_price, $total_stamps, $items)
+                                       $total_conc_used, $total_stamps, $total_people, $overhead_price, $items, $labor, $materials)
     {
 
         $em = $this->getDoctrine()->getManager();
@@ -342,9 +442,9 @@ class DataTrackingService extends Base
         $entity->setNotes($notes);
         $entity->setOtherMaterials($other_materials);
         $entity->setTotalConcUsed($total_conc_used);
-        $entity->setTotalLabor($total_labor);
-        $entity->setLaborPrice($labor_price);
         $entity->setTotalStamps($total_stamps);
+        $entity->setTotalPeople($total_people);
+        $entity->setOverheadPrice($overhead_price);
 
         if ($is_new) {
 
@@ -371,6 +471,10 @@ class DataTrackingService extends Base
 
         // items
         $this->SalvarItems($entity, $items);
+        // labor
+        $this->SalvarLabor($entity, $labor);
+        // materials
+        $this->SalvarMaterials($entity, $materials);
 
         $em->flush();
 
@@ -385,6 +489,90 @@ class DataTrackingService extends Base
     }
 
     /**
+     * SalvarMaterials
+     * @param array $materials
+     * @param DataTracking $entity
+     * @return array
+     */
+    public function SalvarMaterials($entity, $materials)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        foreach ($materials as $value) {
+
+            $data_tracking_material_entity = null;
+
+            if (is_numeric($value->data_tracking_material_id)) {
+                $data_tracking_material_entity = $this->getDoctrine()->getRepository(DataTrackingMaterial::class)
+                    ->find($value->data_tracking_material_id);
+            }
+
+            $is_new_data_tracking_material = false;
+            if ($data_tracking_material_entity == null) {
+                $data_tracking_material_entity = new DataTrackingMaterial();
+                $is_new_data_tracking_material = true;
+            }
+
+            $data_tracking_material_entity->setPrice($value->price);
+            $data_tracking_material_entity->setQuantity($value->quantity);
+
+            if ($value->material_id != '') {
+                $material_entity = $this->getDoctrine()->getRepository(Material::class)
+                    ->find($value->material_id);
+                $data_tracking_material_entity->setMaterial($material_entity);
+            }
+
+            if ($is_new_data_tracking_material) {
+                $data_tracking_material_entity->setDataTracking($entity);
+
+                $em->persist($data_tracking_material_entity);
+            }
+        }
+    }
+
+    /**
+     * SalvarLabor
+     * @param array $labor
+     * @param DataTracking $entity
+     * @return array
+     */
+    public function SalvarLabor($entity, $labor)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        foreach ($labor as $value) {
+
+            $data_tracking_labor_entity = null;
+
+            if (is_numeric($value->data_tracking_labor_id)) {
+                $data_tracking_labor_entity = $this->getDoctrine()->getRepository(DataTrackingLabor::class)
+                    ->find($value->data_tracking_labor_id);
+            }
+
+            $is_new_data_tracking_labor = false;
+            if ($data_tracking_labor_entity == null) {
+                $data_tracking_labor_entity = new DataTrackingLabor();
+                $is_new_data_tracking_labor = true;
+            }
+
+            $data_tracking_labor_entity->setHourlyRate($value->hourly_rate);
+            $data_tracking_labor_entity->setHours($value->hours);
+
+            if ($value->employee_id != '') {
+                $employee_entity = $this->getDoctrine()->getRepository(Employee::class)
+                    ->find($value->employee_id);
+                $data_tracking_labor_entity->setEmployee($employee_entity);
+            }
+
+            if ($is_new_data_tracking_labor) {
+                $data_tracking_labor_entity->setDataTracking($entity);
+
+                $em->persist($data_tracking_labor_entity);
+            }
+        }
+    }
+
+    /**
      * ValidarSiExisteDataTracking
      * @param $data_tracking_id
      * @param $project_id
@@ -394,7 +582,7 @@ class DataTrackingService extends Base
     {
         $existe = false;
 
-        if($project_id == '' && $data_tracking_id != ''){
+        if ($project_id == '' && $data_tracking_id != '') {
             $entity = $this->getDoctrine()->getRepository(DataTracking::class)
                 ->find($data_tracking_id);
             /** @var DataTracking $entity */
@@ -406,7 +594,7 @@ class DataTrackingService extends Base
 
         if ($data_tracking_id == '' && !empty($data_trackings)) {
             $existe = true;
-        }else if (!empty($data_trackings) && $data_trackings[0]->getId() != $data_tracking_id){
+        } else if (!empty($data_trackings) && $data_trackings[0]->getId() != $data_tracking_id) {
             $existe = true;
         }
 
@@ -455,9 +643,8 @@ class DataTrackingService extends Base
         }
     }
 
-
     /**
-     * ListarDataTrackingsParaCalendario: Listar los items details
+     * ListarDataTrackings: Listar los items details
      *
      * @param int $start Inicio
      * @param int $limit Limite
@@ -465,15 +652,17 @@ class DataTrackingService extends Base
      *
      * @author Marcel
      */
-    public function ListarDataTrackingsParaCalendario($sSearch, $project_id, $fecha_inicial, $fecha_fin)
+    public function ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $fecha_inicial, $fecha_fin)
     {
         $arreglo_resultado = array();
 
         $lista = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->ListarDataTrackingsParaCalendario($sSearch, $project_id, $fecha_inicial, $fecha_fin);
+            ->ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $fecha_inicial, $fecha_fin);
 
         foreach ($lista as $value) {
             $data_tracking_id = $value->getId();
+
+            $acciones = $this->ListarAcciones($data_tracking_id);
 
             $lost_concrete = $this->CalcularLostConcrete($value);
             // totales
@@ -489,19 +678,20 @@ class DataTrackingService extends Base
             $conc_price = $value->getConcPrice();
             $total_concrete = $total_conc_used * $conc_price;
 
-            $total_labor = $value->getTotalLabor();
-            $labor_price = $value->getLaborPrice();
-            $total_labor_price = $total_labor * $labor_price;
 
-            $profit = $total_daily_today - ($total_concrete + $total_labor_price);
+            $total_labor = $this->getDoctrine()->getRepository(DataTrackingLabor::class)
+                ->TotalLabor($data_tracking_id);
+
+            $profit = $total_daily_today - ($total_concrete + $total_labor);
+
+            $total_people = $value->getTotalPeople();
+            $overhead_price = $value->getOverheadPrice();
+            $total_overhead = $total_people * $overhead_price;
 
             $arreglo_resultado[] = [
-                "data_tracking_id" => $data_tracking_id,
-                'title' => $value->getProject()->getProjectNumber() . " - " . $value->getProject()->getName(),
-                'start' => $value->getDate()->format('Y-m-d H:i'),
-                'end' => $value->getDate()->format('Y-m-d') . " 23:59",
-                'className' => "fc-event-default",
-                "fecha" => $value->getDate()->format('m/d/Y'),
+                "id" => $data_tracking_id,
+                'project' => $value->getProject()->getProjectNumber() . " - " . $value->getProject()->getName(),
+                'date' => $value->getDate()->format('d/m/Y'),
                 "stationNumber" => $value->getStationNumber(),
                 "measuredBy" => $value->getMeasuredBy(),
                 "totalConcUsed" => $total_conc_used,
@@ -513,20 +703,36 @@ class DataTrackingService extends Base
                 "crewLead" => $value->getCrewLead(),
                 "notes" => $value->getNotes(),
                 "totalLabor" => $total_labor,
-                "laborPrice" => $labor_price,
-                "totalLaborPrice" => $total_labor_price,
                 "totalStamps" => $value->getTotalStamps(),
                 "otherMaterials" => $value->getOtherMaterials(),
+                // overhead
+                "totalPeople" => $total_people,
+                "overheadPrice" => $overhead_price,
+                "totalOverhead" => $total_overhead,
                 // totales
                 "total_concrete_yiel" => $total_concrete_yiel,
                 'total_quantity_today' => $total_quantity_today != null ? $total_quantity_today : 0,
                 'total_daily_today' => $total_daily_today,
                 'total_concrete' => $total_concrete,
-                'profit' => $profit
+                'profit' => $profit,
+                'acciones' => $acciones
             ];
         }
 
         return $arreglo_resultado;
+    }
+
+    /**
+     * TotalDataTrackings: Total de items
+     * @param string $sSearch Para buscar
+     * @author Marcel
+     */
+    public function TotalDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin)
+    {
+        $total = $this->getDoctrine()->getRepository(DataTracking::class)
+            ->TotalDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin);
+
+        return $total;
     }
 
     /**
@@ -584,92 +790,6 @@ class DataTrackingService extends Base
         }
 
         return round($total_conc_used - $total_conc_item, 2);
-    }
-
-    /**
-     * ListarDataTrackings: Listar los items details
-     *
-     * @param int $start Inicio
-     * @param int $limit Limite
-     * @param string $sSearch Para buscar
-     *
-     * @author Marcel
-     */
-    public function ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $fecha_inicial, $fecha_fin)
-    {
-        $arreglo_resultado = array();
-
-        $lista = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->ListarDataTrackings($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0, $project_id, $fecha_inicial, $fecha_fin);
-
-        foreach ($lista as $value) {
-            $data_tracking_id = $value->getId();
-
-            $acciones = $this->ListarAcciones($data_tracking_id);
-
-            $lost_concrete = $this->CalcularLostConcrete($value);
-            // totales
-            $total_concrete_yiel = $this->CalcularTotalConcreteYiel($data_tracking_id);
-
-            $total_quantity_today = $this->getDoctrine()->getRepository(DataTrackingItem::class)
-                ->TotalQuantity($data_tracking_id);
-
-            $total_daily_today = $this->getDoctrine()->getRepository(DataTrackingItem::class)
-                ->TotalDaily($data_tracking_id);
-
-            $total_conc_used = $value->getTotalConcUsed();
-            $conc_price = $value->getConcPrice();
-            $total_concrete = $total_conc_used * $conc_price;
-
-            $total_labor = $value->getTotalLabor();
-            $labor_price = $value->getLaborPrice();
-            $total_labor_price = $total_labor * $labor_price;
-
-            $profit = $total_daily_today - ($total_concrete + $total_labor_price);
-
-            $arreglo_resultado[] = [
-                "id" => $data_tracking_id,
-                'project' => $value->getProject()->getProjectNumber() . " - " . $value->getProject()->getName(),
-                'date' => $value->getDate()->format('d/m/Y'),
-                "stationNumber" => $value->getStationNumber(),
-                "measuredBy" => $value->getMeasuredBy(),
-                "totalConcUsed" => $total_conc_used,
-                "lostConcrete" => $lost_concrete,
-                "concVendor" => $value->getConcVendor(),
-                "concPrice" => $value->getConcPrice(),
-                "inspector" => $value->getInspector() != null ? $value->getInspector()->getName() : '',
-                "inspectorNumber" => $value->getInspector() != null ? $value->getInspector()->getPhone() : '',
-                "crewLead" => $value->getCrewLead(),
-                "notes" => $value->getNotes(),
-                "totalLabor" => $total_labor,
-                "laborPrice" => $labor_price,
-                "totalLaborPrice" => $total_labor_price,
-                "totalStamps" => $value->getTotalStamps(),
-                "otherMaterials" => $value->getOtherMaterials(),
-                // totales
-                "total_concrete_yiel" => $total_concrete_yiel,
-                'total_quantity_today' => $total_quantity_today != null ? $total_quantity_today : 0,
-                'total_daily_today' => $total_daily_today,
-                'total_concrete' => $total_concrete,
-                'profit' => $profit,
-                'acciones' => $acciones
-            ];
-        }
-
-        return $arreglo_resultado;
-    }
-
-    /**
-     * TotalDataTrackings: Total de items
-     * @param string $sSearch Para buscar
-     * @author Marcel
-     */
-    public function TotalDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin)
-    {
-        $total = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->TotalDataTrackings($sSearch, $project_id, $fecha_inicial, $fecha_fin);
-
-        return $total;
     }
 
     /**

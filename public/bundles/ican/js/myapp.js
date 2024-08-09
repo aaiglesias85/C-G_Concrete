@@ -224,6 +224,15 @@ var MyApp = function () {
             return /\d/.test(String.fromCharCode(keynum));
         });
 
+        $(document).on('keypress', ".just-float", function(e) {
+            var keynum = window.event ? window.event.keyCode : e.which;
+
+            if ((keynum == 8) || (keynum == 0))
+                return true;
+
+            return /^[0-9.\-]*$/.test(String.fromCharCode(keynum));
+        });
+
         $(document).on('keypress', ".just-letters", function (e) {
             var keynum = window.event ? window.event.keyCode : e.which;
 

@@ -3,6 +3,7 @@
 namespace App\Utils\Admin;
 
 use App\Entity\Item;
+use App\Entity\Material;
 use App\Entity\Unit;
 use App\Utils\Base;
 
@@ -59,6 +60,15 @@ class UnitService extends Base
                 return $resultado;
             }
 
+            // materiales
+            $materiales = $this->getDoctrine()->getRepository(Material::class)
+                ->ListarMaterialsDeUnit($unit_id);
+            if (count($materiales) > 0) {
+                $resultado['success'] = false;
+                $resultado['error'] = "The unit could not be deleted, because it is related to a material";
+                return $resultado;
+            }
+
             $unit_descripcion = $entity->getDescription();
 
 
@@ -100,9 +110,14 @@ class UnitService extends Base
                         ->find($unit_id);
                     /**@var Unit $entity */
                     if ($entity != null) {
+
                         $items = $this->getDoctrine()->getRepository(Item::class)
                             ->ListarItemsDeUnit($unit_id);
-                        if (count($items) == 0) {
+
+                        $materiales = $this->getDoctrine()->getRepository(Material::class)
+                            ->ListarMaterialsDeUnit($unit_id);
+
+                        if (count($items) == 0 && count($materiales) == 0) {
 
                             $unit_descripcion = $entity->getDescription();
 

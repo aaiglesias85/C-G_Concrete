@@ -24,14 +24,6 @@ var DataTracking = function () {
         }
         aoColumns.push(
             {
-                field: "acciones",
-                width: 80,
-                title: "Actions",
-                sortable: false,
-                overflow: 'visible',
-                textAlign: 'center'
-            },
-            {
                 field: "date",
                 title: "Date",
                 width: 100,
@@ -40,11 +32,11 @@ var DataTracking = function () {
             {
                 field: "project",
                 title: "Project",
-                width: 200,
+                width: 150,
             },
             {
                 field: "totalConcUsed",
-                title: "Total Conc Used",
+                title: "Conc. Used",
                 width: 120,
                 textAlign: 'center',
                 template: function (row) {
@@ -52,8 +44,17 @@ var DataTracking = function () {
                 }
             },
             {
+                field: "total_concrete_yiel",
+                title: "Conc. Yield",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.total_concrete_yiel, 2, '.', ',')}</span>`;
+                }
+            },
+            {
                 field: "lostConcrete",
-                title: "Lost Concrete",
+                title: "Difference",
                 width: 100,
                 textAlign: 'center',
                 template: function (row) {
@@ -61,8 +62,17 @@ var DataTracking = function () {
                 }
             },
             {
+                field: "total_concrete",
+                title: "Conc. Total",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.total_concrete, 2, '.', ',')}</span>`;
+                }
+            },
+            {
                 field: "totalLabor",
-                title: "Total Labor",
+                title: "Labor Total",
                 width: 100,
                 textAlign: 'center',
                 template: function (row) {
@@ -70,6 +80,25 @@ var DataTracking = function () {
                 }
             },
             {
+                field: "total_daily_today",
+                title: "Daily Total",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.total_daily_today, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "profit",
+                title: "Profit",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.profit, 2, '.', ',')}</span>`;
+                }
+            },
+
+            /*{
                 field: "totalStamps",
                 title: "Total Stamps",
                 width: 100,
@@ -83,15 +112,6 @@ var DataTracking = function () {
                 title: "Conc Vendor",
             },
             {
-                field: "total_concrete_yiel",
-                title: "Concrete Yield",
-                width: 100,
-                textAlign: 'center',
-                template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.total_concrete_yiel, 2, '.', ',')}</span>`;
-                }
-            },
-            {
                 field: "total_quantity_today",
                 title: "Quantity Today",
                 width: 120,
@@ -100,32 +120,15 @@ var DataTracking = function () {
                     return `<span>${MyApp.formatearNumero(row.total_quantity_today, 2, '.', ',')}</span>`;
                 }
             },
+             */
+
             {
-                field: "total_daily_today",
-                title: "Daily Today",
-                width: 100,
-                textAlign: 'center',
-                template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.total_daily_today, 2, '.', ',')}</span>`;
-                }
-            },
-            {
-                field: "total_concrete",
-                title: "Total Concrete",
-                width: 100,
-                textAlign: 'center',
-                template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.total_concrete, 2, '.', ',')}</span>`;
-                }
-            },
-            {
-                field: "profit",
-                title: "Profit",
-                width: 100,
-                textAlign: 'center',
-                template: function (row) {
-                    return `<span>${MyApp.formatearNumero(row.profit, 2, '.', ',')}</span>`;
-                }
+                field: "acciones",
+                width: 80,
+                title: "Actions",
+                sortable: false,
+                overflow: 'visible',
+                textAlign: 'center'
             },
         );
         oTable = table.mDatatable({
@@ -379,13 +382,13 @@ var DataTracking = function () {
                 var measured_by = $('#measured_by').val();
                 var conc_vendor = $('#conc_vendor').val();
                 var conc_price = $('#conc_price').val();
-                var labor_price = $('#labor_price').val();
                 var crew_lead = $('#crew_lead').val();
                 var notes = $('#notes').val();
                 var other_materials = $('#other_materials').val();
                 var total_conc_used = $('#total_conc_used').val();
-                var total_labor = $('#total_labor').val();
                 var total_stamps = $('#total_stamps').val();
+                var total_people = $('#total_people').val();
+                var overhead_price = $('#overhead_price').val();
 
                 MyApp.block('#modal-data-tracking .modal-content');
 
@@ -402,13 +405,13 @@ var DataTracking = function () {
                         'measured_by': measured_by,
                         'conc_vendor': conc_vendor,
                         'conc_price': conc_price,
-                        'labor_price': labor_price,
                         'crew_lead': crew_lead,
                         'notes': notes,
                         'other_materials': other_materials,
                         'total_conc_used': total_conc_used,
-                        'total_labor': total_labor,
                         'total_stamps': total_stamps,
+                        'total_people': total_people,
+                        'overhead_price': overhead_price,
                         'items': JSON.stringify(items_data_tracking)
                     },
                     success: function (response) {
@@ -499,16 +502,16 @@ var DataTracking = function () {
                         $('#conc_price').on('change', calcularTotalConcrete);
 
 
-                        $('#total_labor').off('change', calcularTotalLaborPrice);
-                        $('#labor_price').off('change', calcularTotalLaborPrice);
+                        $('#total_people').off('change', calcularTotalOverheadPrice);
+                        $('#overhead_price').off('change', calcularTotalOverheadPrice);
 
-                        $('#total_labor').val(response.data_tracking.total_labor);
-                        $('#labor_price').val(response.data_tracking.labor_price);
+                        $('#total_people').val(response.data_tracking.total_people);
+                        $('#overhead_price').val(response.data_tracking.overhead_price);
 
-                        calcularTotalLaborPrice();
+                        calcularTotalOverheadPrice();
 
-                        $('#total_labor').on('change', calcularTotalLaborPrice);
-                        $('#labor_price').on('change', calcularTotalLaborPrice);
+                        $('#total_people').on('change', calcularTotalOverheadPrice);
+                        $('#overhead_price').on('change', calcularTotalOverheadPrice);
 
                         $('#total_stamps').val(response.data_tracking.total_stamps);
 
@@ -700,8 +703,8 @@ var DataTracking = function () {
         $('#total_conc_used').change(calcularTotalConcrete);
         $('#conc_price').change(calcularTotalConcrete);
 
-        $('#total_labor').change(calcularTotalLaborPrice);
-        $('#labor_price').change(calcularTotalLaborPrice);
+        $('#total_people').change(calcularTotalOverheadPrice);
+        $('#overhead_price').change(calcularTotalOverheadPrice);
     }
 
     var initSelectProject = function () {
@@ -737,12 +740,12 @@ var DataTracking = function () {
         }
     }
 
-    var calcularTotalLaborPrice = function () {
-        var cantidad = $('#total_labor').val();
-        var price = $('#labor_price').val();
+    var calcularTotalOverheadPrice = function () {
+        var cantidad = $('#total_people').val();
+        var price = $('#overhead_price').val();
         if (cantidad != '' && price != '') {
             var total = parseFloat(cantidad) * parseFloat(price);
-            $('#total_labor_price').val(total);
+            $('#total_overhead_price').val(total);
 
             // profit
             calcularProfit();
@@ -753,7 +756,7 @@ var DataTracking = function () {
         var data_tracking_id = $('#data_tracking_id').val();
         if (data_tracking_id != '') {
             var total_concrete = $('#total_concrete').val();
-            var total_labor = $('#total_labor_price').val();
+            var total_labor = $('#total_labor_price').val() > 0 ? $('#total_labor_price').val() : 0;
             var total_daily_today = $('#total_daily_today').val();
 
             var profit = parseFloat(total_daily_today) - ( parseFloat(total_concrete) + parseFloat(total_labor) );

@@ -514,6 +514,8 @@ class Base
             $menuInvoice = false;
             $menuNotification = false;
             $menuEquation = false;
+            $menuEmployee = false;
+            $menuMaterial = false;
 
             foreach ($permisos as $permiso) {
                 if ($permiso['funcion_id'] == 1 && $permiso['ver']) {
@@ -555,6 +557,12 @@ class Base
                 if ($permiso['funcion_id'] == 13 && $permiso['ver']) {
                     $menuEquation = true;
                 }
+                if ($permiso['funcion_id'] == 14 && $permiso['ver']) {
+                    $menuEmployee = true;
+                }
+                if ($permiso['funcion_id'] == 15 && $permiso['ver']) {
+                    $menuMaterial = true;
+                }
             }
             $menu = array(
                 'menuInicio' => $menuInicio,
@@ -569,7 +577,9 @@ class Base
                 'menuDataTracking' => $menuDataTracking,
                 'menuInvoice' => $menuInvoice,
                 'menuNotification' => $menuNotification,
-                'menuEquation' => $menuEquation
+                'menuEquation' => $menuEquation,
+                'menuEmployee' => $menuEmployee,
+                'menuMaterial' => $menuMaterial
             );
         }
 

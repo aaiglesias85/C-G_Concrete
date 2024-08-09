@@ -1059,13 +1059,22 @@ class ProjectService extends Base
         $arreglo_resultado = array();
         $cont = 0;
 
-        $lista = $this->getDoctrine()->getRepository(ProjectItem::class)
-            ->ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
-                $company_id, '', $status, $fecha_inicial, $fecha_fin);
+        $projects = [];
 
-        foreach ($lista as $p_i) {
-            $value = $p_i->getProject();
+        if($sSearch != ''){
+            $lista = $this->getDoctrine()->getRepository(ProjectItem::class)
+                ->ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
+                    $company_id, '', $status, $fecha_inicial, $fecha_fin);
+            foreach ($lista as $p_i) {
+                $projects[] = $p_i->getProject();
+            }
+        }else{
+            $projects = $this->getDoctrine()->getRepository(Project::class)
+                ->ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
+                    $company_id, '', $status, $fecha_inicial, $fecha_fin);
+        }
 
+        foreach ($projects as $value) {
             $project_id = $value->getProjectId();
 
             $acciones = $this->ListarAcciones($project_id);
@@ -1122,8 +1131,14 @@ class ProjectService extends Base
      */
     public function TotalProjects($sSearch, $company_id, $status, $fecha_inicial, $fecha_fin)
     {
-        $total = $this->getDoctrine()->getRepository(ProjectItem::class)
-            ->TotalProjects($sSearch, $company_id, '', $status, $fecha_inicial, $fecha_fin);
+        if ($sSearch != '') {
+            $total = $this->getDoctrine()->getRepository(ProjectItem::class)
+                ->TotalProjects($sSearch, $company_id, '', $status, $fecha_inicial, $fecha_fin);
+        } else {
+            $total = $this->getDoctrine()->getRepository(Project::class)
+                ->TotalProjects($sSearch, $company_id, '', $status, $fecha_inicial, $fecha_fin);
+        }
+
 
         return $total;
     }

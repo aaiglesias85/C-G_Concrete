@@ -6,10 +6,6 @@ listarDataTrackingAdmin:
   path: /data-tracking/listar
   defaults: { _controller: App\Controller\Admin\DataTrackingController::listar, _format: json }
 
-listarCalendarioDataTrackingAdmin:
-  path: /data-tracking/listarCalendario
-  defaults: { _controller: App\Controller\Admin\DataTrackingController::listarCalendario, _format: json }
-
 salvarDataTrackingAdmin:
   path: /data-tracking/salvarDataTracking
   defaults: { _controller: App\Controller\Admin\DataTrackingController::salvar, _format: json }
