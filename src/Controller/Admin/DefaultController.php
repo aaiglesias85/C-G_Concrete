@@ -33,28 +33,23 @@ class DefaultController extends AbstractController
             if ($permiso[0]['ver']) {
 
                 //last 6 projects
-                $projects = $this->defaultService->ListarProjectsParaDashboard('DESC', 1);
-
+                $projects = $this->defaultService->ListarProjectsParaDashboard('DESC', 6);
 
                 // filter projects
                 $filter_projects = $this->defaultService->ListarProjectsParaDashboard();
-                $project_id = '';
-                $project_name = '';
-                if (!empty($projects)) {
-                    $project_id = $filter_projects[0]['project_id'];
-                    $project_name = "{$filter_projects[0]['number']} {$filter_projects[0]['name']}" ;
-                }
 
                 // stats
                 $stats = $this->defaultService->ListarStats();
                 // chart 1
-                $chart1 = $this->defaultService->DevolverDataChartCosts($project_id);
+                $chart1 = $this->defaultService->DevolverDataChartCosts();
                 // chart 2
-                $chart2 = $this->defaultService->DevolverDataChartProfit($project_id);
+                $chart2 = $this->defaultService->DevolverDataChartProfit();
                 // chart 3
                 $chart3 = $this->defaultService->DevolverDataChart3();
                 // items
-                $items = $this->defaultService->ListarItemsConMontos($project_id);
+                $items = $this->defaultService->ListarItemsConMontos();
+                // materials
+                $materials = $this->defaultService->ListarMaterialsConMontos();
 
                 return $this->render('admin/default/index.html.twig', array(
                     'usuario' => $usuario,
@@ -63,10 +58,9 @@ class DefaultController extends AbstractController
                     'chart2' => $chart2,
                     'chart3' => $chart3,
                     'items' => $items,
+                    'materials' => $materials,
                     'projects' => $projects,
                     'filter_projects' => $filter_projects,
-                    'project_id' => $project_id,
-                    'project_name' => $project_name,
                 ));
             }
         } else {
@@ -81,13 +75,14 @@ class DefaultController extends AbstractController
     public function listarStats(Request $request)
     {
         $project_id = $request->get('project_id');
+        $status = $request->get('status');
         $fecha_inicial = $request->get('fechaInicial');
         $fecha_fin = $request->get('fechaFin');
 
         try {
 
 
-            $stats = $this->defaultService->FiltrarDashboard($project_id, $fecha_inicial, $fecha_fin);
+            $stats = $this->defaultService->FiltrarDashboard($project_id, $status, $fecha_inicial, $fecha_fin);
 
             $resultadoJson['success'] = true;
             $resultadoJson['stats'] = $stats;

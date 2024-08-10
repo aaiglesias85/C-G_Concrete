@@ -5,9 +5,12 @@ namespace App\Utils\Admin;
 use App\Entity\Company;
 use App\Entity\DataTracking;
 use App\Entity\DataTrackingItem;
+use App\Entity\DataTrackingLabor;
+use App\Entity\DataTrackingMaterial;
 use App\Entity\Invoice;
 use App\Entity\InvoiceItem;
 use App\Entity\Item;
+use App\Entity\Material;
 use App\Entity\Project;
 use App\Entity\ProjectItem;
 use App\Utils\Base;
@@ -18,17 +21,22 @@ class DefaultService extends Base
     /*
      * FiltrarDashboard
      */
-    public function FiltrarDashboard($project_id, $fecha_inicial, $fecha_fin)
+    public function FiltrarDashboard($project_id, $status, $fecha_inicial, $fecha_fin)
     {
-        $chart_costs = $this->DevolverDataChartCosts($project_id, $fecha_inicial, $fecha_fin);
-        $chart_profit = $this->DevolverDataChartProfit($project_id, $fecha_inicial, $fecha_fin);
+        $chart_costs = $this->DevolverDataChartCosts($project_id, $fecha_inicial, $fecha_fin, $status);
+        $chart_profit = $this->DevolverDataChartProfit($project_id, $fecha_inicial, $fecha_fin, $status);
+        $chart3 = $this->DevolverDataChart3($project_id, $fecha_inicial, $fecha_fin, $status);
 
-        $items = $this->ListarItemsConMontos($project_id, $fecha_inicial, $fecha_fin);
+        $items = $this->ListarItemsConMontos($project_id, $fecha_inicial, $fecha_fin, $status);
+
+        $materials = $this->ListarMaterialsConMontos($project_id, $fecha_inicial, $fecha_fin, $status);
 
         return [
             'chart_costs' => $chart_costs,
             'chart_profit' => $chart_profit,
+            'chart3' => $chart3,
             'items' => $items,
+            'materials' => $materials,
         ];
     }
 
@@ -45,17 +53,12 @@ class DefaultService extends Base
         foreach ($lista as $value) {
             $project_id = $value->getProjectId();
 
-            $data_tracking = $this->getDoctrine()->getRepository(DataTracking::class)
-                ->ListarDataTracking($project_id);
-
-            if (!empty($data_tracking)) {
-                $arreglo_resultado[] = [
-                    'project_id' => $value->getProjectId(),
-                    'number' => $value->getProjectNumber(),
-                    'name' => $value->getName(),
-                    'dueDate' => $value->getDueDate() != '' ? $value->getDueDate()->format('m/d/Y') : ''
-                ];
-            }
+            $arreglo_resultado[] = [
+                'project_id' => $project_id,
+                'number' => $value->getProjectNumber(),
+                'name' => $value->getName(),
+                'dueDate' => $value->getDueDate() != '' ? $value->getDueDate()->format('m/d/Y') : ''
+            ];
 
         }
 
@@ -69,27 +72,71 @@ class DefaultService extends Base
      */
     public function ListarStats()
     {
-        $arreglo_resultado = [];
-
-        // total de proyectos activos
+        // total de proyectos In Progress
         $total_proyectos_activos = $this->getDoctrine()->getRepository(Project::class)
             ->TotalProjects('', '', '', 1);
 
-        // total de proyectos inactivos
+        // total de proyectos Not Started
         $total_proyectos_inactivos = $this->getDoctrine()->getRepository(Project::class)
             ->TotalProjects('', '', '', 0);
 
+        // total de proyectos Completed
+        $total_proyectos_completed = $this->getDoctrine()->getRepository(Project::class)
+            ->TotalProjects('', '', '', 2);
+
         return [
             'total_proyectos_activos' => $total_proyectos_activos,
-            'total_proyectos_inactivos' => $total_proyectos_inactivos
+            'total_proyectos_inactivos' => $total_proyectos_inactivos,
+            'total_proyectos_completed' => $total_proyectos_completed
         ];
+    }
+
+    /**
+     * ListarMaterialsConMontos: lista los materials ordenados por el monto
+     * @return array
+     */
+    public function ListarMaterialsConMontos($project_id = '', $fecha_inicial = '', $fecha_fin = '', $status = '')
+    {
+        $arreglo_resultado = [];
+
+        $materials = $this->getDoctrine()->getRepository(Material::class)->findAll();
+        /** @var Material $material */
+        foreach ($materials as $material) {
+            $material_id = $material->getMaterialId();
+
+            $quantity = $this->getDoctrine()->getRepository(DataTrackingMaterial::class)
+                ->TotalQuantity('', $project_id, $material_id, $fecha_inicial, $fecha_fin, $status);
+
+            $amount = $this->getDoctrine()->getRepository(DataTrackingMaterial::class)
+                ->TotalMaterials('', $material_id, $project_id, $fecha_inicial, $fecha_fin, $status);
+
+            if ($quantity > 0) {
+                $arreglo_resultado[] = [
+                    'material_id' => $material_id,
+                    'name' => $material->getName(),
+                    'unit' => $material->getUnit()->getDescription(),
+                    'quantity' => $quantity,
+                    'amount' => $amount
+                ];
+            }
+        }
+
+        // ordenar
+        $arreglo_resultado = $this->ordenarArrayDesc($arreglo_resultado, 'amount');
+
+        // sacar los primeros 6
+        /*if ($project_id == '') {
+            $arreglo_resultado = array_slice($arreglo_resultado, 0, 6);
+        }*/
+
+        return $arreglo_resultado;
     }
 
     /**
      * ListarItemsConMontos: lista los items ordenados por el monto
      * @return array
      */
-    public function ListarItemsConMontos($project_id = '', $fecha_inicial = '', $fecha_fin = '')
+    public function ListarItemsConMontos($project_id = '', $fecha_inicial = '', $fecha_fin = '', $status = '')
     {
         $arreglo_resultado = [];
 
@@ -99,10 +146,10 @@ class DefaultService extends Base
             $project_item_id = $project_item->getId();
 
             $quantity = $this->getDoctrine()->getRepository(DataTrackingItem::class)
-                ->TotalQuantity('', $project_item_id, $fecha_inicial, $fecha_fin);
+                ->TotalQuantity('', $project_item_id, $fecha_inicial, $fecha_fin, $status );
 
             $amount = $this->getDoctrine()->getRepository(DataTrackingItem::class)
-                ->TotalDaily('', $project_item_id, '', $fecha_inicial, $fecha_fin);
+                ->TotalDaily('', $project_item_id, '', $fecha_inicial, $fecha_fin, $status);
 
             if ($quantity > 0) {
                 $arreglo_resultado[] = [
@@ -118,11 +165,10 @@ class DefaultService extends Base
         // ordenar
         $arreglo_resultado = $this->ordenarArrayDesc($arreglo_resultado, 'amount');
 
-        // sacar los primeros 3
-        if ($project_id == '') {
+        // sacar los primeros 6
+        /*if ($project_id == '') {
             $arreglo_resultado = array_slice($arreglo_resultado, 0, 6);
-        }
-
+        }*/
 
         return $arreglo_resultado;
     }
@@ -131,17 +177,17 @@ class DefaultService extends Base
      * DevolverDataChart3: devuelve la data para el grafico
      * @return array
      */
-    public function DevolverDataChart3()
+    public function DevolverDataChart3($project_id = '', $fecha_inicial = '', $fecha_fin = '', $status = '')
     {
         $anno = date('Y');
-        $fecha_inicial = "01/01/$anno";
-        $fecha_final = "12/31/$anno";
+        $fecha_inicial =  $fecha_inicial == '' ? "01/01/$anno": $fecha_inicial;
+        $fecha_final = $fecha_fin == '' ? "12/31/$anno": $fecha_fin;
 
         $meses = [];
         $data = [];
 
         $invoices = $this->getDoctrine()->getRepository(Invoice::class)
-            ->ListarInvoicesRangoFecha('', '', $fecha_inicial, $fecha_final);
+            ->ListarInvoicesRangoFecha('', $project_id, $fecha_inicial, $fecha_final, $status);
         foreach ($invoices as $invoice) {
 
             $fecha = $this->DevolverMes($invoice->getStartDate()->format('m'));
@@ -176,10 +222,10 @@ class DefaultService extends Base
      * DevolverDataChartProfit: devuelve la data para el grafico
      * @return array
      */
-    public function DevolverDataChartProfit($project_id = '', $fecha_inicial = '', $fecha_fin = '')
+    public function DevolverDataChartProfit($project_id = '', $fecha_inicial = '', $fecha_fin = '', $status = '')
     {
         // profit total
-        $total = $this->CalcularProfitTotal($project_id, $fecha_inicial, $fecha_fin);
+        $total = $this->CalcularProfitTotal($project_id, $fecha_inicial, $fecha_fin, $status);
 
 
         // projects
@@ -187,7 +233,7 @@ class DefaultService extends Base
 
         // daily
         $amount_daily = $this->getDoctrine()->getRepository(DataTrackingItem::class)
-            ->TotalDaily('', '', $project_id, $fecha_inicial, $fecha_fin);
+            ->TotalDaily('', '', $project_id, $fecha_inicial, $fecha_fin, $status);
         $porciento_daily = $total > 0 ? round($amount_daily / $total * 100) : 0;
 
         $data[] = [
@@ -198,10 +244,10 @@ class DefaultService extends Base
 
         // profit
         $profit_concrete = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->TotalConcrete($project_id, $fecha_inicial, $fecha_fin);
+            ->TotalConcrete($project_id, $fecha_inicial, $fecha_fin, $status);
 
-        $profit_labor = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->TotalLabor($project_id, $fecha_inicial, $fecha_fin);
+        $profit_labor = $this->getDoctrine()->getRepository(DataTrackingLabor::class)
+            ->TotalLabor('', '', $project_id, $fecha_inicial, $fecha_fin, $status);
 
         $amount_profit = $amount_daily - ($profit_concrete + $profit_labor);
 
@@ -219,7 +265,7 @@ class DefaultService extends Base
         ];
     }
 
-    private function CalcularProfitTotal($project_id = '', $fecha_inicial = '', $fecha_fin = '')
+    private function CalcularProfitTotal($project_id = '', $fecha_inicial = '', $fecha_fin = '', $status = '')
     {
         $total_concrete = 0;
         $total_labor = 0;
@@ -230,13 +276,13 @@ class DefaultService extends Base
             $project_id = $project['project_id'];
 
             $total_concrete += $this->getDoctrine()->getRepository(DataTracking::class)
-                ->TotalConcrete($project_id, $fecha_inicial, $fecha_fin);
+                ->TotalConcrete($project_id, $fecha_inicial, $fecha_fin, $status);
 
-            $total_labor += $this->getDoctrine()->getRepository(DataTracking::class)
-                ->TotalLabor($project_id, $fecha_inicial, $fecha_fin);
+            $total_labor = $this->getDoctrine()->getRepository(DataTrackingLabor::class)
+                ->TotalLabor('', '', $project_id, $fecha_inicial, $fecha_fin, $status);
 
             $total_daily += $this->getDoctrine()->getRepository(DataTrackingItem::class)
-                ->TotalDaily('', '', $project_id, $fecha_inicial, $fecha_fin);
+                ->TotalDaily('', '', $project_id, $fecha_inicial, $fecha_fin, $status);
         }
 
 
@@ -247,16 +293,19 @@ class DefaultService extends Base
      * DevolverDataChartCosts: devuelve la data para el grafico
      * @return array
      */
-    public function DevolverDataChartCosts($project_id = '', $fecha_inicial = '', $fecha_fin = '')
+    public function DevolverDataChartCosts($project_id = '', $fecha_inicial = '', $fecha_fin = '', $status = '')
     {
         // total
         $total_concrete = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->TotalConcrete($project_id, $fecha_inicial, $fecha_fin);
+            ->TotalConcrete($project_id, $fecha_inicial, $fecha_fin, $status);
 
-        $total_labor = $this->getDoctrine()->getRepository(DataTracking::class)
-            ->TotalLabor($project_id, $fecha_inicial, $fecha_fin);
+        $total_labor = $this->getDoctrine()->getRepository(DataTrackingLabor::class)
+            ->TotalLabor('', '', $project_id, $fecha_inicial, $fecha_fin, $status);
 
-        $total = $total_concrete + $total_labor;
+        $total_material = $this->getDoctrine()->getRepository(DataTrackingMaterial::class)
+            ->TotalMaterials('', '', $project_id, $fecha_inicial, $fecha_fin, $status);
+
+        $total = $total_concrete + $total_labor + $total_material;
 
 
         // projects
@@ -278,6 +327,15 @@ class DefaultService extends Base
             'name' => 'Labor',
             'amount' => $total_labor,
             'porciento' => $porciento_labor
+        ];
+
+        // material
+        $porciento_material = $total > 0 ? round($total_material / $total * 100) : 0;
+
+        $data[] = [
+            'name' => 'Materials',
+            'amount' => $total_material,
+            'porciento' => $porciento_material
         ];
 
         return [

@@ -19,7 +19,7 @@ class ProjectRepository extends EntityRepository
         $consulta = $this->createQueryBuilder('p')
             ->leftJoin('p.company', 'c')
             ->leftJoin('p.inspector', 'i')
-            ->where('p.status = 1');
+            /*->where('p.status = 1 OR p.status = 2')*/;
 
         if ($sSearch != "") {
             $consulta->andWhere('p.invoiceContact LIKE :invoiceContact OR p.owner LIKE :owner OR
@@ -338,7 +338,8 @@ class ProjectRepository extends EntityRepository
         $consulta = $this->createQueryBuilder('p')
             ->leftJoin('p.company', 'c')
             ->leftJoin('p.inspector', 'i')
-            ->where('p.status = 1 and p.dueDate is not null');
+            /*->where('p.dueDate is not null')
+            ->andWhere('p.status = 1 OR p.status = 2')*/;
 
         if ($from != "") {
 

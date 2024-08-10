@@ -233,6 +233,14 @@ var Index = function () {
             }
         });
     }
+    var updateChart3 = function () {
+        if (chart3) {
+            chart3.destroy();
+            chart3 = null; // Opcional, para liberar la referencia
+        }
+
+        initChart3();
+    }
 
     var destroyChart = function (chart, selector) {
         // Limpiar los eventos del chart
@@ -246,7 +254,12 @@ var Index = function () {
         $('.m-select2').select2();
 
         // change
+        $('#status').change(changeStatus);
         $('#project').change(changeProject);
+    }
+
+    var changeStatus = function (e) {
+        btnClickFiltrar();
     }
 
     var changeProject = function (e) {
@@ -263,6 +276,7 @@ var Index = function () {
     var btnClickFiltrar = function () {
 
         var project_id = $('#project').val();
+        var status = $('#status').val();
         var fechaInicial = $('#fechaInicial').val();
         var fechaFin = $('#fechaFin').val();
 
@@ -274,6 +288,7 @@ var Index = function () {
             dataType: "json",
             data: {
                 'project_id': project_id,
+                'status': status,
                 'fechaInicial': fechaInicial,
                 'fechaFin': fechaFin
             },
@@ -292,8 +307,15 @@ var Index = function () {
                     chart2_data = response.stats.chart_profit;
                     updateChartProfit();
 
+                    // chart 3
+                    chart3_data = response.stats.chart3;
+                    updateChart3();
+
                     // items
                     updateItems(response.stats.items);
+
+                    // materials
+                    updateMaterials(response.stats.materials);
 
                 } else {
                     toastr.error(response.error, "Error !!!");
@@ -356,6 +378,56 @@ var Index = function () {
         }
 
         $('#items-body').html(html);
+    }
+
+    var updateMaterials = function (materials) {
+        // reset
+        $('#materials-body').html('');
+
+        var html = '';
+        for (let [i, item] of materials.entries()) {
+            html += `
+            <div class="m-widget5__item">
+                <div class="m-widget5__content">
+                    <div class="m-widget5__section">
+                        <h4 class="m-widget5__title">
+                            ${item.name}
+                        </h4>
+                        <span class="m-widget5__desc">
+                        ${item.unit}
+                        </span>
+                    </div>
+                </div>
+                <div class="m-widget5__content">
+                    <div class="m-widget5__stats1 mr-5">
+                        <span class="m-widget5__sales">${item.quantity}</span>
+                    </div>
+                    <div class="m-widget5__stats2">
+                        <span class="m-widget5__sales m--font-success m--font-bold"> 
+                            ${MyApp.formatearNumero(item.amount, 2, '.', ',')}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        if (materials.length == 0) {
+            html = `
+            <div class="m-widget5__item">
+                <div class="m-widget5__content">
+                    <div class="m-widget5__section">
+                        <h4 class="m-widget5__title">
+                            There are no materials
+                        </h4>
+                    </div>
+                </div>
+                <div class="m-widget5__content"></div>
+            </div>
+            `;
+        }
+
+        $('#materials-body').html(html);
     }
 
     var updateProjectName = function () {

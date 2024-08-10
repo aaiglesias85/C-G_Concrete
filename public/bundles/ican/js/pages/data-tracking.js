@@ -264,6 +264,14 @@ var DataTracking = function () {
         items_data_tracking = [];
         actualizarTableListaItems();
 
+        // labor
+        labor = [];
+        actualizarTableListaLabor();
+
+        // materials
+        materials = [];
+        actualizarTableListaMaterial();
+
         //Mostrar el primer tab
         resetWizard();
 
@@ -412,7 +420,9 @@ var DataTracking = function () {
                         'total_stamps': total_stamps,
                         'total_people': total_people,
                         'overhead_price': overhead_price,
-                        'items': JSON.stringify(items_data_tracking)
+                        'items': JSON.stringify(items_data_tracking),
+                        'labor': JSON.stringify(labor),
+                        'materials': JSON.stringify(materials)
                     },
                     success: function (response) {
                         mApp.unblock('#modal-data-tracking .modal-content');
@@ -522,6 +532,12 @@ var DataTracking = function () {
                         // project items
                         items = response.data_tracking.project_items;
                         actualizarSelectProjectItems();
+
+                        // labor
+                        labor = response.data_tracking.labor;
+
+                        // materials
+                        materials = response.data_tracking.materials;
 
                         // totals
                         $('#form-group-totals').removeClass('m--hide');
@@ -756,10 +772,10 @@ var DataTracking = function () {
         var data_tracking_id = $('#data_tracking_id').val();
         if (data_tracking_id != '') {
             var total_concrete = $('#total_concrete').val();
-            var total_labor = $('#total_labor_price').val() > 0 ? $('#total_labor_price').val() : 0;
+            var total_labor = calcularTotalLaborPrice();
             var total_daily_today = $('#total_daily_today').val();
 
-            var profit = parseFloat(total_daily_today) - ( parseFloat(total_concrete) + parseFloat(total_labor) );
+            var profit = parseFloat(total_daily_today) - (parseFloat(total_concrete) + parseFloat(total_labor));
             $('#profit').val(profit);
         }
     }
@@ -947,7 +963,7 @@ var DataTracking = function () {
 
     //Wizard
     var activeTab = 1;
-    var totalTabs = 2;
+    var totalTabs = 4;
     var initWizard = function () {
         $(document).off('click', "#modal-data-tracking .wizard-tab");
         $(document).on('click', "#modal-data-tracking .wizard-tab", function (e) {
@@ -967,6 +983,12 @@ var DataTracking = function () {
                 case 2:
                     actualizarTableListaItems()
                     break;
+                case 3:
+                    actualizarTableListaLabor()
+                    break;
+                case 4:
+                    actualizarTableListaMaterial()
+                    break;
             }
 
         });
@@ -981,12 +1003,20 @@ var DataTracking = function () {
                     $('#tab-items').tab('show');
                     actualizarTableListaItems();
                     break;
+                case 3:
+                    $('#tab-labor').tab('show');
+                    actualizarTableListaLabor();
+                    break;
+                case 4:
+                    $('#tab-material').tab('show');
+                    actualizarTableListaMaterial();
+                    break;
             }
         }, 0);
     }
     var resetWizard = function () {
         activeTab = 1;
-        totalTabs = 2;
+        totalTabs = 4;
         mostrarTab();
     }
     var validWizard = function () {
@@ -1006,7 +1036,6 @@ var DataTracking = function () {
     var oTableItems;
     var items_data_tracking = [];
     var nEditingRowItem = null;
-    var rowDeleteItem = null;
     var initTableItems = function () {
         MyApp.block('#items-table-editable');
 
@@ -1295,18 +1324,26 @@ var DataTracking = function () {
         $(document).on('click', "#items-table-editable a.delete", function (e) {
 
             e.preventDefault();
-            rowDeleteItem = $(this).data('posicion');
-            $('#modal-eliminar-item').modal({
-                'show': true
+            var posicion = $(this).data('posicion');
+
+            swal.fire({
+                buttonsStyling: false,
+                html: "Are you sure you want to delete the selected item?",
+                type: "warning",
+                confirmButtonText: "Yes, delete it!",
+                confirmButtonClass: "btn btn-sm btn-bold btn-success",
+                showCancelButton: true,
+                cancelButtonText: "No, cancel",
+                cancelButtonClass: "btn btn-sm btn-bold btn-danger"
+            }).then(function (result) {
+                if (result.value) {
+                    EliminarItem(posicion);
+                }
             });
+
         });
 
-        $(document).off('click', "#btn-delete-item");
-        $(document).on('click', "#btn-delete-item", function (e) {
-
-            e.preventDefault();
-            var posicion = rowDeleteItem;
-
+        function EliminarItem(posicion) {
             if (items_data_tracking[posicion]) {
 
                 if (items_data_tracking[posicion].data_tracking_item_id != '') {
@@ -1341,8 +1378,7 @@ var DataTracking = function () {
                     deleteItem(posicion);
                 }
             }
-
-        });
+        }
 
         function deleteItem(posicion) {
             //Eliminar
@@ -1460,6 +1496,728 @@ var DataTracking = function () {
 
     };
 
+    // labor
+    var oTableLabor;
+    var labor = [];
+    var nEditingRowLabor = null;
+    var initTableLabor = function () {
+        MyApp.block('#labor-table-editable');
+
+        var table = $('#labor-table-editable');
+
+        var aoColumns = [
+            {
+                field: "employee",
+                title: "Employee",
+            },
+            {
+                field: "hours",
+                title: "Hours",
+                width: 120,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.hours, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "hourly_rate",
+                title: "Hourly Rate",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.hourly_rate, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "total",
+                title: "$ Total",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>$${MyApp.formatearNumero(row.total, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "posicion",
+                width: 120,
+                title: "Actions",
+                sortable: false,
+                overflow: 'visible',
+                textAlign: 'center',
+                template: function (row) {
+                    return `
+                    <a href="javascript:;" data-posicion="${row.posicion}" class="edit m-portlet__nav-link btn m-btn m-btn--hover-success m-btn--icon m-btn--icon-only m-btn--pill" title="Edit item"><i class="la la-edit"></i></a>
+                    <a href="javascript:;" data-posicion="${row.posicion}" class="delete m-portlet__nav-link btn m-btn m-btn--hover-danger m-btn--icon m-btn--icon-only m-btn--pill" title="Delete item"><i class="la la-trash"></i></a>
+                    `;
+                }
+            }
+        ];
+        oTableLabor = table.mDatatable({
+            // datasource definition
+            data: {
+                type: 'local',
+                source: labor,
+                pageSize: 10,
+                saveState: {
+                    cookie: false,
+                    webstorage: false
+                }
+            },
+            // layout definition
+            layout: {
+                theme: 'default', // datatable theme
+                class: '', // custom wrapper class
+                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
+                //height: 550, // datatable's body's fixed height
+                footer: false // display/hide footer
+            },
+            // column sorting
+            sortable: true,
+            pagination: true,
+            // columns definition
+            columns: aoColumns,
+            // toolbar
+            toolbar: {
+                // toolbar items
+                items: {
+                    // pagination
+                    pagination: {
+                        // page size select
+                        pageSizeSelect: [10, 25, 30, 50, -1] // display dropdown to select pagination size. -1 is used for "ALl" option
+                    }
+                }
+            },
+            search: {
+                input: $('#lista-labor .m_form_search'),
+            }
+        });
+
+        //Events
+        oTableItems
+            .on('m-datatable--on-ajax-done', function () {
+                mApp.unblock('#labor-table-editable');
+            })
+            .on('m-datatable--on-ajax-fail', function (e, jqXHR) {
+                mApp.unblock('#labor-table-editable');
+            })
+            .on('m-datatable--on-goto-page', function (e, args) {
+                MyApp.block('#labor-table-editable');
+            })
+            .on('m-datatable--on-reloaded', function (e) {
+                MyApp.block('#labor-table-editable');
+            })
+            .on('m-datatable--on-sort', function (e, args) {
+                MyApp.block('#labor-table-editable');
+            })
+            .on('m-datatable--on-check', function (e, args) {
+                //eventsWriter('Checkbox active: ' + args.toString());
+            })
+            .on('m-datatable--on-uncheck', function (e, args) {
+                //eventsWriter('Checkbox inactive: ' + args.toString());
+            });
+    };
+    var actualizarTableListaLabor = function () {
+        if (oTableLabor) {
+            oTableLabor.destroy();
+        }
+
+        initTableLabor();
+    }
+    var initFormLabor = function () {
+        $("#data-tracking-labor-form").validate({
+            rules: {
+                hours: {
+                    required: true
+                },
+            },
+            showErrors: function (errorMap, errorList) {
+                // Clean up any tooltips for valid elements
+                $.each(this.validElements(), function (index, element) {
+                    var $element = $(element);
+
+                    $element.data("title", "") // Clear the title - there is no error associated anymore
+                        .removeClass("has-error")
+                        .tooltip("dispose");
+
+                    $element
+                        .closest('.form-group')
+                        .removeClass('has-error').addClass('success');
+                });
+
+                // Create new tooltips for invalid elements
+                $.each(errorList, function (index, error) {
+                    var $element = $(error.element);
+
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", error.message)
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+
+                });
+            },
+        });
+    };
+    var initAccionesLabor = function () {
+
+        $(document).off('click', "#btn-agregar-labor");
+        $(document).on('click', "#btn-agregar-labor", function (e) {
+            // reset
+            resetFormLabor();
+
+            $('#modal-data-tracking-labor').modal({
+                'show': true
+            });
+        });
+
+        $(document).off('click', "#btn-salvar-data-tracking-labor");
+        $(document).on('click', "#btn-salvar-data-tracking-labor", function (e) {
+            e.preventDefault();
+
+
+            var employee_id = $('#employee').val();
+
+            if ($('#data-tracking-labor-form').valid() && employee_id != '') {
+
+                var employee = $("#employee option:selected").text();
+                var hours = $('#hours').val();
+
+                var hourly_rate = $('#employee option[value="' + employee_id + '"]').attr("data-rate");
+                var total = hours * hourly_rate;
+
+                if (nEditingRowLabor == null) {
+
+                    labor.push({
+                        data_tracking_labor_id: '',
+                        employee_id: employee_id,
+                        employee: employee,
+                        hours: hours,
+                        hourly_rate: hourly_rate,
+                        total: total,
+                        posicion: labor.length
+                    });
+
+                } else {
+                    var posicion = nEditingRowLabor;
+                    if (labor[posicion]) {
+                        labor[posicion].employee_id = employee_id;
+                        labor[posicion].employee = employee;
+                        labor[posicion].hours = hours;
+                        labor[posicion].hourly_rate = hourly_rate;
+                        labor[posicion].total = total;
+                    }
+                }
+
+                //actualizar lista
+                actualizarTableListaLabor();
+
+                if (nEditingRowLabor != null) {
+                    $('#modal-data-tracking-labor').modal('hide');
+                }
+
+                // reset
+                resetFormLabor();
+
+            } else {
+                if (employee_id == '') {
+                    var $element = $('#select-employee .select2');
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", "This field is required")
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+                }
+            }
+
+        });
+
+        $(document).off('click', "#labor-table-editable a.edit");
+        $(document).on('click', "#labor-table-editable a.edit", function (e) {
+            var posicion = $(this).data('posicion');
+            if (labor[posicion]) {
+
+                // reset
+                resetFormLabor();
+
+                nEditingRowLabor = posicion;
+
+                $('#employee').val(labor[posicion].employee_id);
+                $('#employee').trigger('change');
+
+                $('#hours').val(labor[posicion].hours);
+
+                // open modal
+                $('#modal-data-tracking-labor').modal('show');
+
+            }
+        });
+
+        $(document).off('click', "#labor-table-editable a.delete");
+        $(document).on('click', "#labor-table-editable a.delete", function (e) {
+
+            e.preventDefault();
+            var posicion = $(this).data('posicion');
+
+            swal.fire({
+                buttonsStyling: false,
+                html: "Are you sure you want to delete the selected employee?",
+                type: "warning",
+                confirmButtonText: "Yes, delete it!",
+                confirmButtonClass: "btn btn-sm btn-bold btn-success",
+                showCancelButton: true,
+                cancelButtonText: "No, cancel",
+                cancelButtonClass: "btn btn-sm btn-bold btn-danger"
+            }).then(function (result) {
+                if (result.value) {
+                    EliminarLabor(posicion);
+                }
+            });
+
+        });
+
+        function EliminarLabor(posicion) {
+            if (labor[posicion]) {
+
+                if (labor[posicion].data_tracking_labor_id != '') {
+                    MyApp.block('#labor-table-editable');
+
+                    $.ajax({
+                        type: "POST",
+                        url: "data-tracking/eliminarLabor",
+                        dataType: "json",
+                        data: {
+                            'data_tracking_labor_id': labor[posicion].data_tracking_labor_id
+                        },
+                        success: function (response) {
+                            mApp.unblock('#labor-table-editable');
+                            if (response.success) {
+
+                                toastr.success(response.message, "Success");
+
+                                deleteLabor(posicion);
+
+                            } else {
+                                toastr.error(response.error, "");
+                            }
+                        },
+                        failure: function (response) {
+                            mApp.unblock('#labor-table-editable');
+
+                            toastr.error(response.error, "");
+                        }
+                    });
+                } else {
+                    deleteLabor(posicion);
+                }
+            }
+        }
+
+        function deleteLabor(posicion) {
+            //Eliminar
+            labor.splice(posicion, 1);
+            //actualizar posiciones
+            for (var i = 0; i < labor.length; i++) {
+                labor[i].posicion = i;
+            }
+            //actualizar lista
+            actualizarTableListaLabor();
+        }
+    };
+    var resetFormLabor = function () {
+        $('#data-tracking-labor-form input').each(function (e) {
+            $element = $(this);
+            $element.val('');
+
+            $element.data("title", "").removeClass("has-error").tooltip("dispose");
+            $element.closest('.form-group').removeClass('has-error').addClass('success');
+        });
+
+        $('#employee').val('');
+        $('#employee').trigger('change');
+
+        var $element = $('.select2');
+        $element.removeClass('has-error').tooltip("dispose");
+
+        nEditingRowLabor = null;
+    };
+    var calcularTotalLaborPrice = function () {
+        var total = 0;
+
+        for (var i = 0; i < labor.length; i++) {
+            total += labor[i].hours * labor[i].hourly_rate;
+        }
+
+        return total;
+    }
+
+    // materials
+    var oTableMaterial;
+    var materials = [];
+    var nEditingRowMaterial = null;
+    var initTableMaterial = function () {
+        MyApp.block('#material-table-editable');
+
+        var table = $('#material-table-editable');
+
+        var aoColumns = [
+            {
+                field: "material",
+                title: "Material",
+            },
+            {
+                field: "unit",
+                title: "Unit",
+                width: 100,
+            },
+            {
+                field: "quantity",
+                title: "Quantity",
+                width: 120,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.quantity, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "price",
+                title: "Price",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.price, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "total",
+                title: "$ Total",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>$${MyApp.formatearNumero(row.total, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "posicion",
+                width: 120,
+                title: "Actions",
+                sortable: false,
+                overflow: 'visible',
+                textAlign: 'center',
+                template: function (row) {
+                    return `
+                    <a href="javascript:;" data-posicion="${row.posicion}" class="edit m-portlet__nav-link btn m-btn m-btn--hover-success m-btn--icon m-btn--icon-only m-btn--pill" title="Edit item"><i class="la la-edit"></i></a>
+                    <a href="javascript:;" data-posicion="${row.posicion}" class="delete m-portlet__nav-link btn m-btn m-btn--hover-danger m-btn--icon m-btn--icon-only m-btn--pill" title="Delete item"><i class="la la-trash"></i></a>
+                    `;
+                }
+            }
+        ];
+        oTableMaterial = table.mDatatable({
+            // datasource definition
+            data: {
+                type: 'local',
+                source: materials,
+                pageSize: 10,
+                saveState: {
+                    cookie: false,
+                    webstorage: false
+                }
+            },
+            // layout definition
+            layout: {
+                theme: 'default', // datatable theme
+                class: '', // custom wrapper class
+                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
+                //height: 550, // datatable's body's fixed height
+                footer: false // display/hide footer
+            },
+            // column sorting
+            sortable: true,
+            pagination: true,
+            // columns definition
+            columns: aoColumns,
+            // toolbar
+            toolbar: {
+                // toolbar items
+                items: {
+                    // pagination
+                    pagination: {
+                        // page size select
+                        pageSizeSelect: [10, 25, 30, 50, -1] // display dropdown to select pagination size. -1 is used for "ALl" option
+                    }
+                }
+            },
+            search: {
+                input: $('#lista-items .m_form_search'),
+            }
+        });
+
+        //Events
+        oTableItems
+            .on('m-datatable--on-ajax-done', function () {
+                mApp.unblock('#material-table-editable');
+            })
+            .on('m-datatable--on-ajax-fail', function (e, jqXHR) {
+                mApp.unblock('#material-table-editable');
+            })
+            .on('m-datatable--on-goto-page', function (e, args) {
+                MyApp.block('#material-table-editable');
+            })
+            .on('m-datatable--on-reloaded', function (e) {
+                MyApp.block('#material-table-editable');
+            })
+            .on('m-datatable--on-sort', function (e, args) {
+                MyApp.block('#material-table-editable');
+            })
+            .on('m-datatable--on-check', function (e, args) {
+                //eventsWriter('Checkbox active: ' + args.toString());
+            })
+            .on('m-datatable--on-uncheck', function (e, args) {
+                //eventsWriter('Checkbox inactive: ' + args.toString());
+            });
+    };
+    var actualizarTableListaMaterial = function () {
+        if (oTableMaterial) {
+            oTableMaterial.destroy();
+        }
+
+        initTableMaterial();
+    }
+    var initFormMaterial = function () {
+        $("#data-tracking-material-form").validate({
+            rules: {
+                quantity: {
+                    required: true
+                },
+            },
+            showErrors: function (errorMap, errorList) {
+                // Clean up any tooltips for valid elements
+                $.each(this.validElements(), function (index, element) {
+                    var $element = $(element);
+
+                    $element.data("title", "") // Clear the title - there is no error associated anymore
+                        .removeClass("has-error")
+                        .tooltip("dispose");
+
+                    $element
+                        .closest('.form-group')
+                        .removeClass('has-error').addClass('success');
+                });
+
+                // Create new tooltips for invalid elements
+                $.each(errorList, function (index, error) {
+                    var $element = $(error.element);
+
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", error.message)
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+
+                });
+            },
+        });
+    };
+    var initAccionesMaterial = function () {
+
+        $(document).off('click', "#btn-agregar-material");
+        $(document).on('click', "#btn-agregar-material", function (e) {
+            // reset
+            resetFormMaterial();
+
+            $('#modal-data-tracking-material').modal({
+                'show': true
+            });
+        });
+
+        $(document).off('click', "#btn-salvar-data-tracking-material");
+        $(document).on('click', "#btn-salvar-data-tracking-material", function (e) {
+            e.preventDefault();
+
+
+            var material_id = $('#material').val();
+
+            if ($('#data-tracking-material-form').valid() && material_id != '') {
+
+                var material = $("#material option:selected").text();
+                var quantity = $('#material-quantity').val();
+                var unit = $('#material option[value="' + material_id + '"]').attr("data-unit");
+                var price = $('#material option[value="' + material_id + '"]').attr("data-price");
+                var total = quantity * price;
+
+                if (nEditingRowMaterial == null) {
+
+                    materials.push({
+                        data_tracking_material_id: '',
+                        material_id: material_id,
+                        material: material,
+                        unit: unit,
+                        quantity: quantity,
+                        price: price,
+                        total: total,
+                        posicion: materials.length
+                    });
+
+                } else {
+                    var posicion = nEditingRowMaterial;
+                    if (materials[posicion]) {
+                        materials[posicion].material_id = material_id;
+                        materials[posicion].material = material;
+                        materials[posicion].unit = unit;
+                        materials[posicion].quantity = quantity;
+                        materials[posicion].price = price;
+                        materials[posicion].total = total;
+                    }
+                }
+
+                //actualizar lista
+                actualizarTableListaMaterial();
+
+                if (nEditingRowMaterial != null) {
+                    $('#modal-data-tracking-material').modal('hide');
+                }
+
+                // reset
+                resetFormMaterial();
+
+            } else {
+                if (material_id == '') {
+                    var $element = $('#select-material .select2');
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", "This field is required")
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+                }
+            }
+
+        });
+
+        $(document).off('click', "#material-table-editable a.edit");
+        $(document).on('click', "#material-table-editable a.edit", function (e) {
+            var posicion = $(this).data('posicion');
+            if (materials[posicion]) {
+
+                // reset
+                resetFormMaterial();
+
+                nEditingRowMaterial = posicion;
+
+                $('#material').val(materials[posicion].material_id);
+                $('#material').trigger('change');
+
+                $('#material-quantity').val(materials[posicion].quantity);
+
+                // open modal
+                $('#modal-data-tracking-material').modal('show');
+
+            }
+        });
+
+        $(document).off('click', "#material-table-editable a.delete");
+        $(document).on('click', "#material-table-editable a.delete", function (e) {
+
+            e.preventDefault();
+            var posicion = $(this).data('posicion');
+
+            swal.fire({
+                buttonsStyling: false,
+                html: "Are you sure you want to delete the selected material?",
+                type: "warning",
+                confirmButtonText: "Yes, delete it!",
+                confirmButtonClass: "btn btn-sm btn-bold btn-success",
+                showCancelButton: true,
+                cancelButtonText: "No, cancel",
+                cancelButtonClass: "btn btn-sm btn-bold btn-danger"
+            }).then(function (result) {
+                if (result.value) {
+                    EliminarMaterial(posicion);
+                }
+            });
+
+        });
+
+        function EliminarMaterial(posicion) {
+            if (materials[posicion]) {
+
+                if (materials[posicion].data_tracking_material_id != '') {
+                    MyApp.block('#material-table-editable');
+
+                    $.ajax({
+                        type: "POST",
+                        url: "data-tracking/eliminarMaterial",
+                        dataType: "json",
+                        data: {
+                            'data_tracking_material_id': materials[posicion].data_tracking_material_id
+                        },
+                        success: function (response) {
+                            mApp.unblock('#material-table-editable');
+                            if (response.success) {
+
+                                toastr.success(response.message, "Success");
+
+                                deleteMaterial(posicion);
+
+                            } else {
+                                toastr.error(response.error, "");
+                            }
+                        },
+                        failure: function (response) {
+                            mApp.unblock('#material-table-editable');
+
+                            toastr.error(response.error, "");
+                        }
+                    });
+                } else {
+                    deleteMaterial(posicion);
+                }
+            }
+        }
+
+        function deleteMaterial(posicion) {
+            //Eliminar
+            materials.splice(posicion, 1);
+            //actualizar posiciones
+            for (var i = 0; i < materials.length; i++) {
+                materials[i].posicion = i;
+            }
+            //actualizar lista
+            actualizarTableListaMaterial();
+        }
+    };
+    var resetFormMaterial = function () {
+        $('#data-tracking-material-form input').each(function (e) {
+            $element = $(this);
+            $element.val('');
+
+            $element.data("title", "").removeClass("has-error").tooltip("dispose");
+            $element.closest('.form-group').removeClass('has-error').addClass('success');
+        });
+
+        $('#material').val('');
+        $('#material').trigger('change');
+
+        var $element = $('.select2');
+        $element.removeClass('has-error').tooltip("dispose");
+
+        nEditingRowMaterial = null;
+    };
+
     return {
         //main function to initiate the module
         init: function () {
@@ -1486,6 +2244,16 @@ var DataTracking = function () {
             initTableItems();
             initFormItem();
             initAccionesItems();
+
+            // labor
+            initTableLabor();
+            initFormLabor();
+            initAccionesLabor();
+
+            // materials
+            initTableMaterial();
+            initFormMaterial();
+            initAccionesMaterial();
         }
 
     };

@@ -3,9 +3,11 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Company;
+use App\Entity\Employee;
 use App\Entity\Equation;
 use App\Entity\Inspector;
 use App\Entity\Item;
+use App\Entity\Material;
 use App\Entity\Project;
 use App\Entity\Unit;
 use App\Utils\Admin\DataTrackingService;
@@ -40,10 +42,20 @@ class DataTrackingController extends AbstractController
                 $inspectors = $this->projectService->getDoctrine()->getRepository(Inspector::class)
                     ->ListarOrdenados();
 
+                // employees
+                $employees = $this->trackingService->getDoctrine()->getRepository(Employee::class)
+                    ->ListarOrdenados();
+
+                // materials
+                $materials = $this->trackingService->getDoctrine()->getRepository(Material::class)
+                    ->ListarOrdenados();
+
                 return $this->render('admin/data-tracking/index.html.twig', array(
                     'permiso' => $permiso[0],
                     'projects' => $projects,
-                    'inspectors' => $inspectors
+                    'inspectors' => $inspectors,
+                    'employees' => $employees,
+                    'materials' => $materials
                 ));
             }
         } else {
@@ -263,7 +275,7 @@ class DataTrackingController extends AbstractController
     }
 
     /**
-     * eliminarItem Acción que elimina un dataTracking en la BD
+     * eliminarItem Acción que elimina un item en la BD
      *
      */
     public function eliminarItem(Request $request)
@@ -272,6 +284,64 @@ class DataTrackingController extends AbstractController
 
         try {
             $resultado = $this->trackingService->EliminarItemDataTracking($data_tracking_item_id);
+            if ($resultado['success']) {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['message'] = "The operation was successful";
+
+            } else {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['error'] = $resultado['error'];
+            }
+
+            return $this->json($resultadoJson);
+
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+    }
+
+    /**
+     * eliminarLabor Acción que elimina un employee en la BD
+     *
+     */
+    public function eliminarLabor(Request $request)
+    {
+        $data_tracking_labor_id = $request->get('data_tracking_labor_id');
+
+        try {
+            $resultado = $this->trackingService->EliminarLaborDataTracking($data_tracking_labor_id);
+            if ($resultado['success']) {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['message'] = "The operation was successful";
+
+            } else {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['error'] = $resultado['error'];
+            }
+
+            return $this->json($resultadoJson);
+
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+    }
+
+    /**
+     * eliminarMaterial Acción que elimina un material en la BD
+     *
+     */
+    public function eliminarMaterial(Request $request)
+    {
+        $data_tracking_material_id = $request->get('data_tracking_material_id');
+
+        try {
+            $resultado = $this->trackingService->EliminarMaterialDataTracking($data_tracking_material_id);
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";

@@ -18,6 +18,82 @@ class DataTrackingService extends Base
 {
 
     /**
+     * EliminarMaterialDataTracking: Elimina un material en la BD
+     * @param int $data_tracking_material_id Id
+     * @author Marcel
+     */
+    public function EliminarMaterialDataTracking($data_tracking_material_id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $this->getDoctrine()->getRepository(DataTrackingMaterial::class)
+            ->find($data_tracking_material_id);
+        /**@var DataTrackingMaterial $entity */
+        if ($entity != null) {
+
+
+            $project_name = $entity->getDataTracking()->getProject()->getProjectNumber() . " - " . $entity->getDataTracking()->getProject()->getName();
+            $date = $entity->getDataTracking()->getDate()->format('m/d/Y');
+
+            $material_name = $entity->getMaterial()->getName();
+
+            $em->remove($entity);
+            $em->flush();
+
+            //Salvar log
+            $log_operacion = "Delete";
+            $log_categoria = "Data Tracking";
+            $log_descripcion = "The material of the data tracking is deleted, Material: $material_name, Project: $project_name, Date: $date";
+            $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
+
+            $resultado['success'] = true;
+        } else {
+            $resultado['success'] = false;
+            $resultado['error'] = "The requested record does not exist";
+        }
+
+        return $resultado;
+    }
+
+    /**
+     * EliminarLaborDataTracking: Elimina un employee en la BD
+     * @param int $data_tracking_labor_id Id
+     * @author Marcel
+     */
+    public function EliminarLaborDataTracking($data_tracking_labor_id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $this->getDoctrine()->getRepository(DataTrackingLabor::class)
+            ->find($data_tracking_labor_id);
+        /**@var DataTrackingLabor $entity */
+        if ($entity != null) {
+
+
+            $project_name = $entity->getDataTracking()->getProject()->getProjectNumber() . " - " . $entity->getDataTracking()->getProject()->getName();
+            $date = $entity->getDataTracking()->getDate()->format('m/d/Y');
+
+            $employee_name = $entity->getEmployee()->getName();
+
+            $em->remove($entity);
+            $em->flush();
+
+            //Salvar log
+            $log_operacion = "Delete";
+            $log_categoria = "Data Tracking";
+            $log_descripcion = "The employee of the data tracking is deleted, Employee: $employee_name, Project: $project_name, Date: $date";
+            $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
+
+            $resultado['success'] = true;
+        } else {
+            $resultado['success'] = false;
+            $resultado['error'] = "The requested record does not exist";
+        }
+
+        return $resultado;
+    }
+
+    /**
      * EliminarItemDataTracking: Elimina un item details en la BD
      * @param int $data_tracking_item_id Id
      * @author Marcel

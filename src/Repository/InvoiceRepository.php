@@ -205,7 +205,7 @@ class InvoiceRepository extends EntityRepository
      *
      * @return Invoice[]
      */
-    public function ListarInvoicesRangoFecha($company_id = '', $project_id = '', $fecha_inicial = '', $fecha_fin = '')
+    public function ListarInvoicesRangoFecha($company_id = '', $project_id = '', $fecha_inicial = '', $fecha_fin = '', $status = '')
     {
         $consulta = $this->createQueryBuilder('i')
             ->leftJoin('i.project', 'p')
@@ -219,6 +219,11 @@ class InvoiceRepository extends EntityRepository
         if ($project_id != '') {
             $consulta->andWhere('p.projectId = :project_id')
                 ->setParameter('project_id', $project_id);
+        }
+
+        if ($status !== '') {
+            $consulta->andWhere('p.status = :status')
+                ->setParameter('status', $status);
         }
 
         if ($fecha_inicial != "") {

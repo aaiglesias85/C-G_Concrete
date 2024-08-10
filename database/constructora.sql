@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 09-08-2024 a las 20:41:21
+-- Tiempo de generación: 10-08-2024 a las 20:38:44
 -- Versión del servidor: 5.7.44
 -- Versión de PHP: 8.1.29
 
@@ -84,8 +84,6 @@ CREATE TABLE `data_tracking` (
   `other_materials` text,
   `total_conc_used` float(8,2) DEFAULT NULL,
   `conc_price` float(8,2) DEFAULT NULL,
-  `total_labor` float(8,2) DEFAULT NULL,
-  `labor_price` float(8,2) DEFAULT NULL,
   `total_stamps` float(8,2) DEFAULT NULL,
   `total_people` float(18,2) NOT NULL,
   `overhead_price` float(18,2) NOT NULL,
@@ -99,9 +97,9 @@ CREATE TABLE `data_tracking` (
 -- Volcado de datos para la tabla `data_tracking`
 --
 
-INSERT INTO `data_tracking` (`id`, `date`, `station_number`, `measured_by`, `conc_vendor`, `crew_lead`, `notes`, `other_materials`, `total_conc_used`, `conc_price`, `total_labor`, `labor_price`, `total_stamps`, `total_people`, `overhead_price`, `created_at`, `updated_at`, `project_id`, `inspector_id`) VALUES
-(3, '2024-06-11', '45453', 'Marcel', 'CMP', '', '', '', 20.00, 150.00, 4.00, 50.00, 0.00, 0.00, 0.00, '2024-06-23 21:07:27', '2024-08-04 22:35:04', 2, NULL),
-(4, '2024-06-11', '435435', 'Marcel', 'CMP', '', '', '', 20.00, 100.00, NULL, NULL, 0.00, 40.00, 3500.00, '2024-06-23 21:16:44', '2024-08-09 20:25:39', 3, NULL);
+INSERT INTO `data_tracking` (`id`, `date`, `station_number`, `measured_by`, `conc_vendor`, `crew_lead`, `notes`, `other_materials`, `total_conc_used`, `conc_price`, `total_stamps`, `total_people`, `overhead_price`, `created_at`, `updated_at`, `project_id`, `inspector_id`) VALUES
+(3, '2024-06-11', '45453', 'Marcel', 'CMP', '', '', '', 20.00, 150.00, 0.00, 0.00, 0.00, '2024-06-23 21:07:27', '2024-08-10 19:26:35', 2, NULL),
+(4, '2024-06-11', '435435', 'Marcel', 'CMP', '', '', '', 20.00, 100.00, 0.00, 40.00, 3500.00, '2024-06-23 21:16:44', '2024-08-10 19:15:28', 3, NULL);
 
 -- --------------------------------------------------------
 
@@ -124,7 +122,6 @@ CREATE TABLE `data_tracking_item` (
 INSERT INTO `data_tracking_item` (`id`, `quantity`, `price`, `data_tracking_id`, `project_item_id`) VALUES
 (8, 40.00, 160.00, 3, 11),
 (9, 50.00, 200.00, 3, 12),
-(10, 30.00, 300.00, 3, 13),
 (11, 50.00, 16.50, 4, 1),
 (12, 30.00, 63.00, 4, 2);
 
@@ -142,6 +139,15 @@ CREATE TABLE `data_tracking_labor` (
   `employee_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Volcado de datos para la tabla `data_tracking_labor`
+--
+
+INSERT INTO `data_tracking_labor` (`id`, `hours`, `hourly_rate`, `data_tracking_id`, `employee_id`) VALUES
+(1, 20.00, 56.00, 4, 1),
+(3, 5.00, 70.00, 3, 2),
+(4, 10.00, 56.00, 3, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -155,6 +161,15 @@ CREATE TABLE `data_tracking_material` (
   `data_tracking_id` int(11) NOT NULL,
   `material_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Volcado de datos para la tabla `data_tracking_material`
+--
+
+INSERT INTO `data_tracking_material` (`id`, `quantity`, `price`, `data_tracking_id`, `material_id`) VALUES
+(1, 30.00, 5000.00, 4, 1),
+(3, 5.00, 5000.00, 3, 1),
+(4, 10.00, 500.00, 3, 2);
 
 -- --------------------------------------------------------
 
@@ -568,7 +583,14 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (199, 'Add', 'Material', 'The material is added: sdfdf', '::1', '2024-08-09 19:54:09', 1),
 (200, 'Update', 'Material', 'The material is modified: sdfdf fdgdfg', '::1', '2024-08-09 19:54:13', 1),
 (201, 'Delete', 'Material', 'The material is deleted: sdfdf fdgdfg', '::1', '2024-08-09 19:54:17', 1),
-(202, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-08-09 20:25:39', 1);
+(202, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-08-09 20:25:39', 1),
+(203, 'Delete', 'Data Tracking', 'The item of the data tracking is deleted, Item: CONC CURB & GUTTEER 8INX30IN TP7, Project: 0009002 - FL MIAMI, Date: 06/11/2024', '::1', '2024-08-10 17:38:56', 1),
+(204, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-08-10 19:10:49', 1),
+(205, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-08-10 19:13:36', 1),
+(206, 'Delete', 'Data Tracking', 'The material of the data tracking is deleted, Material: Material 2, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-08-10 19:15:23', 1),
+(207, 'Delete', 'Data Tracking', 'The employee of the data tracking is deleted, Employee: Andres Iglesias, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-08-10 19:15:26', 1),
+(208, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-08-10 19:15:28', 1),
+(209, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009002 - FL MIAMI, Date: 06/11/2024', '::1', '2024-08-10 19:26:35', 1);
 
 -- --------------------------------------------------------
 
@@ -1062,13 +1084,13 @@ ALTER TABLE `data_tracking_item`
 -- AUTO_INCREMENT de la tabla `data_tracking_labor`
 --
 ALTER TABLE `data_tracking_labor`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `data_tracking_material`
 --
 ALTER TABLE `data_tracking_material`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `employee`
@@ -1116,7 +1138,7 @@ ALTER TABLE `item`
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=203;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=210;
 
 --
 -- AUTO_INCREMENT de la tabla `material`

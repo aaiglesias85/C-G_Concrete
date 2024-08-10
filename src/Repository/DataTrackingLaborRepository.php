@@ -141,7 +141,7 @@ class DataTrackingLaborRepository extends EntityRepository
      *
      * @return float
      */
-    public function TotalLabor($data_tracking_id = '', $employee_id = '', $project_id = '', $fecha_inicial = '', $fecha_fin = '')
+    public function TotalLabor($data_tracking_id = '', $employee_id = '', $project_id = '', $fecha_inicial = '', $fecha_fin = '', $status = '')
     {
         $em = $this->getEntityManager();
         $consulta = 'SELECT SUM(d_t_l.hours * d_t_l.hourlyRate) FROM App\Entity\DataTrackingLabor d_t_l ';
@@ -195,6 +195,14 @@ class DataTrackingLaborRepository extends EntityRepository
                 $where .= 'AND (d_t.date <= :end) ';
         }
 
+        if ($status !== '') {
+            $esta_query = explode("WHERE", $where);
+            if (count($esta_query) == 1)
+                $where .= 'WHERE (p.status = :status) ';
+            else
+                $where .= 'AND (p.status = :status) ';
+        }
+
         $consulta .= $join;
         $consulta .= $where;
         $query = $em->createQuery($consulta);
@@ -223,6 +231,11 @@ class DataTrackingLaborRepository extends EntityRepository
         $esta_query_end = substr_count($consulta, ':end');
         if ($esta_query_end == 1) {
             $query->setParameter('end', $fecha_fin);
+        }
+
+        $esta_query_status = substr_count($consulta, ':status');
+        if ($esta_query_status == 1) {
+            $query->setParameter('status', $status);
         }
 
         return $query->getSingleScalarResult();
