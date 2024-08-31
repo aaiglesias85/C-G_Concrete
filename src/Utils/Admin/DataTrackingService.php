@@ -767,7 +767,7 @@ class DataTrackingService extends Base
             $arreglo_resultado[] = [
                 "id" => $data_tracking_id,
                 'project' => $value->getProject()->getProjectNumber() . " - " . $value->getProject()->getName(),
-                'date' => $value->getDate()->format('d/m/Y'),
+                'date' => $value->getDate()->format('m/d/Y'),
                 "stationNumber" => $value->getStationNumber(),
                 "measuredBy" => $value->getMeasuredBy(),
                 "totalConcUsed" => $total_conc_used,

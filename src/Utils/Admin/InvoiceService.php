@@ -49,16 +49,16 @@ class InvoiceService extends Base
         /** @var Invoice $invoice_entity */
 
         // fecha actual
-        $fecha_actual = date('d/m/Y');
+        $fecha_actual = date('m/d/Y');
         $objWorksheet->setCellValueExplicit("H5", $fecha_actual, DataType::TYPE_STRING);
 
         $number = $invoice_entity->getNumber();
         $objWorksheet->setCellValue("I5", $number);
 
-        $start_date = $invoice_entity->getStartDate()->format('d/m/Y');
+        $start_date = $invoice_entity->getStartDate()->format('m/d/Y');
         $objWorksheet->setCellValueExplicit("H10", $start_date, DataType::TYPE_STRING);
 
-        $end_date = $invoice_entity->getEndDate()->format('d/m/Y');
+        $end_date = $invoice_entity->getEndDate()->format('m/d/Y');
         $objWorksheet->setCellValueExplicit("I10", $end_date, DataType::TYPE_STRING);
 
         // company
