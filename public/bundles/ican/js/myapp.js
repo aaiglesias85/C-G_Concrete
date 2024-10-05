@@ -301,6 +301,18 @@ var MyApp = function () {
     }
 
     var handlerFormatNumber = function () {
+
+        // para que no se permitan caracteres que no sean numero y .
+        $(document).on('keypress', ".form-control-number", function(e) {
+            var keynum = window.event ? window.event.keyCode : e.which;
+
+            if ((keynum == 8) || (keynum == 0))
+                return true;
+
+            return /^[0-9.\-]*$/.test(String.fromCharCode(keynum));
+        });
+
+        // el plugin no funciona
         if (!jQuery().number) {
             return;
         }
