@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 10-08-2024 a las 20:38:44
+-- Tiempo de generación: 06-10-2024 a las 14:14:20
 -- Versión del servidor: 5.7.44
 -- Versión de PHP: 8.1.29
 
@@ -82,11 +82,11 @@ CREATE TABLE `data_tracking` (
   `crew_lead` varchar(255) DEFAULT NULL,
   `notes` text,
   `other_materials` text,
-  `total_conc_used` float(8,2) DEFAULT NULL,
-  `conc_price` float(8,2) DEFAULT NULL,
-  `total_stamps` float(8,2) DEFAULT NULL,
-  `total_people` float(18,2) NOT NULL,
-  `overhead_price` float(18,2) NOT NULL,
+  `total_conc_used` double(18,2) DEFAULT NULL,
+  `conc_price` double(18,2) DEFAULT NULL,
+  `total_stamps` double(18,2) DEFAULT NULL,
+  `total_people` double(18,2) NOT NULL,
+  `overhead_price` double(18,2) NOT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL,
@@ -98,7 +98,7 @@ CREATE TABLE `data_tracking` (
 --
 
 INSERT INTO `data_tracking` (`id`, `date`, `station_number`, `measured_by`, `conc_vendor`, `crew_lead`, `notes`, `other_materials`, `total_conc_used`, `conc_price`, `total_stamps`, `total_people`, `overhead_price`, `created_at`, `updated_at`, `project_id`, `inspector_id`) VALUES
-(3, '2024-06-11', '45453', 'Marcel', 'CMP', '', '', '', 20.00, 150.00, 0.00, 0.00, 0.00, '2024-06-23 21:07:27', '2024-08-10 19:26:35', 2, NULL),
+(3, '2024-08-31', '45453', 'Marcel', 'CMP', '', '', '', 20.00, 150.00, 0.00, 0.00, 0.00, '2024-06-23 21:07:27', '2024-08-31 16:32:41', 2, NULL),
 (4, '2024-06-11', '435435', 'Marcel', 'CMP', '', '', '', 20.00, 100.00, 0.00, 40.00, 3500.00, '2024-06-23 21:16:44', '2024-08-10 19:15:28', 3, NULL);
 
 -- --------------------------------------------------------
@@ -109,8 +109,8 @@ INSERT INTO `data_tracking` (`id`, `date`, `station_number`, `measured_by`, `con
 
 CREATE TABLE `data_tracking_item` (
   `id` int(11) NOT NULL,
-  `quantity` float(8,2) DEFAULT NULL,
-  `price` float(8,2) DEFAULT NULL,
+  `quantity` double(18,2) DEFAULT NULL,
+  `price` double(18,2) DEFAULT NULL,
   `data_tracking_id` int(11) DEFAULT NULL,
   `project_item_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -133,8 +133,8 @@ INSERT INTO `data_tracking_item` (`id`, `quantity`, `price`, `data_tracking_id`,
 
 CREATE TABLE `data_tracking_labor` (
   `id` int(11) NOT NULL,
-  `hours` float(8,2) DEFAULT NULL,
-  `hourly_rate` float(8,2) DEFAULT NULL,
+  `hours` double(18,2) DEFAULT NULL,
+  `hourly_rate` double(18,2) DEFAULT NULL,
   `data_tracking_id` int(11) NOT NULL,
   `employee_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -156,8 +156,8 @@ INSERT INTO `data_tracking_labor` (`id`, `hours`, `hourly_rate`, `data_tracking_
 
 CREATE TABLE `data_tracking_material` (
   `id` int(11) NOT NULL,
-  `quantity` float(8,2) DEFAULT NULL,
-  `price` float(8,2) DEFAULT NULL,
+  `quantity` double(18,2) DEFAULT NULL,
+  `price` double(18,2) DEFAULT NULL,
   `data_tracking_id` int(11) NOT NULL,
   `material_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -292,7 +292,7 @@ CREATE TABLE `invoice` (
 --
 
 INSERT INTO `invoice` (`invoice_id`, `number`, `start_date`, `end_date`, `notes`, `created_at`, `updated_at`, `project_id`) VALUES
-(1, '1', '2024-06-01', '2024-06-30', '', '2024-07-07 19:19:29', NULL, 2);
+(1, '1', '2024-08-01', '2024-08-31', '', '2024-07-07 19:19:29', '2024-08-31 16:37:43', 2);
 
 -- --------------------------------------------------------
 
@@ -302,9 +302,9 @@ INSERT INTO `invoice` (`invoice_id`, `number`, `start_date`, `end_date`, `notes`
 
 CREATE TABLE `invoice_item` (
   `id` int(11) NOT NULL,
-  `quantity_from_previous` float(8,2) DEFAULT NULL,
-  `quantity` float(8,2) DEFAULT NULL,
-  `price` float(8,2) DEFAULT NULL,
+  `quantity_from_previous` double(18,2) DEFAULT NULL,
+  `quantity` double(18,2) DEFAULT NULL,
+  `price` double(18,2) DEFAULT NULL,
   `invoice_id` int(11) DEFAULT NULL,
   `project_item_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -316,7 +316,10 @@ CREATE TABLE `invoice_item` (
 INSERT INTO `invoice_item` (`id`, `quantity_from_previous`, `quantity`, `price`, `invoice_id`, `project_item_id`) VALUES
 (1, NULL, 40.00, 160.00, 1, 11),
 (2, NULL, 50.00, 200.00, 1, 12),
-(3, NULL, 30.00, 300.00, 1, 13);
+(3, NULL, 30.00, 300.00, 1, 13),
+(4, 40.00, 40.00, 160.00, 1, 11),
+(5, 50.00, 50.00, 200.00, 1, 12),
+(6, 30.00, NULL, 300.00, 1, 13);
 
 -- --------------------------------------------------------
 
@@ -590,7 +593,13 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (206, 'Delete', 'Data Tracking', 'The material of the data tracking is deleted, Material: Material 2, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-08-10 19:15:23', 1),
 (207, 'Delete', 'Data Tracking', 'The employee of the data tracking is deleted, Employee: Andres Iglesias, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-08-10 19:15:26', 1),
 (208, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009003 - Houston Texas, Date: 06/11/2024', '::1', '2024-08-10 19:15:28', 1),
-(209, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009002 - FL MIAMI, Date: 06/11/2024', '::1', '2024-08-10 19:26:35', 1);
+(209, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009002 - FL MIAMI, Date: 06/11/2024', '::1', '2024-08-10 19:26:35', 1),
+(210, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009002 - FL MIAMI, Date: 08/31/2024', '127.0.0.1', '2024-08-31 16:32:41', 1),
+(211, 'Update', 'Invoice', 'The invoice #1 is modified', '127.0.0.1', '2024-08-31 16:37:43', 1),
+(212, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-05 17:13:53', 1),
+(213, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-06 14:07:16', 1),
+(214, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-06 14:07:55', 1),
+(215, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-06 14:08:31', 1);
 
 -- --------------------------------------------------------
 
@@ -650,7 +659,7 @@ CREATE TABLE `project` (
   `location` varchar(255) DEFAULT NULL,
   `owner` varchar(255) DEFAULT NULL,
   `subcontract` varchar(255) DEFAULT NULL,
-  `contract_amount` float(18,2) DEFAULT NULL,
+  `contract_amount` double(18,2) DEFAULT NULL,
   `federal_funding` tinyint(1) DEFAULT NULL,
   `county` varchar(255) DEFAULT NULL,
   `resurfacing` tinyint(1) DEFAULT NULL,
@@ -676,7 +685,7 @@ CREATE TABLE `project` (
 INSERT INTO `project` (`project_id`, `project_id_number`, `project_number`, `proposal_number`, `name`, `location`, `owner`, `subcontract`, `contract_amount`, `federal_funding`, `county`, `resurfacing`, `invoice_contact`, `certified_payrolls`, `start_date`, `end_date`, `due_date`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `company_id`, `inspector_id`) VALUES
 (1, NULL, '0009001', NULL, 'FL COUNTY', 'FL COUNTY', '', '', NULL, 0, '', 0, '', 0, NULL, NULL, '2024-05-31', 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-05-14 15:52:54', 1, 1),
 (2, NULL, '0009002', NULL, 'FL MIAMI', 'FL MIAMI', '', '', NULL, 0, '', 0, '', 0, NULL, NULL, '2024-05-28', 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-06-23 21:06:22', 1, 1),
-(3, '32435', '0009003', '345345', 'Houston Texas', NULL, 'Marcel', '896532', 500000.00, 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 2, NULL, NULL, '2024-04-24 04:24:02', '2024-07-28 19:23:17', 3, 1);
+(3, '32435', '0009003', '345345', 'Houston Texas', NULL, 'Marcel', '896532', 504554592.89, 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 2, NULL, NULL, '2024-04-24 04:24:02', '2024-10-06 14:08:31', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -686,8 +695,8 @@ INSERT INTO `project` (`project_id`, `project_id_number`, `project_number`, `pro
 
 CREATE TABLE `project_item` (
   `id` int(11) NOT NULL,
-  `quantity` float(8,2) DEFAULT NULL,
-  `price` float(8,2) DEFAULT NULL,
+  `quantity` double(18,2) DEFAULT NULL,
+  `price` double(18,2) DEFAULT NULL,
   `yield_calculation` varchar(50) DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL,
   `item_id` int(11) DEFAULT NULL,
@@ -1096,13 +1105,13 @@ ALTER TABLE `data_tracking_material`
 -- AUTO_INCREMENT de la tabla `employee`
 --
 ALTER TABLE `employee`
-  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `equation`
 --
 ALTER TABLE `equation`
-  MODIFY `equation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `equation_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `function`
@@ -1126,25 +1135,25 @@ ALTER TABLE `invoice`
 -- AUTO_INCREMENT de la tabla `invoice_item`
 --
 ALTER TABLE `invoice_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `item`
 --
 ALTER TABLE `item`
-  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=210;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=216;
 
 --
 -- AUTO_INCREMENT de la tabla `material`
 --
 ALTER TABLE `material`
-  MODIFY `material_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `material_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `notification`
@@ -1156,13 +1165,13 @@ ALTER TABLE `notification`
 -- AUTO_INCREMENT de la tabla `project`
 --
 ALTER TABLE `project`
-  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `project_item`
 --
 ALTER TABLE `project_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de la tabla `project_notes`
