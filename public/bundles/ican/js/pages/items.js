@@ -74,7 +74,7 @@ var Items = function () {
                         url: 'item/listarItem',
                     }
                 },
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false

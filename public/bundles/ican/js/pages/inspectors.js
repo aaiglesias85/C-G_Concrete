@@ -74,7 +74,7 @@ var Inspectors = function () {
                         url: 'inspector/listarInspector',
                     }
                 },
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false

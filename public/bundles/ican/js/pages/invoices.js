@@ -78,7 +78,7 @@ var Invoices = function () {
                         url: 'invoice/listarInvoice',
                     }
                 },
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false
@@ -1055,7 +1055,7 @@ var Invoices = function () {
             data: {
                 type: 'local',
                 source: items,
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false

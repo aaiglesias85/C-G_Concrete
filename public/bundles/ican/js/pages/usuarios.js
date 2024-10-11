@@ -82,7 +82,7 @@ var Usuarios = function () {
                         url: 'usuario/listarUsuario',
                     }
                 },
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false

@@ -53,7 +53,7 @@ var Employees = function () {
                         url: 'employee/listarEmployee',
                     }
                 },
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false

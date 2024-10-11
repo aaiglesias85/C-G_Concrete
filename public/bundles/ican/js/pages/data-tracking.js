@@ -140,7 +140,7 @@ var DataTracking = function () {
                         url: 'data-tracking/listar',
                     }
                 },
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false
@@ -1102,7 +1102,7 @@ var DataTracking = function () {
             data: {
                 type: 'local',
                 source: items_data_tracking,
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false
@@ -1557,7 +1557,7 @@ var DataTracking = function () {
             data: {
                 type: 'local',
                 source: labor,
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false
@@ -1924,7 +1924,7 @@ var DataTracking = function () {
             data: {
                 type: 'local',
                 source: materials,
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false

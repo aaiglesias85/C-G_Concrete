@@ -95,7 +95,7 @@ var Projects = function () {
                         url: 'project/listarProject',
                     }
                 },
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false
@@ -356,7 +356,10 @@ var Projects = function () {
         var po_number = $('#po_number').val();
         var po_cg = $('#po_cg').val();
         var manager = $('#manager').val();
+
         var contract_amount = $('#contract_amount').val();
+        contract_amount = contract_amount.replace(/,/g, '');  // Elimina todas las comas
+
         var proposal_number = $('#proposal_number').val();
         var project_id_number = $('#project_id_number').val();
 
@@ -565,7 +568,7 @@ var Projects = function () {
                     $('#subcontract').val(response.project.subcontract);
                     $('#county').val(response.project.county);
                     $('#invoice_contact').val(response.project.invoice_contact);
-                    $('#contract_amount').val(response.project.contract_amount);
+                    $('#contract_amount').val(MyApp.formatearNumero(response.project.contract_amount, 2, '.', ','));
                     $('#proposal_number').val(response.project.proposal_number);
                     $('#project_id_number').val(response.project.project_id_number);
 
@@ -754,6 +757,11 @@ var Projects = function () {
 
         $(document).off('switchChange.bootstrapSwitch', '#item-type');
         $(document).on('switchChange.bootstrapSwitch', '#item-type', changeItemType);
+
+        $('#contract_amount').change(function () {
+            var value = $(this).val();
+            $(this).val(MyApp.formatearNumero(value, 2, '.', ','));
+        });
 
     }
 
@@ -1028,7 +1036,7 @@ var Projects = function () {
             data: {
                 type: 'local',
                 source: items,
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false
@@ -1095,6 +1103,7 @@ var Projects = function () {
             total += item.quantity * item.price;
         });
         $('#total_total_items').val(MyApp.formatearNumero(total, 2, '.', ','));
+        $('#contract_amount').val(MyApp.formatearNumero(total, 2, '.', ','));
     };
     var actualizarTableListaItems = function () {
         if (oTableItems) {
@@ -1543,7 +1552,7 @@ var Projects = function () {
                         url: 'project/listarNotes',
                     }
                 },
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false

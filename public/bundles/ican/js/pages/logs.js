@@ -109,7 +109,7 @@ var Logs = function () {
                         url: 'log/listarLog',
                     }
                 },
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false

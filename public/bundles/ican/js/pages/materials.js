@@ -57,7 +57,7 @@ var Materials = function () {
                         url: 'material/listarMaterial',
                     }
                 },
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false

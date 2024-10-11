@@ -80,8 +80,8 @@ class ProjectController extends AbstractController
 
         //Sort
         $sort = !empty($request->get('sort')) ? $request->get('sort') : array();
-        $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'desc';
-        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'createdAt';
+        $sSortDir_0 = !empty($sort['sort']) ? $sort['sort'] : 'asc';
+        $iSortCol_0 = !empty($sort['field']) ? $sort['field'] : 'name';
         //$start and $limit
         $pagination = !empty($request->get('pagination')) ? $request->get('pagination') : array();
         $page = !empty($pagination['page']) ? (int)$pagination['page'] : 1;

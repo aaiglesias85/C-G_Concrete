@@ -59,7 +59,7 @@ var Units = function () {
                         url: 'unit/listarUnit',
                     }
                 },
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false

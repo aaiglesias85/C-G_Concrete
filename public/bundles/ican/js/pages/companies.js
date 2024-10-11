@@ -55,7 +55,7 @@ var Companies = function () {
                         url: 'company/listarCompany',
                     }
                 },
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false
@@ -657,7 +657,7 @@ var Companies = function () {
             data: {
                 type: 'local',
                 source: contacts,
-                pageSize: 10,
+                pageSize: 25,
                 saveState: {
                     cookie: false,
                     webstorage: false
