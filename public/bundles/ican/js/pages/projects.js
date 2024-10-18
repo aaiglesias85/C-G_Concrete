@@ -220,6 +220,8 @@ var Projects = function () {
         var $element = $('.select2');
         $element.removeClass('has-error').tooltip("dispose");
 
+        $('#div-contract-amount').removeClass('m--hide').addClass('m--hide');
+
         // items
         items = [];
         actualizarTableListaItems();
@@ -242,9 +244,9 @@ var Projects = function () {
                 end_date: {
                     required: true
                 },
-                contract_amount: {
+                /*contract_amount: {
                     required: true
-                },
+                },*/
                 owner: {
                     required: true
                 },
@@ -357,8 +359,8 @@ var Projects = function () {
         var po_cg = $('#po_cg').val();
         var manager = $('#manager').val();
 
-        var contract_amount = $('#contract_amount').val();
-        contract_amount = contract_amount.replace(/,/g, '');  // Elimina todas las comas
+        var contract_amount = calcularMontoTotalItems();
+        // contract_amount = contract_amount.replace(/,/g, '');  // Elimina todas las comas
 
         var proposal_number = $('#proposal_number').val();
         var project_id_number = $('#project_id_number').val();
@@ -568,7 +570,11 @@ var Projects = function () {
                     $('#subcontract').val(response.project.subcontract);
                     $('#county').val(response.project.county);
                     $('#invoice_contact').val(response.project.invoice_contact);
+
+
                     $('#contract_amount').val(MyApp.formatearNumero(response.project.contract_amount, 2, '.', ','));
+                    $('#div-contract-amount').removeClass('m--hide');
+
                     $('#proposal_number').val(response.project.proposal_number);
                     $('#project_id_number').val(response.project.project_id_number);
 
@@ -758,10 +764,13 @@ var Projects = function () {
         $(document).off('switchChange.bootstrapSwitch', '#item-type');
         $(document).on('switchChange.bootstrapSwitch', '#item-type', changeItemType);
 
-        $('#contract_amount').change(function () {
+
+        /*$('#contract_amount').change(function () {
             var value = $(this).val();
             $(this).val(MyApp.formatearNumero(value, 2, '.', ','));
         });
+
+         */
 
     }
 
@@ -1098,12 +1107,9 @@ var Projects = function () {
         // totals
         $('#total_count_items').val(items.length);
 
-        var total = 0;
-        items.forEach(item => {
-            total += item.quantity * item.price;
-        });
+        var total = calcularMontoTotalItems();
         $('#total_total_items').val(MyApp.formatearNumero(total, 2, '.', ','));
-        $('#contract_amount').val(MyApp.formatearNumero(total, 2, '.', ','));
+        // $('#contract_amount').val(MyApp.formatearNumero(total, 2, '.', ','));
     };
     var actualizarTableListaItems = function () {
         if (oTableItems) {
@@ -1513,6 +1519,16 @@ var Projects = function () {
         $("#proyect-number-item").html($('#number').val());
         $("#proyect-name-item").html($('#name').val());
     };
+    // calcular el monto total
+    var calcularMontoTotalItems = function () {
+        var total = 0;
+
+        items.forEach(item => {
+            total += item.quantity * item.price;
+        });
+
+        return total;
+    }
 
 
     // notes

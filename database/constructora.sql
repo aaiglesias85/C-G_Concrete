@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 06-10-2024 a las 14:38:00
+-- Tiempo de generación: 18-10-2024 a las 22:51:44
 -- Versión del servidor: 5.7.44
 -- Versión de PHP: 8.1.29
 
@@ -44,7 +44,7 @@ CREATE TABLE `company` (
 
 INSERT INTO `company` (`company_id`, `name`, `phone`, `address`, `contact_name`, `contact_email`, `created_at`, `updated_at`) VALUES
 (1, 'CONTRACTOR, INC', '(618)985-7850', NULL, 'Dan Schamerhorn', 'merhorn@earsnel.com', '2024-04-13 19:10:40', '2024-04-29 14:51:27'),
-(3, 'CONTRACTOR TWO , INC', '(653)289-6532', '', NULL, NULL, '2024-04-24 04:23:31', '2024-07-28 17:43:32');
+(3, 'Disrupsoft', '(653)289-6532', '', NULL, NULL, '2024-04-24 04:23:31', '2024-10-11 19:55:35');
 
 -- --------------------------------------------------------
 
@@ -109,7 +109,7 @@ INSERT INTO `data_tracking` (`id`, `date`, `station_number`, `measured_by`, `con
 
 CREATE TABLE `data_tracking_item` (
   `id` int(11) NOT NULL,
-  `quantity` decimal(18,2) DEFAULT NULL,
+  `quantity` decimal(18,6) DEFAULT NULL,
   `price` decimal(18,2) DEFAULT NULL,
   `data_tracking_id` int(11) DEFAULT NULL,
   `project_item_id` int(11) DEFAULT NULL
@@ -120,10 +120,10 @@ CREATE TABLE `data_tracking_item` (
 --
 
 INSERT INTO `data_tracking_item` (`id`, `quantity`, `price`, `data_tracking_id`, `project_item_id`) VALUES
-(8, 40.00, 160.00, 3, 11),
-(9, 50.00, 200.00, 3, 12),
-(11, 50.00, 16.50, 4, 1),
-(12, 30.00, 63.00, 4, 2);
+(8, 40.000000, 160.00, 3, 11),
+(9, 50.000000, 200.00, 3, 12),
+(11, 50.000000, 16.50, 4, 1),
+(12, 30.000000, 63.00, 4, 2);
 
 -- --------------------------------------------------------
 
@@ -302,8 +302,8 @@ INSERT INTO `invoice` (`invoice_id`, `number`, `start_date`, `end_date`, `notes`
 
 CREATE TABLE `invoice_item` (
   `id` int(11) NOT NULL,
-  `quantity_from_previous` decimal(18,2) DEFAULT NULL,
-  `quantity` decimal(18,2) DEFAULT NULL,
+  `quantity_from_previous` decimal(18,6) DEFAULT NULL,
+  `quantity` decimal(18,6) DEFAULT NULL,
   `price` decimal(18,2) DEFAULT NULL,
   `invoice_id` int(11) DEFAULT NULL,
   `project_item_id` int(11) DEFAULT NULL
@@ -314,12 +314,12 @@ CREATE TABLE `invoice_item` (
 --
 
 INSERT INTO `invoice_item` (`id`, `quantity_from_previous`, `quantity`, `price`, `invoice_id`, `project_item_id`) VALUES
-(1, NULL, 40.00, 160.00, 1, 11),
-(2, NULL, 50.00, 200.00, 1, 12),
-(3, NULL, 30.00, 300.00, 1, 13),
-(4, 40.00, 40.00, 160.00, 1, 11),
-(5, 50.00, 50.00, 200.00, 1, 12),
-(6, 30.00, NULL, 300.00, 1, 13);
+(1, NULL, 40.000000, 160.00, 1, 11),
+(2, NULL, 50.000000, 200.00, 1, 12),
+(3, NULL, 30.000000, 300.00, 1, 13),
+(4, 40.000000, 40.000000, 160.00, 1, 11),
+(5, 50.000000, 50.000000, 200.00, 1, 12),
+(6, 30.000000, NULL, 300.00, 1, 13);
 
 -- --------------------------------------------------------
 
@@ -601,7 +601,9 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (214, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-06 14:07:55', 1),
 (215, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-06 14:08:31', 1),
 (216, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-06 14:18:43', 1),
-(217, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-06 14:25:01', 1);
+(217, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-06 14:25:01', 1),
+(218, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-11 19:42:49', 1),
+(219, 'Update', 'Company', 'The company is modified: Disrupsoft', '::1', '2024-10-11 19:55:35', 1);
 
 -- --------------------------------------------------------
 
@@ -687,7 +689,7 @@ CREATE TABLE `project` (
 INSERT INTO `project` (`project_id`, `project_id_number`, `project_number`, `proposal_number`, `name`, `location`, `owner`, `subcontract`, `contract_amount`, `federal_funding`, `county`, `resurfacing`, `invoice_contact`, `certified_payrolls`, `start_date`, `end_date`, `due_date`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `company_id`, `inspector_id`) VALUES
 (1, NULL, '0009001', NULL, 'FL COUNTY', 'FL COUNTY', '', '', NULL, 0, '', 0, '', 0, NULL, NULL, '2024-05-31', 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-05-14 15:52:54', 1, 1),
 (2, NULL, '0009002', NULL, 'FL MIAMI', 'FL MIAMI', '', '', NULL, 0, '', 0, '', 0, NULL, NULL, '2024-05-28', 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-06-23 21:06:22', 1, 1),
-(3, '32435', '0009003', '345345', 'Houston Texas', NULL, 'Marcel', '896532', 504554.57, 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 2, NULL, NULL, '2024-04-24 04:24:02', '2024-10-06 14:25:01', 3, 1);
+(3, '32435', '0009003', '345345', 'Houston Texas', NULL, 'Marcel', '896532', 844500.00, 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 2, NULL, NULL, '2024-04-24 04:24:02', '2024-10-11 19:42:49', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -697,7 +699,7 @@ INSERT INTO `project` (`project_id`, `project_id_number`, `project_number`, `pro
 
 CREATE TABLE `project_item` (
   `id` int(11) NOT NULL,
-  `quantity` decimal(18,2) DEFAULT NULL,
+  `quantity` decimal(18,6) DEFAULT NULL,
   `price` decimal(18,2) DEFAULT NULL,
   `yield_calculation` varchar(50) DEFAULT NULL,
   `project_id` int(11) DEFAULT NULL,
@@ -710,16 +712,16 @@ CREATE TABLE `project_item` (
 --
 
 INSERT INTO `project_item` (`id`, `quantity`, `price`, `yield_calculation`, `project_id`, `item_id`, `equation_id`) VALUES
-(1, 1500.00, 16.50, 'equation', 3, 6, 2),
-(2, 2000.00, 63.00, 'same', 3, 15, NULL),
-(4, 1600.00, 150.00, 'equation', 3, 20, 2),
+(1, 1500.000000, 16.50, 'equation', 3, 6, 2),
+(2, 2000.000000, 63.00, 'same', 3, 15, NULL),
+(4, 1600.000000, 150.00, 'equation', 3, 20, 2),
 (5, NULL, 253.00, 'none', 1, 10, NULL),
-(8, 2500.00, 25.00, 'equation', 3, 3, 2),
-(9, 2500.00, 16.50, 'equation', 3, 7, 2),
-(10, 5000.00, 70.00, 'equation', 3, 12, 2),
-(11, 50.00, 160.00, 'none', 2, 12, NULL),
-(12, 60.00, 200.00, '', 2, 6, NULL),
-(13, 50.00, 300.00, '', 2, 7, NULL);
+(8, 2500.000000, 25.00, 'equation', 3, 3, 2),
+(9, 2500.000000, 16.50, 'equation', 3, 7, 2),
+(10, 5000.000000, 70.00, 'equation', 3, 12, 2),
+(11, 50.000000, 160.00, 'none', 2, 12, NULL),
+(12, 60.000000, 200.00, '', 2, 6, NULL),
+(13, 50.000000, 300.00, '', 2, 7, NULL);
 
 -- --------------------------------------------------------
 
@@ -1149,7 +1151,7 @@ ALTER TABLE `item`
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=218;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=220;
 
 --
 -- AUTO_INCREMENT de la tabla `material`
