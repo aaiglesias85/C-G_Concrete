@@ -22,9 +22,10 @@ class ProjectRepository extends EntityRepository
             /*->where('p.status = 1 OR p.status = 2')*/;
 
         if ($sSearch != "") {
-            $consulta->andWhere('p.invoiceContact LIKE :invoiceContact OR p.owner LIKE :owner OR
+            $consulta->andWhere('p.projectIdNumber LIKE :projectIdNumber OR p.invoiceContact LIKE :invoiceContact OR p.owner LIKE :owner OR
              p.manager LIKE :manager OR p.county LIKE :county OR p.projectNumber LIKE :number OR
-              p.name LIKE :name OR p.poNumber LIKE :po OR p.poCG LIKE :cg')
+              p.name LIKE :name OR p.poNumber LIKE :po OR p.poCG LIKE :cg OR i.name LIKE :inspector')
+                ->setParameter('projectIdNumber', "%${sSearch}%")
                 ->setParameter('invoiceContact', "%${sSearch}%")
                 ->setParameter('owner', "%${sSearch}%")
                 ->setParameter('manager', "%${sSearch}%")
@@ -32,7 +33,8 @@ class ProjectRepository extends EntityRepository
                 ->setParameter('number', "%${sSearch}%")
                 ->setParameter('name', "%${sSearch}%")
                 ->setParameter('po', "%${sSearch}%")
-                ->setParameter('cg', "%${sSearch}%");
+                ->setParameter('cg', "%${sSearch}%")
+                ->setParameter('inspector', "%${sSearch}%");
         }
 
         if ($company_id != '') {

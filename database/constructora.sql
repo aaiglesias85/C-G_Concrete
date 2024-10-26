@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 18-10-2024 a las 22:51:44
+-- Tiempo de generación: 19-10-2024 a las 00:05:44
 -- Versión del servidor: 5.7.44
 -- Versión de PHP: 8.1.29
 
@@ -43,7 +43,7 @@ CREATE TABLE `company` (
 --
 
 INSERT INTO `company` (`company_id`, `name`, `phone`, `address`, `contact_name`, `contact_email`, `created_at`, `updated_at`) VALUES
-(1, 'CONTRACTOR, INC', '(618)985-7850', NULL, 'Dan Schamerhorn', 'merhorn@earsnel.com', '2024-04-13 19:10:40', '2024-04-29 14:51:27'),
+(1, 'CONTRACTOR, INC', '(618)985-7850', '', NULL, NULL, '2024-04-13 19:10:40', '2024-10-18 23:59:37'),
 (3, 'Disrupsoft', '(653)289-6532', '', NULL, NULL, '2024-04-24 04:23:31', '2024-10-11 19:55:35');
 
 -- --------------------------------------------------------
@@ -57,6 +57,8 @@ CREATE TABLE `company_contact` (
   `name` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `phone` varchar(50) DEFAULT NULL,
+  `role` varchar(255) DEFAULT NULL,
+  `notes` text,
   `company_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -64,8 +66,8 @@ CREATE TABLE `company_contact` (
 -- Volcado de datos para la tabla `company_contact`
 --
 
-INSERT INTO `company_contact` (`contact_id`, `name`, `email`, `phone`, `company_id`) VALUES
-(1, 'Dan Schamerhorn', 'merhorn@earsnel.com', '(618)985-7850', 1);
+INSERT INTO `company_contact` (`contact_id`, `name`, `email`, `phone`, `role`, `notes`, `company_id`) VALUES
+(1, 'Dan Schamerhorn', 'merhorn@earsnel.com', '(618)985-7850', 'Senior', ' test', 1);
 
 -- --------------------------------------------------------
 
@@ -603,7 +605,8 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (216, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-06 14:18:43', 1),
 (217, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-06 14:25:01', 1),
 (218, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-11 19:42:49', 1),
-(219, 'Update', 'Company', 'The company is modified: Disrupsoft', '::1', '2024-10-11 19:55:35', 1);
+(219, 'Update', 'Company', 'The company is modified: Disrupsoft', '::1', '2024-10-11 19:55:35', 1),
+(220, 'Update', 'Company', 'The company is modified: CONTRACTOR, INC', '::1', '2024-10-18 23:59:37', 1);
 
 -- --------------------------------------------------------
 
@@ -690,6 +693,22 @@ INSERT INTO `project` (`project_id`, `project_id_number`, `project_number`, `pro
 (1, NULL, '0009001', NULL, 'FL COUNTY', 'FL COUNTY', '', '', NULL, 0, '', 0, '', 0, NULL, NULL, '2024-05-31', 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-05-14 15:52:54', 1, 1),
 (2, NULL, '0009002', NULL, 'FL MIAMI', 'FL MIAMI', '', '', NULL, 0, '', 0, '', 0, NULL, NULL, '2024-05-28', 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-06-23 21:06:22', 1, 1),
 (3, '32435', '0009003', '345345', 'Houston Texas', NULL, 'Marcel', '896532', 844500.00, 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 2, NULL, NULL, '2024-04-24 04:24:02', '2024-10-11 19:42:49', 3, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `project_contact`
+--
+
+CREATE TABLE `project_contact` (
+  `contact_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `role` varchar(255) DEFAULT NULL,
+  `notes` text,
+  `project_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -1015,6 +1034,13 @@ ALTER TABLE `project`
   ADD KEY `Ref6573` (`inspector_id`);
 
 --
+-- Indices de la tabla `project_contact`
+--
+ALTER TABLE `project_contact`
+  ADD PRIMARY KEY (`contact_id`),
+  ADD KEY `Ref6475` (`project_id`);
+
+--
 -- Indices de la tabla `project_item`
 --
 ALTER TABLE `project_item`
@@ -1151,7 +1177,7 @@ ALTER TABLE `item`
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=220;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=221;
 
 --
 -- AUTO_INCREMENT de la tabla `material`
@@ -1170,6 +1196,12 @@ ALTER TABLE `notification`
 --
 ALTER TABLE `project`
   MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `project_contact`
+--
+ALTER TABLE `project_contact`
+  MODIFY `contact_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `project_item`
@@ -1295,6 +1327,12 @@ ALTER TABLE `notification`
 ALTER TABLE `project`
   ADD CONSTRAINT `Refcontractor67` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`),
   ADD CONSTRAINT `Refinspector73` FOREIGN KEY (`inspector_id`) REFERENCES `inspector` (`inspector_id`);
+
+--
+-- Filtros para la tabla `project_contact`
+--
+ALTER TABLE `project_contact`
+  ADD CONSTRAINT `Refcontractor75` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Filtros para la tabla `project_item`

@@ -71,11 +71,51 @@ class CompanyService extends Base
             $contacts = $this->ListarContacts($company_id);
             $arreglo_resultado['contacts'] = $contacts;
 
+            // projects
+            $projects = $this->ListarProjects($company_id);
+            $arreglo_resultado['projects'] = $projects;
+
             $resultado['success'] = true;
             $resultado['company'] = $arreglo_resultado;
         }
 
         return $resultado;
+    }
+
+    /**
+     * ListarProjects
+     * @param $company_id
+     * @return array
+     */
+    public function ListarProjects($company_id)
+    {
+        $projects = [];
+
+        $company_projects = $this->getDoctrine()->getRepository(Project::class)
+            ->ListarProjectsDeCompany($company_id);
+
+        foreach ($company_projects as $key => $value) {
+            $project_id = $value->getProjectId();
+
+            // listar ultima nota del proyecto
+            $nota = $this->ListarUltimaNotaDeProject($project_id);
+
+            $projects[] = [
+                "id" => $project_id,
+                "projectNumber" => $value->getProjectNumber(),
+                "name" => $value->getName(),
+                "company" => $value->getCompany()->getName(),
+                "county" => $value->getCounty(),
+                "status" => $value->getStatus(),
+                "startDate" => $value->getStartDate() != '' ? $value->getStartDate()->format('m/d/Y') : '',
+                "endDate" => $value->getEndDate() != '' ? $value->getEndDate()->format('m/d/Y') : '',
+                "dueDate" => $value->getDueDate() != '' ? $value->getDueDate()->format('m/d/Y') : '',
+                'nota' => $nota,
+                'posicion' => $key
+            ];
+        }
+
+        return $projects;
     }
 
     /**
@@ -95,6 +135,8 @@ class CompanyService extends Base
                 'name' => $contact->getName(),
                 'email' => $contact->getEmail(),
                 'phone' => $contact->getPhone(),
+                'role' => $contact->getRole(),
+                'notes' => $contact->getNotes(),
                 'posicion' => $key
             ];
         }
@@ -338,6 +380,8 @@ class CompanyService extends Base
             $contact_entity->setName($value->name);
             $contact_entity->setEmail($value->email);
             $contact_entity->setPhone($value->phone);
+            $contact_entity->setRole($value->role);
+            $contact_entity->setNotes($value->notes);
 
             if ($is_new_contact) {
                 $contact_entity->setCompany($entity);

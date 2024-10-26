@@ -164,16 +164,22 @@ class ProjectController extends AbstractController
         $items = $request->get('items');
         $items = json_decode($items);
 
+        // contacts
+        $contacts = $request->get('contacts');
+        $contacts = json_decode($contacts);
+
         try {
 
             if ($project_id == "") {
                 $resultado = $this->projectService->SalvarProject($company_id, $inspector_id, $number, $name,
                     $location, $po_number, $po_cg, $manager, $status, $owner, $subcontract, $federal_funding, $county,
-                $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $due_date, $contract_amount, $proposal_number, $project_id_number, $items);
+                $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $due_date, $contract_amount,
+                    $proposal_number, $project_id_number, $items, $contacts);
             } else {
                 $resultado = $this->projectService->ActualizarProject($project_id, $company_id, $inspector_id, $number,
                     $name, $location, $po_number, $po_cg, $manager, $status, $owner, $subcontract, $federal_funding, $county,
-                    $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $due_date, $contract_amount, $proposal_number, $project_id_number, $items);
+                    $resurfacing, $invoice_contact, $certified_payrolls, $start_date, $end_date, $due_date, $contract_amount,
+                    $proposal_number, $project_id_number, $items, $contacts);
             }
 
             if ($resultado['success']) {

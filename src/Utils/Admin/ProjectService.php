@@ -11,6 +11,7 @@ use App\Entity\InvoiceItem;
 use App\Entity\Item;
 use App\Entity\Project;
 use App\Entity\DataTracking;
+use App\Entity\ProjectContact;
 use App\Entity\ProjectItem;
 use App\Entity\ProjectNotes;
 use App\Entity\Unit;
@@ -552,11 +553,41 @@ class ProjectService extends Base
             $items = $this->ListarItemsDeProject($project_id);
             $arreglo_resultado['items'] = $items;
 
+            // contacts
+            $contacts = $this->ListarContacts($project_id);
+            $arreglo_resultado['contacts'] = $contacts;
+
             $resultado['success'] = true;
             $resultado['project'] = $arreglo_resultado;
         }
 
         return $resultado;
+    }
+
+    /**
+     * ListarContacts
+     * @param $project_id
+     * @return array
+     */
+    public function ListarContacts($project_id)
+    {
+        $contacts = [];
+
+        $project_contacts = $this->getDoctrine()->getRepository(ProjectContact::class)
+            ->ListarContacts($project_id);
+        foreach ($project_contacts as $key => $contact) {
+            $contacts[] = [
+                'contact_id' => $contact->getContactId(),
+                'name' => $contact->getName(),
+                'email' => $contact->getEmail(),
+                'phone' => $contact->getPhone(),
+                'role' => $contact->getRole(),
+                'notes' => $contact->getNotes(),
+                'posicion' => $key
+            ];
+        }
+
+        return $contacts;
     }
 
     /**
@@ -627,6 +658,13 @@ class ProjectService extends Base
                 $resultado['success'] = false;
                 $resultado['error'] = "The project could not be deleted, because it is related to a invoice";
                 return $resultado;
+            }
+
+            // contacts
+            $contacts = $this->getDoctrine()->getRepository(ProjectContact::class)
+                ->ListarContacts($project_id);
+            foreach ($contacts as $contact) {
+                $em->remove($contact);
             }
 
             // items
@@ -704,6 +742,13 @@ class ProjectService extends Base
                             ->ListarInvoicesDeProject($project_id);
                         if (count($invoices) == 0) {
 
+                            // contacts
+                            $contacts = $this->getDoctrine()->getRepository(ProjectContact::class)
+                                ->ListarContacts($project_id);
+                            foreach ($contacts as $contact) {
+                                $em->remove($contact);
+                            }
+
                             // items
                             $items = $this->getDoctrine()->getRepository(ProjectItem::class)
                                 ->ListarItemsDeProject($project_id);
@@ -771,7 +816,8 @@ class ProjectService extends Base
     public function ActualizarProject($project_id, $company_id, $inspector_id, $number, $name, $location,
                                       $po_number, $po_cg, $manager, $status, $owner, $subcontract,
                                       $federal_funding, $county, $resurfacing, $invoice_contact,
-                                      $certified_payrolls, $start_date, $end_date, $due_date, $contract_amount, $proposal_number, $project_id_number, $items)
+                                      $certified_payrolls, $start_date, $end_date, $due_date,
+                                      $contract_amount, $proposal_number, $project_id_number, $items, $contacts)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -788,47 +834,202 @@ class ProjectService extends Base
                 return $resultado;
             }
 
+            // para guardar los cambios
+            $notas = [];
+
+            if ($number != $entity->getProjectNumber()) {
+                $notas[] = [
+                    'notes' => 'Change project number',
+                    'date' => new \DateTime()
+                ];
+            }
+
             $entity->setProjectNumber($number);
+
+
+            if ($name != $entity->getName()) {
+                $notas[] = [
+                    'notes' => 'Change name',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setName($name);
+
+            if ($location != $entity->getLocation()) {
+                $notas[] = [
+                    'notes' => 'Change location',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setLocation($location);
+
             $entity->setPoNumber($po_number);
             $entity->setPoCG($po_cg);
+
+            if ($manager != $entity->getManager()) {
+                $notas[] = [
+                    'notes' => 'Change manager',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setManager($manager);
+
+            if ($status != $entity->getStatus()) {
+                $notas[] = [
+                    'notes' => 'Change status',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setStatus($status);
+
+            if ($contract_amount != $entity->getContractAmount()) {
+                $notas[] = [
+                    'notes' => 'Change contract amount',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setContractAmount($contract_amount);
+
+            if ($proposal_number != $entity->getProposalNumber()) {
+                $notas[] = [
+                    'notes' => 'Change proposal id #',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setProposalNumber($proposal_number);
+
+
+            if ($project_id_number != $entity->getProjectIdNumber()) {
+                $notas[] = [
+                    'notes' => 'Change project id #',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setProjectIdNumber($project_id_number);
 
+
             if ($company_id != '') {
+
+                if ($company_id != $entity->getCompany()->getCompanyId()) {
+                    $notas[] = [
+                        'notes' => 'Change company',
+                        'date' => new \DateTime()
+                    ];
+                }
+
                 $company = $this->getDoctrine()->getRepository(Company::class)
                     ->find($company_id);
                 $entity->setCompany($company);
             }
+
+
             if ($inspector_id != '') {
+
+                if ($inspector_id != $entity->getInspector()->getInspectorId()) {
+                    $notas[] = [
+                        'notes' => 'Change inspector',
+                        'date' => new \DateTime()
+                    ];
+                }
+
                 $inspector = $this->getDoctrine()->getRepository(Inspector::class)
                     ->find($inspector_id);
                 $entity->setInspector($inspector);
             }
 
+
+            if ($owner != $entity->getOwner()) {
+                $notas[] = [
+                    'notes' => 'Change owner',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setOwner($owner);
+
+            if ($subcontract != $entity->getSubcontract()) {
+                $notas[] = [
+                    'notes' => 'Change Subcontract NO',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setSubcontract($subcontract);
+
+            if ($federal_funding != $entity->getFederalFunding()) {
+                $notas[] = [
+                    'notes' => 'Change federal funding',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setFederalFunding($federal_funding);
+
+            if ($county != $entity->getCounty()) {
+                $notas[] = [
+                    'notes' => 'Change county',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setCounty($county);
+
+            if ($resurfacing != $entity->getResurfacing()) {
+                $notas[] = [
+                    'notes' => 'Change resurfacing',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setResurfacing($resurfacing);
+
+            if ($invoice_contact != $entity->getInvoiceContact()) {
+                $notas[] = [
+                    'notes' => 'Change invoice contact',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setInvoiceContact($invoice_contact);
+
+            if ($certified_payrolls != $entity->getCertifiedPayrolls()) {
+                $notas[] = [
+                    'notes' => 'Change certified payrolls',
+                    'date' => new \DateTime()
+                ];
+            }
             $entity->setCertifiedPayrolls($certified_payrolls);
 
             if ($start_date != '') {
+
+                if ($start_date != $entity->getStartDate()->format('m/d/Y')) {
+                    $notas[] = [
+                        'notes' => 'Change start date',
+                        'date' => new \DateTime()
+                    ];
+                }
+
+
                 $start_date = \DateTime::createFromFormat('m/d/Y', $start_date);
                 $entity->setStartDate($start_date);
             }
 
             if ($end_date != '') {
+
+                if ($end_date != $entity->getEndDate()->format('m/d/Y')) {
+                    $notas[] = [
+                        'notes' => 'Change end date',
+                        'date' => new \DateTime()
+                    ];
+                }
+
                 $end_date = \DateTime::createFromFormat('m/d/Y', $end_date);
                 $entity->setEndDate($end_date);
             }
 
             if ($due_date != '') {
+
+                if ($due_date != $entity->getDueDate()->format('m/d/Y')) {
+                    $notas[] = [
+                        'notes' => 'Change due date',
+                        'date' => new \DateTime()
+                    ];
+                }
+
                 $due_date = \DateTime::createFromFormat('m/d/Y', $due_date);
                 $entity->setDueDate($due_date);
             }
@@ -837,6 +1038,11 @@ class ProjectService extends Base
 
             // items
             $items_new = $this->SalvarItems($entity, $items);
+            // save contacts
+            $this->SalvarContacts($entity, $contacts);
+
+            // save notes
+            $this->SalvarNotesUpdate($entity, $notas);
 
             $em->flush();
 
@@ -855,6 +1061,31 @@ class ProjectService extends Base
     }
 
     /**
+     * SalvarNotesUpdate
+     * @param $notas
+     * @param Project $entity
+     * @return void
+     */
+    public function SalvarNotesUpdate($entity, $notas)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        //notes
+        foreach ($notas as $value) {
+
+            $project_note = new ProjectNotes();
+
+            $project_note->setNotes($value['notes']);
+            $project_note->setDate($value['date']);
+
+            $project_note->setProject($entity);
+
+            $em->persist($project_note);
+
+        }
+    }
+
+    /**
      * SalvarProject: Guarda los datos de project en la BD
      * @param string $description Nombre
      * @author Marcel
@@ -862,7 +1093,8 @@ class ProjectService extends Base
     public function SalvarProject($company_id, $inspector_id, $number, $name, $location,
                                   $po_number, $po_cg, $manager, $status, $owner, $subcontract,
                                   $federal_funding, $county, $resurfacing, $invoice_contact,
-                                  $certified_payrolls, $start_date, $end_date, $due_date, $contract_amount, $proposal_number, $project_id_number, $items)
+                                  $certified_payrolls, $start_date, $end_date, $due_date,
+                                  $contract_amount, $proposal_number, $project_id_number, $items, $contacts)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -929,6 +1161,9 @@ class ProjectService extends Base
         // items
         $items_new = $this->SalvarItems($entity, $items);
 
+        // save contacts
+        $this->SalvarContacts($entity, $contacts);
+
         $em->flush();
 
         //Salvar log
@@ -942,6 +1177,46 @@ class ProjectService extends Base
         $resultado['items'] = $items_new;
 
         return $resultado;
+    }
+
+    /**
+     * SalvarContacts
+     * @param $contacts
+     * @param Project $entity
+     * @return void
+     */
+    public function SalvarContacts($entity, $contacts)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        //Senderos
+        foreach ($contacts as $value) {
+
+            $contact_entity = null;
+
+            if (is_numeric($value->contact_id)) {
+                $contact_entity = $this->getDoctrine()->getRepository(ProjectContact::class)
+                    ->find($value->contact_id);
+            }
+
+            $is_new_contact = false;
+            if ($contact_entity == null) {
+                $contact_entity = new ProjectContact();
+                $is_new_contact = true;
+            }
+
+            $contact_entity->setName($value->name);
+            $contact_entity->setEmail($value->email);
+            $contact_entity->setPhone($value->phone);
+            $contact_entity->setRole($value->role);
+            $contact_entity->setNotes($value->notes);
+
+            if ($is_new_contact) {
+                $contact_entity->setProject($entity);
+
+                $em->persist($contact_entity);
+            }
+        }
     }
 
     /**
@@ -1061,14 +1336,14 @@ class ProjectService extends Base
 
         $projects = [];
 
-        if($sSearch != ''){
+        if ($sSearch != '') {
             $lista = $this->getDoctrine()->getRepository(ProjectItem::class)
                 ->ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
                     $company_id, '', $status, $fecha_inicial, $fecha_fin);
             foreach ($lista as $p_i) {
                 $projects[] = $p_i->getProject();
             }
-        }else{
+        } else {
             $projects = $this->getDoctrine()->getRepository(Project::class)
                 ->ListarProjects($start, $limit, $sSearch, $iSortCol_0, $sSortDir_0,
                     $company_id, '', $status, $fecha_inicial, $fecha_fin);
@@ -1100,28 +1375,6 @@ class ProjectService extends Base
         }
 
         return $arreglo_resultado;
-    }
-
-    /**
-     * ListarUltimaNotaDeProject
-     * @param $project_id
-     * @return array
-     */
-    private function ListarUltimaNotaDeProject($project_id)
-    {
-        $nota = null;
-
-        $lista = $this->getDoctrine()->getRepository(ProjectNotes::class)
-            ->ListarNotesDeProject($project_id);
-        if (!empty($lista)) {
-            $nota = [
-                'id' => $lista[0]->getId(),
-                'nota' => $this->truncate($lista[0]->getNotes(), 50),
-                'date' => $lista[0]->getDate()->format('m/d/Y')
-            ];
-        }
-
-        return $nota;
     }
 
     /**

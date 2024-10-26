@@ -253,6 +253,34 @@ var Index = function () {
     var initWidgets = function () {
         $('.m-select2').select2();
 
+        $("#project").select2({
+            placeholder: "Search projects",
+            allowClear: true,
+            ajax: {
+                url: "project/listarOrdenados",
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return {
+                        search: params.term  // El término de búsqueda ingresado por el usuario
+                    };
+                },
+                processResults: function(data) {
+                    // Convierte los resultados de la API en el formato que Select2 espera
+                    return {
+                        results: $.map(data.projects, function(item) {
+                            return {
+                                id: item.project_id,  // ID del elemento
+                                text: `${item.number} - ${item.name}` // El nombre que se mostrará
+                            };
+                        })
+                    };
+                },
+                cache: true
+            },
+            minimumInputLength: 3
+        });
+
         // change
         $('#status').change(changeStatus);
         $('#project').change(changeProject);

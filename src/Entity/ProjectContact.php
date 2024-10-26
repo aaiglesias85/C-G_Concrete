@@ -5,12 +5,12 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * CompanyContact
+ * ProjectContact
  *
- * @ORM\Table(name="company_contact")
- * @ORM\Entity(repositoryClass="App\Repository\CompanyContactRepository")
+ * @ORM\Table(name="project_contact")
+ * @ORM\Entity(repositoryClass="App\Repository\ProjectContactRepository")
  */
-class CompanyContact
+class ProjectContact
 {
     /**
      * @var integer
@@ -57,14 +57,14 @@ class CompanyContact
     private $notes;
 
     /**
-     * @var Company
+     * @var Project
      *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Company")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Project")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="company_id", referencedColumnName="company_id")
+     *   @ORM\JoinColumn(name="project_id", referencedColumnName="project_id")
      * })
      */
-    private $company;
+    private $project;
 
     /**
      * Get contactId
@@ -106,14 +106,14 @@ class CompanyContact
         $this->email = $email;
     }
 
-    public function getCompany(): Company
+    public function getProject(): Project
     {
-        return $this->company;
+        return $this->project;
     }
 
-    public function setCompany($company)
+    public function setProject($project)
     {
-        $this->company = $company;
+        $this->project = $project;
     }
 
     public function getRole()

@@ -63,12 +63,18 @@
                     </div>
 
                     <div class="col-12 col-sm-3 col-md-3 mb-2 mb-sm-0">
+
+                        <select class="form-control m-select2 event-change" id="project" >
+                            <option></option>
+                        </select>
+                        {#
                         <select class="form-control m-select2 event-change" id="project">
                             <option value="">Project</option>
                             {% for item in projects %}
                                 <option value="{{ item.project_id }}">{{ item.number }} - {{ item.name }}</option>
                             {% endfor %}
                         </select>
+                        #}
                     </div>
 
                     <div class="col-12 col-sm-3 col-md-2 mb-2 mb-sm-0">

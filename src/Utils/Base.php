@@ -6,6 +6,7 @@ use App\Entity\Log;
 use App\Entity\Notification;
 use App\Entity\PermisoUsuario;
 use App\Entity\ProjectItem;
+use App\Entity\ProjectNotes;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
@@ -859,6 +860,28 @@ class Base
         }
 
         return $yield_calculation_name;
+    }
+
+    /**
+     * ListarUltimaNotaDeProject
+     * @param $project_id
+     * @return array
+     */
+    public function ListarUltimaNotaDeProject($project_id)
+    {
+        $nota = null;
+
+        $lista = $this->getDoctrine()->getRepository(ProjectNotes::class)
+            ->ListarNotesDeProject($project_id);
+        if (!empty($lista)) {
+            $nota = [
+                'id' => $lista[0]->getId(),
+                'nota' => $this->truncate($lista[0]->getNotes(), 50),
+                'date' => $lista[0]->getDate()->format('m/d/Y')
+            ];
+        }
+
+        return $nota;
     }
 
 

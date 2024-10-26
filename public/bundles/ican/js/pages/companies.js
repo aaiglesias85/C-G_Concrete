@@ -140,6 +140,10 @@ var Companies = function () {
         contacts = [];
         actualizarTableListaContacts();
 
+        //projects
+        projects = [];
+        actualizarTableListaProjects();
+
         //Mostrar el primer tab
         resetWizard();
 
@@ -347,6 +351,14 @@ var Companies = function () {
                         contacts = response.company.contacts;
                         actualizarTableListaContacts();
 
+                        // projects
+                        projects = response.company.projects;
+                        actualizarTableListaProjects();
+
+                        // habilitar tab
+                        totalTabs = 3;
+                        $('.nav-item-hide').removeClass('m--hide');
+
                         event_change = false;
 
                     } else {
@@ -540,6 +552,9 @@ var Companies = function () {
                 case 2:
                     actualizarTableListaContacts();
                     break;
+                case 3:
+                    actualizarTableListaProjects();
+                    break;
             }
 
         });
@@ -581,6 +596,10 @@ var Companies = function () {
                     break;
                 case 2:
                     $('#tab-contacts').tab('show');
+                    break;
+                case 2:
+                    $('#tab-projects').tab('show');
+                    actualizarTableListaProjects();
                     break;
             }
         }, 0);
@@ -636,6 +655,14 @@ var Companies = function () {
                 template: function (row) {
                     return '<a class="m-link" href="tel:' + row.phone + '">' + row.phone + '</a>';
                 }
+            },
+            {
+                field: "role",
+                title: "Role"
+            },
+            {
+                field: "notes",
+                title: "Notes"
             },
             {
                 field: "posicion",
@@ -727,16 +754,16 @@ var Companies = function () {
     var initFormContact = function () {
         $("#contact-form").validate({
             rules: {
-                name: {
+                /*name: {
                     required: true
-                },
+                },*/
                 email: {
-                    required: true,
+                    // required: true,
                     email: true
                 },
-                phone: {
+                /*phone: {
                     required: true
-                },
+                },*/
             },
             showErrors: function (errorMap, errorList) {
                 // Clean up any tooltips for valid elements
@@ -785,11 +812,13 @@ var Companies = function () {
         $(document).off('click', "#btn-salvar-contact");
         $(document).on('click', "#btn-salvar-contact", function (e) {
             e.preventDefault();
-            
+
             if ($('#contact-form').valid()) {
                 var name = $('#contact-name').val();
                 var email = $('#contact-email').val();
                 var phone = $('#contact-phone').val();
+                var role = $('#contact-role').val();
+                var notes = $('#contact-notes').val();
 
                 if (nEditingRowContact == null) {
 
@@ -798,6 +827,8 @@ var Companies = function () {
                         name: name,
                         email: email,
                         phone: phone,
+                        role: role,
+                        notes: notes,
                         posicion: contacts.length
                     });
 
@@ -807,6 +838,8 @@ var Companies = function () {
                         contacts[posicion].name = name;
                         contacts[posicion].email = email;
                         contacts[posicion].phone = phone;
+                        contacts[posicion].role = role;
+                        contacts[posicion].notes = notes;
                     }
                 }
 
@@ -905,9 +938,148 @@ var Companies = function () {
             $element.closest('.form-group').removeClass('has-error').addClass('success');
         });
 
+        $('#contact-form textarea').each(function (e) {
+            $element = $(this);
+            $element.val('');
+
+            $element.data("title", "").removeClass("has-error").tooltip("dispose");
+            $element.closest('.form-group').removeClass('has-error').addClass('success');
+        });
+
         nEditingRowContact = null;
     };
-    
+
+    // Projects
+    var projects = [];
+    var oTableListaProjects;
+    var initTableListaProjects = function () {
+        MyApp.block('#lista-projects-table-editable');
+
+        var table = $('#lista-projects-table-editable');
+
+        var aoColumns = [
+            {
+                field: "county",
+                title: "County"
+            },
+            {
+                field: "name",
+                title: "Name"
+            },
+            {
+                field: "dueDate",
+                title: "Due Date",
+                width: 100,
+            },
+            {
+                field: "company",
+                title: "Company"
+            },
+            {
+                field: "status",
+                title: "Status",
+                responsive: {visible: 'lg'},
+                width: 100,
+                // callback function support for column rendering
+                template: function (row) {
+                    var status = {
+                        1: {'title': 'In Progress', 'class': ' m-badge--info'},
+                        0: {'title': 'Not Started', 'class': ' m-badge--danger'},
+                        2: {'title': 'Completed', 'class': ' m-badge--success'},
+                    };
+                    return '<span class="m-badge ' + status[row.status].class + ' m-badge--wide">' + status[row.status].title + '</span>';
+                }
+            },
+            {
+                field: "nota",
+                title: "Notes",
+                responsive: {visible: 'lg'},
+                width: 200,
+                sortable: false,
+                // callback function support for column rendering
+                template: function (row) {
+
+                    var html = '';
+                    if (row.nota != null) {
+                        html = `${row.nota.nota} <span class="m-badge m-badge--info">${row.nota.date}</span>`;
+                    }
+                    return html;
+                }
+            }
+        ];
+        oTableListaProjects = table.mDatatable({
+            // datasource definition
+            data: {
+                type: 'local',
+                source: projects,
+                pageSize: 25,
+                saveState: {
+                    cookie: false,
+                    webstorage: false
+                }
+            },
+            // layout definition
+            layout: {
+                theme: 'default', // datatable theme
+                class: '', // custom wrapper class
+                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
+                //height: 550, // datatable's body's fixed height
+                footer: false // display/hide footer
+            },
+            // column sorting
+            sortable: true,
+            pagination: true,
+            // columns definition
+            columns: aoColumns,
+            // toolbar
+            toolbar: {
+                // toolbar items
+                items: {
+                    // pagination
+                    pagination: {
+                        // page size select
+                        pageSizeSelect: [10, 25, 30, 50, -1] // display dropdown to select pagination size. -1 is used for "ALl" option
+                    }
+                }
+            },
+            search: {
+                input: $('#lista-projects .m_form_search'),
+            },
+        });
+
+        //Events
+        oTableListaContacts
+            .on('m-datatable--on-ajax-done', function () {
+                mApp.unblock('#lista-projects-table-editable');
+            })
+            .on('m-datatable--on-ajax-fail', function (e, jqXHR) {
+                mApp.unblock('#lista-projects-table-editable');
+            })
+            .on('m-datatable--on-goto-page', function (e, args) {
+                MyApp.block('#lista-projects-table-editable');
+            })
+            .on('m-datatable--on-reloaded', function (e) {
+                MyApp.block('#lista-projects-table-editable');
+            })
+            .on('m-datatable--on-sort', function (e, args) {
+                MyApp.block('#lista-projects-table-editable');
+            })
+            .on('m-datatable--on-check', function (e, args) {
+                //eventsWriter('Checkbox active: ' + args.toString());
+            })
+            .on('m-datatable--on-uncheck', function (e, args) {
+                //eventsWriter('Checkbox inactive: ' + args.toString());
+            });
+
+    };
+    var actualizarTableListaProjects = function () {
+        if(oTableListaProjects){
+            oTableListaProjects.destroy();
+        }
+
+        initTableListaProjects();
+    }
+
     return {
         //main function to initiate the module
         init: function () {
