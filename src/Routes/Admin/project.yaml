@@ -48,6 +48,10 @@ eliminarNotesProjectAdmin:
   path: /project/eliminarNotes
   defaults: { _controller: App\Controller\Admin\ProjectController::eliminarNotes, _format: json }
 
+eliminarNotesDateProjectAdmin:
+  path: /project/eliminarNotesDate
+  defaults: { _controller: App\Controller\Admin\ProjectController::eliminarNotesDate, _format: json }
+
 #items
 listarItemsDeProjectAdmin:
   path: /project/listarItems

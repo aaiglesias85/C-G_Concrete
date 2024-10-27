@@ -233,6 +233,47 @@ class ProjectService extends Base
     }
 
     /**
+     * EliminarNotesDate: Elimina un notes en un rango de fechas en la BD
+     * @param int $project_id Id
+     * @author Marcel
+     */
+    public function EliminarNotesDate($project_id, $from, $to)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $project_entity = $this->getDoctrine()->getRepository(Project::class)
+            ->find($project_id);
+        /** @var Project $project_entity */
+        if ($project_entity != null) {
+
+            $project_name = $project_entity->getName();
+
+
+            $notes = $this->getDoctrine()->getRepository(ProjectNotes::class)
+                ->ListarNotesDeProject($project_id, $from, $to);
+            foreach ($notes as $entity) {
+                $em->remove($entity);
+            }
+
+            $em->flush();
+
+            //Salvar log
+            $log_operacion = "Delete";
+            $log_categoria = "Project Notes";
+            $log_descripcion = "The notes $from and $to is delete from project: $project_name";
+            $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
+
+            $resultado['success'] = true;
+
+        } else {
+            $resultado['success'] = false;
+            $resultado['error'] = "The requested record does not exist";
+        }
+
+        return $resultado;
+    }
+
+    /**
      * CargarDatosNotes: Carga los datos de un notes
      *
      * @param int $notes_id Id
@@ -839,7 +880,7 @@ class ProjectService extends Base
 
             if ($number != $entity->getProjectNumber()) {
                 $notas[] = [
-                    'notes' => 'Change project number',
+                    'notes' => 'Change project number, old value: ' . $entity->getProjectNumber(),
                     'date' => new \DateTime()
                 ];
             }
@@ -849,7 +890,7 @@ class ProjectService extends Base
 
             if ($name != $entity->getName()) {
                 $notas[] = [
-                    'notes' => 'Change name',
+                    'notes' => 'Change description, old value: ' . $entity->getName(),
                     'date' => new \DateTime()
                 ];
             }
@@ -857,7 +898,7 @@ class ProjectService extends Base
 
             if ($location != $entity->getLocation()) {
                 $notas[] = [
-                    'notes' => 'Change location',
+                    'notes' => 'Change location, old value: ' . $entity->getLocation(),
                     'date' => new \DateTime()
                 ];
             }
@@ -868,15 +909,28 @@ class ProjectService extends Base
 
             if ($manager != $entity->getManager()) {
                 $notas[] = [
-                    'notes' => 'Change manager',
+                    'notes' => 'Change manager, old value: ' . $entity->getManager(),
                     'date' => new \DateTime()
                 ];
             }
             $entity->setManager($manager);
 
             if ($status != $entity->getStatus()) {
+                // definir el valor del status
+                switch ($entity->getStatus()) {
+                    case 0:
+                        $old_status = "Not Started";
+                        break;
+                    case 1:
+                        $old_status = "In Progress";
+                        break;
+                    default:
+                        $old_status = "Completed";
+                        break;
+                }
+
                 $notas[] = [
-                    'notes' => 'Change status',
+                    'notes' => 'Change status, old value: ' . $old_status,
                     'date' => new \DateTime()
                 ];
             }
@@ -884,7 +938,7 @@ class ProjectService extends Base
 
             if ($contract_amount != $entity->getContractAmount()) {
                 $notas[] = [
-                    'notes' => 'Change contract amount',
+                    'notes' => 'Change contract amount, old value: ' . $entity->getContractAmount(),
                     'date' => new \DateTime()
                 ];
             }
@@ -892,7 +946,7 @@ class ProjectService extends Base
 
             if ($proposal_number != $entity->getProposalNumber()) {
                 $notas[] = [
-                    'notes' => 'Change proposal id #',
+                    'notes' => 'Change proposal id #, old value: ' . $entity->getProposalNumber(),
                     'date' => new \DateTime()
                 ];
             }
@@ -901,7 +955,7 @@ class ProjectService extends Base
 
             if ($project_id_number != $entity->getProjectIdNumber()) {
                 $notas[] = [
-                    'notes' => 'Change project id #',
+                    'notes' => 'Change project id #, old value: ' . $entity->getProjectIdNumber(),
                     'date' => new \DateTime()
                 ];
             }
@@ -912,7 +966,7 @@ class ProjectService extends Base
 
                 if ($company_id != $entity->getCompany()->getCompanyId()) {
                     $notas[] = [
-                        'notes' => 'Change company',
+                        'notes' => 'Change company, old value: ' . $entity->getCompany()->getName(),
                         'date' => new \DateTime()
                     ];
                 }
@@ -927,7 +981,7 @@ class ProjectService extends Base
 
                 if ($inspector_id != $entity->getInspector()->getInspectorId()) {
                     $notas[] = [
-                        'notes' => 'Change inspector',
+                        'notes' => 'Change inspector, old value: ' . $entity->getInspector()->getName(),
                         'date' => new \DateTime()
                     ];
                 }
@@ -940,7 +994,7 @@ class ProjectService extends Base
 
             if ($owner != $entity->getOwner()) {
                 $notas[] = [
-                    'notes' => 'Change owner',
+                    'notes' => 'Change owner, old value: ' . $entity->getOwner(),
                     'date' => new \DateTime()
                 ];
             }
@@ -948,7 +1002,7 @@ class ProjectService extends Base
 
             if ($subcontract != $entity->getSubcontract()) {
                 $notas[] = [
-                    'notes' => 'Change Subcontract NO',
+                    'notes' => 'Change Subcontract NO, old value: ' . $entity->getSubcontract(),
                     'date' => new \DateTime()
                 ];
             }
@@ -956,7 +1010,7 @@ class ProjectService extends Base
 
             if ($federal_funding != $entity->getFederalFunding()) {
                 $notas[] = [
-                    'notes' => 'Change federal funding',
+                    'notes' => 'Change federal funding, old value: ' . $entity->getFederalFunding() ? 'Yes' : 'No',
                     'date' => new \DateTime()
                 ];
             }
@@ -964,7 +1018,7 @@ class ProjectService extends Base
 
             if ($county != $entity->getCounty()) {
                 $notas[] = [
-                    'notes' => 'Change county',
+                    'notes' => 'Change county, old value: ' . $entity->getCounty(),
                     'date' => new \DateTime()
                 ];
             }
@@ -972,7 +1026,7 @@ class ProjectService extends Base
 
             if ($resurfacing != $entity->getResurfacing()) {
                 $notas[] = [
-                    'notes' => 'Change resurfacing',
+                    'notes' => 'Change resurfacing, old value: ' . $entity->getResurfacing() ? 'Yes' : 'No',
                     'date' => new \DateTime()
                 ];
             }
@@ -980,7 +1034,7 @@ class ProjectService extends Base
 
             if ($invoice_contact != $entity->getInvoiceContact()) {
                 $notas[] = [
-                    'notes' => 'Change invoice contact',
+                    'notes' => 'Change invoice contact, old value: ' . $entity->getInvoiceContact(),
                     'date' => new \DateTime()
                 ];
             }
@@ -988,7 +1042,7 @@ class ProjectService extends Base
 
             if ($certified_payrolls != $entity->getCertifiedPayrolls()) {
                 $notas[] = [
-                    'notes' => 'Change certified payrolls',
+                    'notes' => 'Change certified payrolls, old value: ' . $entity->getCertifiedPayrolls() ? 'Yes' : 'No',
                     'date' => new \DateTime()
                 ];
             }
@@ -998,7 +1052,7 @@ class ProjectService extends Base
 
                 if ($start_date != $entity->getStartDate()->format('m/d/Y')) {
                     $notas[] = [
-                        'notes' => 'Change start date',
+                        'notes' => 'Change start date, old value: ' . $entity->getStartDate()->format('m/d/Y'),
                         'date' => new \DateTime()
                     ];
                 }
@@ -1012,7 +1066,7 @@ class ProjectService extends Base
 
                 if ($end_date != $entity->getEndDate()->format('m/d/Y')) {
                     $notas[] = [
-                        'notes' => 'Change end date',
+                        'notes' => 'Change end date, old value: ' . $entity->getEndDate()->format('m/d/Y'),
                         'date' => new \DateTime()
                     ];
                 }
@@ -1025,7 +1079,7 @@ class ProjectService extends Base
 
                 if ($due_date != $entity->getDueDate()->format('m/d/Y')) {
                     $notas[] = [
-                        'notes' => 'Change due date',
+                        'notes' => 'Change due date, old value: ' . $entity->getDueDate()->format('m/d/Y'),
                         'date' => new \DateTime()
                     ];
                 }

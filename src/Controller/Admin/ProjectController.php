@@ -509,6 +509,37 @@ class ProjectController extends AbstractController
     }
 
     /**
+     * eliminarNotesDate Acción que elimina un notes en la BD
+     *
+     */
+    public function eliminarNotesDate(Request $request)
+    {
+        $project_id = $request->get('project_id');
+        $from = $request->get('from');
+        $to = $request->get('to');
+
+        try {
+            $resultado = $this->projectService->EliminarNotesDate($project_id, $from, $to);
+            if ($resultado['success']) {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['message'] = "The operation was successful";
+
+                return $this->json($resultadoJson);
+            } else {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['error'] = $resultado['error'];
+                return $this->json($resultadoJson);
+            }
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+
+    }
+
+    /**
      * listarItems Acción que lista los item en la BD
      *
      */

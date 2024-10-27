@@ -1837,6 +1837,68 @@ var Projects = function () {
 
         });
 
+        $(document).off('click', "#btn-eliminar-notes");
+        $(document).on('click', "#btn-eliminar-notes", function (e) {
+
+            e.preventDefault();
+
+            var project_id = $('#project_id').val();
+            var fechaInicial = $('#filtro-fecha-inicial-notes').val();
+            var fechaFin = $('#filtro-fecha-fin-notes').val();
+
+            if(fechaInicial === '' && fechaFin === ''){
+                toastr.error("Select the dates to delete", "");
+                return;
+            }
+
+            $('#modal-eliminar-notes-date').modal({
+                'show': true
+            });
+        });
+
+        $(document).off('click', "#btn-delete-note-date");
+        $(document).on('click', "#btn-delete-note-date", function (e) {
+
+            var project_id = $('#project_id').val();
+            var fechaInicial = $('#filtro-fecha-inicial-notes').val();
+            var fechaFin = $('#filtro-fecha-fin-notes').val();
+
+            MyApp.block('#notes-table-editable');
+
+            $.ajax({
+                type: "POST",
+                url: "project/eliminarNotesDate",
+                dataType: "json",
+                data: {
+                    'project_id': project_id,
+                    'from': fechaInicial,
+                    'to': fechaFin,
+                },
+                success: function (response) {
+                    mApp.unblock('#notes-table-editable');
+                    if (response.success) {
+
+                        // reset
+                        $('#filtro-fecha-inicial-notes').val('');
+                        $('#filtro-fecha-fin-notes').val('');
+
+                        btnClickFiltrarNotes();
+
+                        toastr.success(response.message, "Success");
+
+                    } else {
+                        toastr.error(response.error, "");
+                    }
+                },
+                failure: function (response) {
+                    mApp.unblock('#notes-table-editable');
+
+                    toastr.error(response.error, "");
+                }
+            });
+
+        });
+
 
     };
     var editRowNote = function (notes_id) {
