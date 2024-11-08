@@ -1052,7 +1052,7 @@ class ProjectService extends Base
 
                 if ($start_date != $entity->getStartDate()->format('m/d/Y')) {
                     $notas[] = [
-                        'notes' => 'Change start date, old value: ' . $entity->getStartDate()->format('m/d/Y'),
+                        'notes' => 'Change start date, old value: ' . preg_replace('/\/00(\d{2})$/', '/20$1', $entity->getStartDate()->format('m/d/Y')),
                         'date' => new \DateTime()
                     ];
                 }
@@ -1066,7 +1066,7 @@ class ProjectService extends Base
 
                 if ($end_date != $entity->getEndDate()->format('m/d/Y')) {
                     $notas[] = [
-                        'notes' => 'Change end date, old value: ' . $entity->getEndDate()->format('m/d/Y'),
+                        'notes' => 'Change end date, old value: ' . preg_replace('/\/00(\d{2})$/', '/20$1', $entity->getEndDate()->format('m/d/Y')),
                         'date' => new \DateTime()
                     ];
                 }
@@ -1079,7 +1079,7 @@ class ProjectService extends Base
 
                 if ($due_date != $entity->getDueDate()->format('m/d/Y')) {
                     $notas[] = [
-                        'notes' => 'Change due date, old value: ' . $entity->getDueDate()->format('m/d/Y'),
+                        'notes' => 'Change due date, old value: ' . preg_replace('/\/00(\d{2})$/', '/20$1', $entity->getDueDate()->format('m/d/Y')),
                         'date' => new \DateTime()
                     ];
                 }
