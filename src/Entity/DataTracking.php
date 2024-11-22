@@ -45,13 +45,6 @@ class DataTracking
     /**
      * @var string
      *
-     * @ORM\Column(name="conc_vendor", type="string", length=255, nullable=false)
-     */
-    private $concVendor;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="crew_lead", type="string", length=255, nullable=false)
      */
     private $crewLead;
@@ -69,6 +62,13 @@ class DataTracking
      * @ORM\Column(name="other_materials", type="string", length=255, nullable=false)
      */
     private $otherMaterials;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="conc_vendor", type="string", length=255, nullable=false)
+     */
+    private $concVendor;
 
     /**
      * @var float

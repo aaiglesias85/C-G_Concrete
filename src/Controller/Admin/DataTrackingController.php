@@ -150,6 +150,10 @@ class DataTrackingController extends AbstractController
         $total_people = $request->get('total_people');
         $overhead_price = $request->get('overhead_price');
 
+        // conc_vendors
+        $conc_vendors = $request->get('conc_vendors');
+        $conc_vendors = json_decode($conc_vendors);
+
         // items
         $items = $request->get('items');
         $items = json_decode($items);
@@ -166,7 +170,7 @@ class DataTrackingController extends AbstractController
 
             $resultado = $this->trackingService->SalvarDataTracking($data_tracking_id, $project_id, $date, $inspector_id,
                 $station_number, $measured_by, $conc_vendor, $conc_price, $crew_lead, $notes, $other_materials,
-                $total_conc_used, $total_stamps, $total_people, $overhead_price, $items, $labor, $materials);
+                $total_conc_used, $total_stamps, $total_people, $overhead_price, $items, $labor, $materials, $conc_vendors);
 
             if ($resultado['success']) {
 
@@ -342,6 +346,35 @@ class DataTrackingController extends AbstractController
 
         try {
             $resultado = $this->trackingService->EliminarMaterialDataTracking($data_tracking_material_id);
+            if ($resultado['success']) {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['message'] = "The operation was successful";
+
+            } else {
+                $resultadoJson['success'] = $resultado['success'];
+                $resultadoJson['error'] = $resultado['error'];
+            }
+
+            return $this->json($resultadoJson);
+
+        } catch (\Exception $e) {
+            $resultadoJson['success'] = false;
+            $resultadoJson['error'] = $e->getMessage();
+
+            return $this->json($resultadoJson);
+        }
+    }
+
+    /**
+     * eliminarConcVendor Acción que elimina un conc vendor en la BD
+     *
+     */
+    public function eliminarConcVendor(Request $request)
+    {
+        $data_tracking_conc_vendor_id = $request->get('data_tracking_conc_vendor_id');
+
+        try {
+            $resultado = $this->trackingService->EliminarConcVendorDataTracking($data_tracking_conc_vendor_id);
             if ($resultado['success']) {
                 $resultadoJson['success'] = $resultado['success'];
                 $resultadoJson['message'] = "The operation was successful";

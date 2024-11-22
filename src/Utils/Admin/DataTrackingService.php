@@ -3,6 +3,7 @@
 namespace App\Utils\Admin;
 
 use App\Entity\DataTracking;
+use App\Entity\DataTrackingConcVendor;
 use App\Entity\DataTrackingItem;
 use App\Entity\DataTrackingLabor;
 use App\Entity\DataTrackingMaterial;
@@ -16,6 +17,44 @@ use App\Utils\Base;
 
 class DataTrackingService extends Base
 {
+
+    /**
+     * EliminarConcVendorDataTracking: Elimina un conc vendor en la BD
+     * @param int $data_tracking_conc_vendor_id Id
+     * @author Marcel
+     */
+    public function EliminarConcVendorDataTracking($data_tracking_conc_vendor_id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $this->getDoctrine()->getRepository(DataTrackingConcVendor::class)
+            ->find($data_tracking_conc_vendor_id);
+        /**@var DataTrackingConcVendor $entity */
+        if ($entity != null) {
+
+
+            $project_name = $entity->getDataTracking()->getProject()->getProjectNumber() . " - " . $entity->getDataTracking()->getProject()->getName();
+            $date = $entity->getDataTracking()->getDate()->format('m/d/Y');
+
+            $conc_vendor = $entity->getConcVendor();
+
+            $em->remove($entity);
+            $em->flush();
+
+            //Salvar log
+            $log_operacion = "Delete";
+            $log_categoria = "Data Tracking";
+            $log_descripcion = "The conc vendor of the data tracking is deleted, Conc Vendor: $conc_vendor, Project: $project_name, Date: $date";
+            $this->SalvarLog($log_operacion, $log_categoria, $log_descripcion);
+
+            $resultado['success'] = true;
+        } else {
+            $resultado['success'] = false;
+            $resultado['error'] = "The requested record does not exist";
+        }
+
+        return $resultado;
+    }
 
     /**
      * EliminarMaterialDataTracking: Elimina un material en la BD
@@ -178,6 +217,10 @@ class DataTrackingService extends Base
 
             $arreglo_resultado['total_stamps'] = $entity->getTotalStamps();
 
+            // conc vendors
+            $conc_vendors = $this->ListarConcVendorsDeDataTracking($data_tracking_id);
+            $arreglo_resultado['conc_vendors'] = $conc_vendors;
+
             // items
             $items = $this->ListarItemsDeDataTracking($data_tracking_id);
             $arreglo_resultado['items'] = $items;
@@ -209,7 +252,9 @@ class DataTrackingService extends Base
                 ->TotalDaily($data_tracking_id);
             $arreglo_resultado['total_daily_today'] = $total_daily_today;
 
-            $total_concrete = $total_conc_used * $conc_price;
+
+            $total_concrete = $this->getDoctrine()->getRepository(DataTrackingConcVendor::class)
+                ->TotalConcPrice($data_tracking_id);
             $arreglo_resultado['total_concrete'] = $total_concrete;
 
             $total_labor_price = $this->getDoctrine()->getRepository(DataTrackingLabor::class)
@@ -224,6 +269,36 @@ class DataTrackingService extends Base
         }
 
         return $resultado;
+    }
+
+    /**
+     * ListarConcVendorsDeDataTracking
+     * @param $data_tracking_id
+     * @return array
+     */
+    public function ListarConcVendorsDeDataTracking($data_tracking_id)
+    {
+        $items = [];
+
+        $lista = $this->getDoctrine()->getRepository(DataTrackingConcVendor::class)
+            ->ListarConcVendor($data_tracking_id);
+        foreach ($lista as $key => $value) {
+
+            $total_conc_used = $value->getTotalConcUsed();
+            $conc_price = $value->getConcPrice();
+            $total = $total_conc_used * $conc_price;
+
+            $items[] = [
+                'data_tracking_conc_vendor_id' => $value->getId(),
+                "conc_vendor" => $value->getConcVendor(),
+                "total_conc_used" => $total_conc_used,
+                "conc_price" => $conc_price,
+                "total" => $total,
+                "posicion" => $key
+            ];
+        }
+
+        return $items;
     }
 
     /**
@@ -429,6 +504,13 @@ class DataTrackingService extends Base
     {
         $em = $this->getDoctrine()->getManager();
 
+        // conc vendors
+        $conc_vendors = $this->getDoctrine()->getRepository(DataTrackingConcVendor::class)
+            ->ListarConcVendor($data_tracking_id);
+        foreach ($conc_vendors as $conc_vendor) {
+            $em->remove($conc_vendor);
+        }
+
         // items
         $items = $this->getDoctrine()->getRepository(DataTrackingItem::class)
             ->ListarItems($data_tracking_id);
@@ -459,7 +541,7 @@ class DataTrackingService extends Base
      */
     public function SalvarDataTracking($data_tracking_id, $project_id, $date, $inspector_id,
                                        $station_number, $measured_by, $conc_vendor, $conc_price, $crew_lead, $notes, $other_materials,
-                                       $total_conc_used, $total_stamps, $total_people, $overhead_price, $items, $labor, $materials)
+                                       $total_conc_used, $total_stamps, $total_people, $overhead_price, $items, $labor, $materials, $conc_vendors)
     {
 
         $em = $this->getDoctrine()->getManager();
@@ -545,6 +627,8 @@ class DataTrackingService extends Base
             $log_descripcion = "The data tracking is modified, Project: $project_desc, Date: $date";
         }
 
+        // conc vendors
+        $this->SalvarConcVendors($entity, $conc_vendors);
         // items
         $this->SalvarItems($entity, $items);
         // labor
@@ -562,6 +646,43 @@ class DataTrackingService extends Base
 
         return $resultado;
 
+    }
+
+    /**
+     * SalvarConcVendors
+     * @param array $conc_vendors
+     * @param DataTracking $entity
+     * @return array
+     */
+    public function SalvarConcVendors($entity, $conc_vendors)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        foreach ($conc_vendors as $value) {
+
+            $data_tracking_conc_vendor_entity = null;
+
+            if (is_numeric($value->data_tracking_conc_vendor_id)) {
+                $data_tracking_conc_vendor_entity = $this->getDoctrine()->getRepository(DataTrackingConcVendor::class)
+                    ->find($value->data_tracking_conc_vendor_id);
+            }
+
+            $is_new_data_tracking_conc_vendor = false;
+            if ($data_tracking_conc_vendor_entity == null) {
+                $data_tracking_conc_vendor_entity = new DataTrackingConcVendor();
+                $is_new_data_tracking_conc_vendor = true;
+            }
+
+            $data_tracking_conc_vendor_entity->setConcVendor($value->conc_vendor);
+            $data_tracking_conc_vendor_entity->setTotalConcUsed($value->total_conc_used);
+            $data_tracking_conc_vendor_entity->setConcPrice($value->conc_price);
+
+            if ($is_new_data_tracking_conc_vendor) {
+                $data_tracking_conc_vendor_entity->setDataTracking($entity);
+
+                $em->persist($data_tracking_conc_vendor_entity);
+            }
+        }
     }
 
     /**
@@ -750,9 +871,12 @@ class DataTrackingService extends Base
             $total_daily_today = $this->getDoctrine()->getRepository(DataTrackingItem::class)
                 ->TotalDaily($data_tracking_id);
 
-            $total_conc_used = $value->getTotalConcUsed();
-            $conc_price = $value->getConcPrice();
-            $total_concrete = $total_conc_used * $conc_price;
+            // conc vendor
+            $total_conc_used = $this->getDoctrine()->getRepository(DataTrackingConcVendor::class)
+                ->TotalConcUsed($data_tracking_id);
+
+            $total_concrete = $this->getDoctrine()->getRepository(DataTrackingConcVendor::class)
+                ->TotalConcPrice($data_tracking_id);
 
 
             $total_labor = $this->getDoctrine()->getRepository(DataTrackingLabor::class)

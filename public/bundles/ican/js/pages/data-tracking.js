@@ -272,6 +272,10 @@ var DataTracking = function () {
         materials = [];
         actualizarTableListaMaterial();
 
+        // conc vendors
+        conc_vendors = [];
+        actualizarTableListaConcVendors();
+
         //Mostrar el primer tab
         resetWizard();
 
@@ -388,15 +392,16 @@ var DataTracking = function () {
                 var inspector_id = $('#inspector').val();
                 var station_number = $('#station_number').val();
                 var measured_by = $('#measured_by').val();
-                var conc_vendor = $('#conc_vendor').val();
-                var conc_price = $('#conc_price').val();
                 var crew_lead = $('#crew_lead').val();
                 var notes = $('#notes').val();
                 var other_materials = $('#other_materials').val();
-                var total_conc_used = $('#total_conc_used').val();
                 var total_stamps = $('#total_stamps').val();
                 var total_people = $('#total_people').val();
                 var overhead_price = $('#overhead_price').val();
+
+                // var conc_vendor = $('#conc_vendor').val();
+                // var conc_price = $('#conc_price').val();
+                // var total_conc_used = $('#total_conc_used').val();
 
                 MyApp.block('#modal-data-tracking .modal-content');
 
@@ -411,18 +416,19 @@ var DataTracking = function () {
                         'inspector_id': inspector_id,
                         'station_number': station_number,
                         'measured_by': measured_by,
-                        'conc_vendor': conc_vendor,
-                        'conc_price': conc_price,
+                        // 'conc_vendor': conc_vendor,
+                        // 'conc_price': conc_price,
                         'crew_lead': crew_lead,
                         'notes': notes,
                         'other_materials': other_materials,
-                        'total_conc_used': total_conc_used,
+                        // 'total_conc_used': total_conc_used,
                         'total_stamps': total_stamps,
                         'total_people': total_people,
                         'overhead_price': overhead_price,
                         'items': JSON.stringify(items_data_tracking),
                         'labor': JSON.stringify(labor),
-                        'materials': JSON.stringify(materials)
+                        'materials': JSON.stringify(materials),
+                        'conc_vendors': JSON.stringify(conc_vendors)
                     },
                     success: function (response) {
                         mApp.unblock('#modal-data-tracking .modal-content');
@@ -499,6 +505,7 @@ var DataTracking = function () {
                         $('#notes').val(response.data_tracking.notes);
                         $('#other_materials').val(response.data_tracking.other_materials);
 
+                        /*
                         $('#total_conc_used').off('change', calcularTotalConcrete);
                         $('#conc_price').off('change', calcularTotalConcrete);
 
@@ -510,6 +517,7 @@ var DataTracking = function () {
 
                         $('#total_conc_used').on('change', calcularTotalConcrete);
                         $('#conc_price').on('change', calcularTotalConcrete);
+                        */
 
 
                         $('#total_people').off('change', calcularTotalOverheadPrice);
@@ -538,6 +546,9 @@ var DataTracking = function () {
 
                         // materials
                         materials = response.data_tracking.materials;
+
+                        // conc vendors
+                        conc_vendors = response.data_tracking.conc_vendors;
 
                         // totals
                         $('#form-group-totals').removeClass('m--hide');
@@ -752,7 +763,7 @@ var DataTracking = function () {
             $('#total_concrete').val(total);
 
             // profit
-            calcularProfit();
+            // calcularProfit();
         }
     }
 
@@ -771,7 +782,7 @@ var DataTracking = function () {
     var calcularProfit = function () {
         var data_tracking_id = $('#data_tracking_id').val();
         if (data_tracking_id != '') {
-            var total_concrete = $('#total_concrete').val();
+            var total_concrete = calcularTotalConcPrice();
             var total_labor = calcularTotalLaborPrice();
             var total_daily_today = $('#total_daily_today').val();
 
@@ -963,7 +974,7 @@ var DataTracking = function () {
 
     //Wizard
     var activeTab = 1;
-    var totalTabs = 4;
+    var totalTabs = 5;
     var initWizard = function () {
         $(document).off('click', "#modal-data-tracking .wizard-tab");
         $(document).on('click', "#modal-data-tracking .wizard-tab", function (e) {
@@ -989,6 +1000,9 @@ var DataTracking = function () {
                 case 4:
                     actualizarTableListaMaterial()
                     break;
+                case 5:
+                    actualizarTableListaConcVendors()
+                    break;
             }
 
         });
@@ -1011,12 +1025,16 @@ var DataTracking = function () {
                     $('#tab-material').tab('show');
                     actualizarTableListaMaterial();
                     break;
+                case 5:
+                    $('#tab-conc-vendor').tab('show');
+                    actualizarTableListaConcVendors();
+                    break;
             }
         }, 0);
     }
     var resetWizard = function () {
         activeTab = 1;
-        totalTabs = 4;
+        totalTabs = 5;
         mostrarTab();
     }
     var validWizard = function () {
@@ -2218,6 +2236,362 @@ var DataTracking = function () {
         nEditingRowMaterial = null;
     };
 
+    // conc vendors
+    var oTableConcVendor;
+    var conc_vendors = [];
+    var nEditingRowConcVendor = null;
+    var initTableConcVendor = function () {
+        MyApp.block('#conc-vendor-table-editable');
+
+        var table = $('#conc-vendor-table-editable');
+
+        var aoColumns = [
+            {
+                field: "conc_vendor",
+                title: "Conc Vendor",
+            },
+            {
+                field: "total_conc_used",
+                title: "Total Conc Used",
+                width: 120,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>${MyApp.formatearNumero(row.total_conc_used, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "conc_price",
+                title: "Conc Price",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>$${MyApp.formatearNumero(row.conc_price, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "total",
+                title: "$ Total",
+                width: 100,
+                textAlign: 'center',
+                template: function (row) {
+                    return `<span>$${MyApp.formatearNumero(row.total, 2, '.', ',')}</span>`;
+                }
+            },
+            {
+                field: "posicion",
+                width: 120,
+                title: "Actions",
+                sortable: false,
+                overflow: 'visible',
+                textAlign: 'center',
+                template: function (row) {
+                    return `
+                    <a href="javascript:;" data-posicion="${row.posicion}" class="edit m-portlet__nav-link btn m-btn m-btn--hover-success m-btn--icon m-btn--icon-only m-btn--pill" title="Edit"><i class="la la-edit"></i></a>
+                    <a href="javascript:;" data-posicion="${row.posicion}" class="delete m-portlet__nav-link btn m-btn m-btn--hover-danger m-btn--icon m-btn--icon-only m-btn--pill" title="Delete"><i class="la la-trash"></i></a>
+                    `;
+                }
+            }
+        ];
+        oTableConcVendor = table.mDatatable({
+            // datasource definition
+            data: {
+                type: 'local',
+                source: conc_vendors,
+                pageSize: 25,
+                saveState: {
+                    cookie: false,
+                    webstorage: false
+                }
+            },
+            // layout definition
+            layout: {
+                theme: 'default', // datatable theme
+                class: '', // custom wrapper class
+                scroll: true, // enable/disable datatable scroll both horizontal and vertical when needed.
+                //height: 550, // datatable's body's fixed height
+                footer: false // display/hide footer
+            },
+            // column sorting
+            sortable: true,
+            pagination: true,
+            // columns definition
+            columns: aoColumns,
+            // toolbar
+            toolbar: {
+                // toolbar items
+                items: {
+                    // pagination
+                    pagination: {
+                        // page size select
+                        pageSizeSelect: [10, 25, 30, 50, -1] // display dropdown to select pagination size. -1 is used for "ALl" option
+                    }
+                }
+            },
+            search: {
+                input: $('#lista-conc-vendor .m_form_search'),
+            }
+        });
+
+        //Events
+        oTableItems
+            .on('m-datatable--on-ajax-done', function () {
+                mApp.unblock('#conc-vendor-table-editable');
+            })
+            .on('m-datatable--on-ajax-fail', function (e, jqXHR) {
+                mApp.unblock('#conc-vendor-table-editable');
+            })
+            .on('m-datatable--on-goto-page', function (e, args) {
+                MyApp.block('#conc-vendor-table-editable');
+            })
+            .on('m-datatable--on-reloaded', function (e) {
+                MyApp.block('#conc-vendor-table-editable');
+            })
+            .on('m-datatable--on-sort', function (e, args) {
+                MyApp.block('#conc-vendor-table-editable');
+            })
+            .on('m-datatable--on-check', function (e, args) {
+                //eventsWriter('Checkbox active: ' + args.toString());
+            })
+            .on('m-datatable--on-uncheck', function (e, args) {
+                //eventsWriter('Checkbox inactive: ' + args.toString());
+            });
+    };
+    var actualizarTableListaConcVendors = function () {
+        if (oTableConcVendor) {
+            oTableConcVendor.destroy();
+        }
+
+        initTableConcVendor();
+
+        // calcular profit
+        calcularProfit();
+    }
+    var initFormConcVendor = function () {
+        $("#data-tracking-conc-vendor-form").validate({
+            rules: {
+                total_conc_used: {
+                    required: true
+                },
+                conc_vendor: {
+                    required: true
+                },
+                conc_price: {
+                    required: true
+                },
+            },
+            showErrors: function (errorMap, errorList) {
+                // Clean up any tooltips for valid elements
+                $.each(this.validElements(), function (index, element) {
+                    var $element = $(element);
+
+                    $element.data("title", "") // Clear the title - there is no error associated anymore
+                        .removeClass("has-error")
+                        .tooltip("dispose");
+
+                    $element
+                        .closest('.form-group')
+                        .removeClass('has-error').addClass('success');
+                });
+
+                // Create new tooltips for invalid elements
+                $.each(errorList, function (index, error) {
+                    var $element = $(error.element);
+
+                    $element.tooltip("dispose") // Destroy any pre-existing tooltip so we can repopulate with new tooltip content
+                        .data("title", error.message)
+                        .addClass("has-error")
+                        .tooltip({
+                            placement: 'bottom'
+                        }); // Create a new tooltip based on the error messsage we just set in the title
+
+                    $element.closest('.form-group')
+                        .removeClass('has-success').addClass('has-error');
+
+                });
+            },
+        });
+    };
+    var initAccionesConcVendor = function () {
+
+        $(document).off('click', "#btn-agregar-conc-vendor");
+        $(document).on('click', "#btn-agregar-conc-vendor", function (e) {
+            // reset
+            resetFormConcVendor();
+
+            $('#modal-data-tracking-conc-vendor').modal({
+                'show': true
+            });
+        });
+
+        $(document).off('click', "#btn-salvar-data-tracking-conc-vendor");
+        $(document).on('click', "#btn-salvar-data-tracking-conc-vendor", function (e) {
+            e.preventDefault();
+
+
+            if ($('#data-tracking-conc-vendor-form').valid()) {
+
+                var total_conc_used = $('#total_conc_used').val();
+                var conc_vendor = $('#conc_vendor').val();
+                var conc_price = $('#conc_price').val();
+
+                var total = total_conc_used * conc_price;
+
+                if (nEditingRowConcVendor == null) {
+
+                    conc_vendors.push({
+                        data_tracking_conc_vendor_id: '',
+                        conc_vendor: conc_vendor,
+                        total_conc_used: total_conc_used,
+                        conc_price: conc_price,
+                        total: total,
+                        posicion: conc_vendors.length
+                    });
+
+                } else {
+                    var posicion = nEditingRowConcVendor;
+                    if (conc_vendors[posicion]) {
+                        conc_vendors[posicion].conc_vendor = conc_vendor;
+                        conc_vendors[posicion].total_conc_used = total_conc_used;
+                        conc_vendors[posicion].conc_price = conc_price;
+                        conc_vendors[posicion].total = total;
+                    }
+                }
+
+                //actualizar lista
+                actualizarTableListaConcVendors();
+
+                if (nEditingRowConcVendor != null) {
+                    $('#modal-data-tracking-conc-vendor').modal('hide');
+                }
+
+                // reset
+                resetFormConcVendor();
+
+            }
+
+        });
+
+        $(document).off('click', "#conc-vendor-table-editable a.edit");
+        $(document).on('click', "#conc-vendor-table-editable a.edit", function (e) {
+            var posicion = $(this).data('posicion');
+            if (conc_vendors[posicion]) {
+
+                // reset
+                resetFormConcVendor();
+
+                nEditingRowConcVendor = posicion;
+
+                $('#total_conc_used').off('change', calcularTotalConcrete);
+                $('#conc_price').off('change', calcularTotalConcrete);
+
+                $('#conc_vendor').val(conc_vendors[posicion].conc_vendor);
+                $('#total_conc_used').val(conc_vendors[posicion].total_conc_used);
+                $('#conc_price').val(conc_vendors[posicion].conc_price);
+
+                calcularTotalConcrete();
+
+                $('#total_conc_used').on('change', calcularTotalConcrete);
+                $('#conc_price').on('change', calcularTotalConcrete);
+
+
+                // open modal
+                $('#modal-data-tracking-conc-vendor').modal('show');
+
+            }
+        });
+
+        $(document).off('click', "#conc-vendor-table-editable a.delete");
+        $(document).on('click', "#conc-vendor-table-editable a.delete", function (e) {
+
+            e.preventDefault();
+            var posicion = $(this).data('posicion');
+
+            swal.fire({
+                buttonsStyling: false,
+                html: "Are you sure you want to delete the selected conc vendor?",
+                type: "warning",
+                confirmButtonText: "Yes, delete it!",
+                confirmButtonClass: "btn btn-sm btn-bold btn-success",
+                showCancelButton: true,
+                cancelButtonText: "No, cancel",
+                cancelButtonClass: "btn btn-sm btn-bold btn-danger"
+            }).then(function (result) {
+                if (result.value) {
+                    EliminarConcVendor(posicion);
+                }
+            });
+
+        });
+
+        function EliminarConcVendor(posicion) {
+            if (conc_vendors[posicion]) {
+
+                if (conc_vendors[posicion].data_tracking_conc_vendor_id != '') {
+                    MyApp.block('#conc-vendor-table-editable');
+
+                    $.ajax({
+                        type: "POST",
+                        url: "data-tracking/eliminarConcVendor",
+                        dataType: "json",
+                        data: {
+                            'data_tracking_conc_vendor_id': conc_vendors[posicion].data_tracking_conc_vendor_id
+                        },
+                        success: function (response) {
+                            mApp.unblock('#conc-vendor-table-editable');
+                            if (response.success) {
+
+                                toastr.success(response.message, "Success");
+
+                                deleteConcVendor(posicion);
+
+                            } else {
+                                toastr.error(response.error, "");
+                            }
+                        },
+                        failure: function (response) {
+                            mApp.unblock('#conc-vendor-table-editable');
+
+                            toastr.error(response.error, "");
+                        }
+                    });
+                } else {
+                    deleteConcVendor(posicion);
+                }
+            }
+        }
+
+        function deleteConcVendor(posicion) {
+            //Eliminar
+            conc_vendors.splice(posicion, 1);
+            //actualizar posiciones
+            for (var i = 0; i < conc_vendors.length; i++) {
+                conc_vendors[i].posicion = i;
+            }
+            //actualizar lista
+            actualizarTableListaConcVendors();
+        }
+    };
+    var resetFormConcVendor = function () {
+        $('#data-tracking-conc-vendor-form input').each(function (e) {
+            $element = $(this);
+            $element.val('');
+
+            $element.data("title", "").removeClass("has-error").tooltip("dispose");
+            $element.closest('.form-group').removeClass('has-error').addClass('success');
+        });
+
+        nEditingRowConcVendor = null;
+    };
+    var calcularTotalConcPrice = function () {
+        var total = 0;
+
+        for (var i = 0; i < conc_vendors.length; i++) {
+            total += conc_vendors[i].total_conc_used * conc_vendors[i].conc_price;
+        }
+
+        return total;
+    }
+
     return {
         //main function to initiate the module
         init: function () {
@@ -2254,6 +2628,11 @@ var DataTracking = function () {
             initTableMaterial();
             initFormMaterial();
             initAccionesMaterial();
+
+            // conc vendor
+            initTableConcVendor();
+            initFormConcVendor();
+            initAccionesConcVendor();
         }
 
     };

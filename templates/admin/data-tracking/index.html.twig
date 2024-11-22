@@ -289,6 +289,12 @@
                                 Materials
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link wizard-tab" data-item="5"
+                               data-toggle="tab" href="#tab-content-conc-vendor" id="tab-conc-vendor">
+                                Conc Vendors
+                            </a>
+                        </li>
 
                     </ul>
 
@@ -362,6 +368,8 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                {#
                                 <div class="form-group m-form__group ic-form-group">
                                     <div class="row">
                                         <div class="col-md-3">
@@ -405,12 +413,13 @@
                                         </div>
                                     </div>
                                 </div>
+                                #}
 
                                 <div class="form-group m-form__group ic-form-group">
                                     <div class="row">
                                         <div class="col-md-4">
                                             <label>
-                                                <span class="ic-step-number">4</span>
+                                                <span class="ic-step-number">3</span>
                                                 Total People
                                                 <span class="ic-small italic">(optional)</span>
                                             </label>
@@ -448,7 +457,7 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <label>
-                                                <span class="ic-step-number">5</span>
+                                                <span class="ic-step-number">4</span>
                                                 Crew Lead
                                                 <span class="ic-small italic">(optional)</span>
                                             </label>
@@ -468,7 +477,7 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <label>
-                                                <span class="ic-step-number">6</span>
+                                                <span class="ic-step-number">5</span>
                                                 Notes
                                                 <span class="ic-small italic">(optional)</span>
                                             </label>
@@ -488,7 +497,7 @@
                                     <div class="row">
                                         <div class="col-md-3">
                                             <label>
-                                                <span class="ic-step-number">7</span>
+                                                <span class="ic-step-number">6</span>
                                                 Total Concrete Yield
                                             </label>
                                             <input type="text" class="form-control form-control-number"
@@ -655,6 +664,49 @@
                                     <!--end: Search Form -->
                                     <!--begin: Datatable -->
                                     <div class="m_datatable" id="material-table-editable"></div>
+                                    <!--end: Datatable -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab-content-conc-vendor" role="tabpanel">
+                            <div class="row" id="lista-conc-vendor">
+                                <div class="col-lg-12">
+                                    <!--begin: Search Form -->
+                                    <div class="m-form m-form--label-align-right">
+                                        <div class="row align-items-center">
+                                            <div class="col-xl-12 order-1">
+                                                <div class="form-group m-form__group row align-items-center">
+                                                    {% if permiso.agregar or permiso.editar %}
+                                                        <div class="col-md-2">
+                                                            <div class="btn-group">
+                                                                <button id="btn-agregar-conc-vendor" class="btn btn-success"
+                                                                        style="margin-bottom: 20px; margin-top: 10px;">
+                                                                    New <i class="la la-plus"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+
+                                                    <div class="col-lg-7"></div>
+
+                                                    <div class="col-md-3">
+                                                        <div class="m-input-icon m-input-icon--left">
+                                                            <input type="text"
+                                                                   class="form-control m-input m_form_search"
+                                                                   placeholder="Search...">
+                                                            <span class="m-input-icon__icon m-input-icon__icon--left">
+                                                        <span><i class="la la-search"></i></span>
+                                                    </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <!--end: Search Form -->
+                                    <!--begin: Datatable -->
+                                    <div class="m_datatable" id="conc-vendor-table-editable"></div>
                                     <!--end: Datatable -->
                                 </div>
                             </div>
@@ -858,6 +910,87 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" id="btn-salvar-data-tracking-material">Save</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- conc vendor -->
+    <div class="modal fade" id="modal-data-tracking-conc-vendor" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        New Conc Vendor
+                    </h5>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+
+                </div>
+                <div class="modal-body">
+                    <form class="m-form" id="data-tracking-conc-vendor-form" action="#"
+                          enctype="multipart/form-data" method="post">
+
+                        <input type="hidden" id="data_tracking_conc_vendor_id" name="data_tracking_conc_vendor_id"/>
+
+                        <div class="form-group m-form__group ic-form-group">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>
+                                        <span class="ic-step-number">1</span>
+                                        Total Conc Used (CY)
+                                        <span class="ic-small italic">(requerid)</span>
+                                    </label>
+                                    <input type="text" class="form-control form-control-number"
+                                           id="total_conc_used" name="total_conc_used">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        Conc Vendor
+                                    </label>
+                                    <input type="text" class="form-control" id="conc_vendor" name="conc_vendor">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group m-form__group ic-form-group">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>
+                                        <span class="ic-step-number">2</span>
+                                        Conc price (#)
+                                        <span class="ic-small italic">(requerid)</span>
+                                    </label>
+                                    <div class="input-group m-input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">$</span>
+                                        </div>
+                                        <input type="text" class="form-control form-control-number"
+                                               id="conc_price" name="conc_price">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        Total Concrete
+                                    </label>
+                                    <div class="input-group m-input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">$</span>
+                                        </div>
+                                        <input type="text" class="form-control form-control-number"
+                                               id="total_concrete" name="total_concrete" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="btn-salvar-data-tracking-conc-vendor">Save</button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
 
                 </div>
