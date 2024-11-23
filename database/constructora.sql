@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost
--- Tiempo de generación: 19-10-2024 a las 00:05:44
+-- Tiempo de generación: 23-11-2024 a las 16:50:47
 -- Versión del servidor: 5.7.44
 -- Versión de PHP: 8.1.29
 
@@ -100,8 +100,22 @@ CREATE TABLE `data_tracking` (
 --
 
 INSERT INTO `data_tracking` (`id`, `date`, `station_number`, `measured_by`, `conc_vendor`, `crew_lead`, `notes`, `other_materials`, `total_conc_used`, `conc_price`, `total_stamps`, `total_people`, `overhead_price`, `created_at`, `updated_at`, `project_id`, `inspector_id`) VALUES
-(3, '2024-08-31', '45453', 'Marcel', 'CMP', '', '', '', 20.00, 150.00, 0.00, 0.00, 0.00, '2024-06-23 21:07:27', '2024-08-31 16:32:41', 2, NULL),
+(3, '2024-08-31', '45453', 'Marcel', NULL, '', '', '', NULL, NULL, 0.00, 0.00, 0.00, '2024-06-23 21:07:27', '2024-11-22 19:14:41', 2, NULL),
 (4, '2024-06-11', '435435', 'Marcel', 'CMP', '', '', '', 20.00, 100.00, 0.00, 40.00, 3500.00, '2024-06-23 21:16:44', '2024-08-10 19:15:28', 3, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `data_tracking_conc_vendor`
+--
+
+CREATE TABLE `data_tracking_conc_vendor` (
+  `id` int(11) NOT NULL,
+  `conc_vendor` varchar(255) DEFAULT NULL,
+  `total_conc_used` decimal(18,2) DEFAULT NULL,
+  `conc_price` decimal(18,2) DEFAULT NULL,
+  `data_tracking_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -606,7 +620,29 @@ INSERT INTO `log` (`log_id`, `operation`, `category`, `description`, `ip`, `crea
 (217, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-06 14:25:01', 1),
 (218, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-11 19:42:49', 1),
 (219, 'Update', 'Company', 'The company is modified: Disrupsoft', '::1', '2024-10-11 19:55:35', 1),
-(220, 'Update', 'Company', 'The company is modified: CONTRACTOR, INC', '::1', '2024-10-18 23:59:37', 1);
+(220, 'Update', 'Company', 'The company is modified: CONTRACTOR, INC', '::1', '2024-10-18 23:59:37', 1),
+(221, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-19 00:19:05', 1),
+(222, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-19 00:19:06', 1),
+(223, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-19 00:19:14', 1),
+(224, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-19 00:20:40', 1),
+(225, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-19 00:20:46', 1),
+(226, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-19 15:52:53', 1),
+(227, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-19 15:57:27', 1),
+(228, 'Update', 'Project', 'The project is modified: Houston Texas Updt', '::1', '2024-10-27 14:19:58', 1),
+(229, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-27 14:20:07', 1),
+(230, 'Delete', 'Project Notes', 'The notes 10/01/2024 and 10/27/2024 is delete from project: Houston Texas', '::1', '2024-10-27 14:39:28', 1),
+(231, 'Add', 'Project Notes', 'The notes: sdasds is add to the project: Houston Texas', '::1', '2024-10-27 14:39:51', 1),
+(232, 'Delete', 'Project Notes', 'The notes 10/28/2024 and 10/29/2024 is delete from project: Houston Texas', '::1', '2024-10-27 14:40:02', 1),
+(233, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-10-27 14:41:20', 1),
+(234, 'Delete', 'Project Notes', 'The notes: sdasds is delete from project: Houston Texas', '::1', '2024-10-27 14:41:28', 1),
+(235, 'Delete', 'Project Notes', 'The notes 10/27/2024 and  is delete from project: Houston Texas', '::1', '2024-10-27 14:41:37', 1),
+(236, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-11-02 16:12:36', 1),
+(237, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-11-02 16:13:09', 1),
+(238, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-11-02 16:15:42', 1),
+(239, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-11-02 16:15:48', 1),
+(240, 'Update', 'Project', 'The project is modified: Houston Texas', '::1', '2024-11-08 02:01:19', 1),
+(241, 'Update', 'Data Tracking', 'The data tracking is modified, Project: 0009002 - FL MIAMI, Date: 08/31/2024', '::1', '2024-11-22 19:14:41', 1),
+(242, 'Delete', 'Data Tracking', 'The conc vendor of the data tracking is deleted, Conc Vendor: Disrupsoft, Project: 0009002 - FL MIAMI, Date: 08/31/2024', '::1', '2024-11-22 19:14:58', 1);
 
 -- --------------------------------------------------------
 
@@ -692,7 +728,7 @@ CREATE TABLE `project` (
 INSERT INTO `project` (`project_id`, `project_id_number`, `project_number`, `proposal_number`, `name`, `location`, `owner`, `subcontract`, `contract_amount`, `federal_funding`, `county`, `resurfacing`, `invoice_contact`, `certified_payrolls`, `start_date`, `end_date`, `due_date`, `manager`, `status`, `po_number`, `po_cg`, `created_at`, `updated_at`, `company_id`, `inspector_id`) VALUES
 (1, NULL, '0009001', NULL, 'FL COUNTY', 'FL COUNTY', '', '', NULL, 0, '', 0, '', 0, NULL, NULL, '2024-05-31', 'Andres', 0, 'B3C210052148-0', 'ERS025', '2024-04-14 20:24:53', '2024-05-14 15:52:54', 1, 1),
 (2, NULL, '0009002', NULL, 'FL MIAMI', 'FL MIAMI', '', '', NULL, 0, '', 0, '', 0, NULL, NULL, '2024-05-28', 'Dan', 1, '896532', '896532', '2024-04-24 04:20:22', '2024-06-23 21:06:22', 1, 1),
-(3, '32435', '0009003', '345345', 'Houston Texas', NULL, 'Marcel', '896532', 844500.00, 1, 'Florida', 1, 'Marcel Curbelo Carmona', 1, '2024-04-01', '2024-04-30', '2024-05-30', 'Carlos', 2, NULL, NULL, '2024-04-24 04:24:02', '2024-10-11 19:42:49', 3, 1);
+(3, '3243545', '0009003', '434354', 'Houston Texas', NULL, 'Marcel', '896532', 844500.00, 1, 'Miami', 1, 'Marcel Curbelo Carmona', 1, '2024-11-06', '2024-11-29', '2024-05-30', 'Marcel', 2, NULL, NULL, '2024-04-24 04:24:02', '2024-11-08 02:01:19', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -709,6 +745,13 @@ CREATE TABLE `project_contact` (
   `notes` text,
   `project_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `project_contact`
+--
+
+INSERT INTO `project_contact` (`contact_id`, `name`, `email`, `phone`, `role`, `notes`, `project_id`) VALUES
+(1, 'Marcel Curbelo Carmona', 'cyborgmnk@gmail.com', '(955)383-3543', 'Master', 'dfsd fdsf ', 3);
 
 -- --------------------------------------------------------
 
@@ -760,7 +803,14 @@ CREATE TABLE `project_notes` (
 --
 
 INSERT INTO `project_notes` (`id`, `notes`, `date`, `project_id`) VALUES
-(2, 'Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.', '2024-05-07', 3);
+(2, 'Lorem ipsum is placeholder text commonly used in the graphic, print, and publishing industries for previewing layouts and visual mockups.', '2024-05-07', 3),
+(3, 'Change start date, old value: 04/01/2024', '2024-11-02', 3),
+(4, 'Change end date, old value: 04/30/2024', '2024-11-02', 3),
+(5, 'Change start date, old value: 11/01/2024', '2024-11-02', 3),
+(6, 'Change end date, old value: 11/30/2024', '2024-11-02', 3),
+(7, 'Change start date, old value: 11/03/2024', '2024-11-02', 3),
+(8, 'Change start date, old value: 08/08/2023', '2024-11-02', 3),
+(9, 'Change start date, old value: 08/01/2023', '2024-11-08', 3);
 
 -- --------------------------------------------------------
 
@@ -932,6 +982,13 @@ ALTER TABLE `data_tracking`
   ADD PRIMARY KEY (`id`),
   ADD KEY `inspector_id` (`inspector_id`),
   ADD KEY `project_id` (`project_id`);
+
+--
+-- Indices de la tabla `data_tracking_conc_vendor`
+--
+ALTER TABLE `data_tracking_conc_vendor`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `Ref6345` (`data_tracking_id`);
 
 --
 -- Indices de la tabla `data_tracking_item`
@@ -1114,6 +1171,12 @@ ALTER TABLE `data_tracking`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT de la tabla `data_tracking_conc_vendor`
+--
+ALTER TABLE `data_tracking_conc_vendor`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT de la tabla `data_tracking_item`
 --
 ALTER TABLE `data_tracking_item`
@@ -1177,7 +1240,7 @@ ALTER TABLE `item`
 -- AUTO_INCREMENT de la tabla `log`
 --
 ALTER TABLE `log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=221;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=243;
 
 --
 -- AUTO_INCREMENT de la tabla `material`
@@ -1201,7 +1264,7 @@ ALTER TABLE `project`
 -- AUTO_INCREMENT de la tabla `project_contact`
 --
 ALTER TABLE `project_contact`
-  MODIFY `contact_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `contact_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `project_item`
@@ -1213,7 +1276,7 @@ ALTER TABLE `project_item`
 -- AUTO_INCREMENT de la tabla `project_notes`
 --
 ALTER TABLE `project_notes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `rol`
@@ -1261,6 +1324,12 @@ ALTER TABLE `company_contact`
 ALTER TABLE `data_tracking`
   ADD CONSTRAINT `Refinspector158` FOREIGN KEY (`inspector_id`) REFERENCES `inspector` (`inspector_id`),
   ADD CONSTRAINT `Refproject25` FOREIGN KEY (`project_id`) REFERENCES `project` (`project_id`);
+
+--
+-- Filtros para la tabla `data_tracking_conc_vendor`
+--
+ALTER TABLE `data_tracking_conc_vendor`
+  ADD CONSTRAINT `Refdatatrackingconcvendor35` FOREIGN KEY (`data_tracking_id`) REFERENCES `data_tracking` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Filtros para la tabla `data_tracking_item`
