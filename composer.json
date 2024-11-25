@@ -78,16 +78,7 @@
             "App\\": "src/"
         },
         "files": [
-            "vendor/phpqrcode/qrlib.php",
-            "vendor/chilexpress/ChileExpress.php",
-            "vendor/invoice-pdf/class.invoice.php",
-            "vendor/payeezy_rest_interface/PayeezyManager.php",
-            "vendor/paypal_rest/DPayPal.php",
-            "vendor/jpgraph/src/jpgraph.php",
-            "vendor/jpgraph/src/jpgraph_pie.php",
-            "vendor/jpgraph/src/jpgraph_bar.php",
-            "vendor/jpgraph/themes/pie_theme.php",
-            "vendor/jpgraph/format/format_label.php"
+            "vendor/phpqrcode/qrlib.php"
         ]
     },
     "autoload-dev": {

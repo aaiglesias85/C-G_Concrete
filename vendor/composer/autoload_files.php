@@ -48,13 +48,4 @@ return array(
     '92c8763cd6170fce6fcfe7e26b4e8c10' => $vendorDir . '/symfony/phpunit-bridge/bootstrap.php',
     '04b6576f786ea6b5b4b577af08f8e4d1' => $vendorDir . '/symfony/polyfill-intl-messageformatter/bootstrap.php',
     'dd4aab59dd12c86f3c498a3d4703e160' => $vendorDir . '/phpqrcode/qrlib.php',
-    '209195060566f217375ca1e3cab75201' => $vendorDir . '/chilexpress/ChileExpress.php',
-    '4832bc6b05891db4e0aefb1349850394' => $vendorDir . '/invoice-pdf/class.invoice.php',
-    '0ea9d2add022995750746651b2b6d40b' => $vendorDir . '/payeezy_rest_interface/PayeezyManager.php',
-    '6c6b820558642636f03bdd92a6bc5ddb' => $vendorDir . '/paypal_rest/DPayPal.php',
-    'f4c9fed2e520f9b867bc4c7f407cf08b' => $vendorDir . '/jpgraph/src/jpgraph.php',
-    '87c6ed42059b1f308b36ac1d27cc7db3' => $vendorDir . '/jpgraph/src/jpgraph_pie.php',
-    '75ba70063666a51fd9b43a976d7db464' => $vendorDir . '/jpgraph/src/jpgraph_bar.php',
-    'c76e821b54866ff49cff95d879a437b0' => $vendorDir . '/jpgraph/themes/pie_theme.php',
-    'dc46e0431ca1733c4098e0c6492e0f58' => $vendorDir . '/jpgraph/format/format_label.php',
 );

@@ -49,15 +49,6 @@ class ComposerStaticInit738f1b02d7cfef1f3274093d72074201
         '92c8763cd6170fce6fcfe7e26b4e8c10' => __DIR__ . '/..' . '/symfony/phpunit-bridge/bootstrap.php',
         '04b6576f786ea6b5b4b577af08f8e4d1' => __DIR__ . '/..' . '/symfony/polyfill-intl-messageformatter/bootstrap.php',
         'dd4aab59dd12c86f3c498a3d4703e160' => __DIR__ . '/..' . '/phpqrcode/qrlib.php',
-        '209195060566f217375ca1e3cab75201' => __DIR__ . '/..' . '/chilexpress/ChileExpress.php',
-        '4832bc6b05891db4e0aefb1349850394' => __DIR__ . '/..' . '/invoice-pdf/class.invoice.php',
-        '0ea9d2add022995750746651b2b6d40b' => __DIR__ . '/..' . '/payeezy_rest_interface/PayeezyManager.php',
-        '6c6b820558642636f03bdd92a6bc5ddb' => __DIR__ . '/..' . '/paypal_rest/DPayPal.php',
-        'f4c9fed2e520f9b867bc4c7f407cf08b' => __DIR__ . '/..' . '/jpgraph/src/jpgraph.php',
-        '87c6ed42059b1f308b36ac1d27cc7db3' => __DIR__ . '/..' . '/jpgraph/src/jpgraph_pie.php',
-        '75ba70063666a51fd9b43a976d7db464' => __DIR__ . '/..' . '/jpgraph/src/jpgraph_bar.php',
-        'c76e821b54866ff49cff95d879a437b0' => __DIR__ . '/..' . '/jpgraph/themes/pie_theme.php',
-        'dc46e0431ca1733c4098e0c6492e0f58' => __DIR__ . '/..' . '/jpgraph/format/format_label.php',
     );
 
     public static $prefixLengthsPsr4 = array (
