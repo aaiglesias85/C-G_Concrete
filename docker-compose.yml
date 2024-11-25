@@ -1,9 +1,8 @@
 services:
   constructora:
-    image: php:8.1-fpm-alpine
     container_name: constructora
     build:
-      context: .
+      context: ./docker/php
       dockerfile: Dockerfile  # Si usas un Dockerfile personalizado
     volumes:
       - ./:/var/www/html  # Mapea todo el directorio del proyecto al contenedor
@@ -22,7 +21,7 @@ services:
       - constructora
     volumes:
       - ./:/var/www/html  # Mapea todo el directorio del proyecto al contenedor
-      - ./default.conf:/etc/nginx/conf.d/default.conf  # Archivos de configuración de nginx
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf  # Archivos de configuración de nginx
     networks:
       - constructora_network
     ports:
@@ -50,17 +49,6 @@ services:
       PMA_PASSWORD: administrador
     ports:
       - "8083:80"
-    networks:
-      - constructora_network
-
-  mailer:
-    image: axllent/mailpit
-    ports:
-      - "1025"
-      - "8025"
-    environment:
-      MP_SMTP_AUTH_ACCEPT_ANY: 1
-      MP_SMTP_AUTH_ALLOW_INSECURE: 1
     networks:
       - constructora_network
 

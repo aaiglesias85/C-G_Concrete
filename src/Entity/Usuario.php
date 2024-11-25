@@ -12,7 +12,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @ORM\Table(name="user")
  * @ORM\Entity(repositoryClass="App\Repository\UsuarioRepository")
  */
-class Usuario implements \Serializable, UserInterface, EquatableInterface
+class Usuario implements UserInterface, EquatableInterface
 {
     /**
      * @var integer
@@ -331,19 +331,18 @@ class Usuario implements \Serializable, UserInterface, EquatableInterface
         return $this->email;
     }
 
-    public function serialize()
+    public function __serialize(): array
     {
-        return serialize(array(
-            $this->usuarioId,
-            $this->email
-        ));
+        return [
+            'usuarioId' => $this->usuarioId,
+            'email' => $this->email,
+        ];
     }
 
-    public function unserialize($serialized)
+    public function __unserialize(array $data): void
     {
-        $arr = unserialize($serialized);
-        $this->setUsuarioId($arr[0]);
-        $this->setEmail($arr[1]);
+        $this->setUsuarioId($data['usuarioId']);
+        $this->setEmail($data['email']);
     }
 
     /**

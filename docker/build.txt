@@ -1,0 +1,5 @@
+# elimina todo para evitar posible cache
+docker-compose down --rmi all
+
+# vuelve a hacer build
+docker-compose up --build -d
